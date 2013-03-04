@@ -18,6 +18,7 @@ namespace positron
 		protected int _Height;
 		#endregion
 		#region Static Variables
+		private static Texture _DefaultTexture;
 		private static Hashtable Textures;
 		#endregion
 		#region Member Accessors
@@ -27,7 +28,7 @@ namespace positron
 		public int Height { get { return _Height; } }
 		#endregion
 		#region Static Accessors
-		// Nobody here but us chickens!
+		public static Texture DefaultTexture { get { return _DefaultTexture; } }
 		#endregion
 		#endregion
 		#region Behavior
@@ -44,8 +45,9 @@ namespace positron
 		public static void Setup ()
 		{
 			Textures = new Hashtable();
+			_DefaultTexture = LoadTexture ("sprite_small_disc", "sprite_small_disc.png");
 			LoadTexture ("sprite_four_square", "sprite_four_square.png");
-			LoadTexture ("sprite_small_disc", "sprite_small_disc.png");
+			LoadTexture ("sprite_player", "sprite_cool_guy.png");
 		}
 		public static void Teardown ()
 		{
@@ -68,12 +70,12 @@ namespace positron
 			return (Texture)Textures[key];
 		}
 
-		public static void LoadTexture(string title, string file_name)
+		public static Texture LoadTexture(string title, string file_name)
 		{
 			string path = Path.Combine(Configuration.ArtworkPath, file_name);
-			LoadTextureAbsolute(title, path);
+			return LoadTextureAbsolute(title, path);
 		}
-		protected static void LoadTextureAbsolute(string title, string file_path)
+		protected static Texture LoadTextureAbsolute(string title, string file_path)
 		{	
 			//GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			//string absolute_file_path = System.IO.Path.GetFullPath (file_path);
@@ -97,8 +99,9 @@ namespace positron
 
 			bitmap.UnlockBits(data);
 
-			Textures[title] = new Texture(title, texture, bitmap.Width, bitmap.Height);
-
+			Texture T = new Texture(title, texture, bitmap.Width, bitmap.Height);
+			Textures[title] = T;
+			return T;
 		}
 		#endregion
 		#endregion

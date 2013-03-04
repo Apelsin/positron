@@ -60,5 +60,7 @@ namespace positron
 		{
 		}
 		public abstract void Render();
+		public abstract double RenderSizeX();
+		public abstract double RenderSizeY();
 	}
 }

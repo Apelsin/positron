@@ -11,8 +11,10 @@ namespace positron
 	{
 		#region State
 		#region Member Variables
-		Color _Color;
-		Texture _Texture;
+		protected Color _Color;
+		protected Texture _Texture;
+		protected double _TileX;
+		protected double _TileY;
 		#endregion
 		#region Member Accessors
 		public Color Color {
@@ -23,26 +25,48 @@ namespace positron
 			get { return _Texture; }
 			set { _Texture = value; }
 		}
+		public double TileX {
+			get { return _TileX; }
+			set { _TileX = value; }
+		}
+		public double TileY {
+			get { return _TileY; }
+			set { _TileY = value; }
+		}
 		#endregion
 		#endregion
 		#region Behavior
 		public SpriteBase():
-			this(0.0, 0.0, 1.0, 1.0)
+			this(0.0, 0.0, 1.0, 1.0, Texture.DefaultTexture)
+		{
+		}
+		public SpriteBase(Texture texture):
+			this(0.0, 0.0, 1.0, 1.0, texture)
 		{
 		}
 		public SpriteBase (double scalex, double scaley):
-			this(0.0, 0.0, scalex, scaley)
+			this(0.0, 0.0, scalex, scaley, Texture.DefaultTexture)
 		{		
 		}
-		public SpriteBase (double x, double y, double scalex, double scaley)
+		public SpriteBase (double scalex, double scaley, Texture texture):
+			this(0.0, 0.0, scalex, scaley, texture)
+		{
+		}
+		public SpriteBase (double x, double y, double scalex, double scaley, Texture texture)
 		{
 			// Size will scale _Texture width and height
-			SizeX = scalex;
-			SizeY = scaley;
-			PositionX = x;
-			PositionY = y;
-			_Texture = Texture.Get("sprite_small_disc");
+			_Color = Color.White;
+			_Size.X = scalex;
+			_Size.Y = scaley;
+			_Position.X = x;
+			_Position.Y = y;
+			_Texture = texture;
+			_TileX = 1.0;
+			_TileY = 1.0;
 		}
+		// TODO: rotation stuff here
+		public override double RenderSizeX () { return _Size.X * _Texture.Width; }
+		public override double RenderSizeY () { return _Size.Y * _Texture.Height; }
 		public override void Render ()
 		{
 			double w = Size.X * _Texture.Width;
@@ -56,14 +80,14 @@ namespace positron
 				//GL.Translate(Math.Floor (Position.X), Math.Floor (Position.Y), Math.Floor (Position.Z));
 				GL.Begin (BeginMode.Quads);
 				{
-					GL.TexCoord2(0.0f, 0.0f);
-					GL.Vertex2(0.0f, 0.0f);
-					GL.TexCoord2(1.0f, 0.0f);
-					GL.Vertex2(w, 0.0f);
-					GL.TexCoord2(1.0f, 1.0f);
+					GL.TexCoord2(0.0, 0.0);
+					GL.Vertex2(0.0, 0.0);
+					GL.TexCoord2(_TileX, 0.0);
+					GL.Vertex2(w, 0.0);
+					GL.TexCoord2(_TileX, -1.0);
 					GL.Vertex2(w, h);
-					GL.TexCoord2(0.0f, 1.0f);
-					GL.Vertex2(0.0f, h);
+					GL.TexCoord2(0.0, -1.0);
+					GL.Vertex2(0.0, h);
 				}
 				GL.End ();
 			}

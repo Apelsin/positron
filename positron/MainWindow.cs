@@ -87,6 +87,7 @@ namespace positron
 		Stopwatch RenderWatch = new Stopwatch();
 		Stopwatch UpdateWatch = new Stopwatch();
 		Stopwatch FrameWatch = new Stopwatch();
+		Stopwatch TestWatch = new Stopwatch();
 
 		bool HasUpdated = false;
 
@@ -123,7 +124,7 @@ namespace positron
 		#endregion
 		RenderSet TestSprites = new RenderSet();
 		Random rand = new Random();
-		HashSet<Key> KeysPressed = new HashSet<Key>();	
+		List<Key> KeysPressed = new List<Key>();	
 		
 		public ThreadedRendering ()
 			: base()
@@ -251,12 +252,23 @@ namespace positron
 
 			Context.MakeCurrent(null); // Release the OpenGL context so it can be used on the new thread.
 
-			for (int i = 0; i < (1<<10); i++) {
+			TestSprites.Add(new SpriteBase(Texture.Get("sprite_player")));
+
+			for (int i = 0; i < (1<<9); i++) {
 				SpriteBase p = new SpriteBase();
 				p.Position = new Vector3d (new Vector2d (
 					rand.Next (10, _CanvasWidth - 10),
 					rand.Next (10, _CanvasHeight - 10)));
 				p.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
+				TestSprites.Add (p);
+			}
+			Texture four_square = Texture.Get("sprite_four_square");
+			for (int i = 0; i < (1<<9); i++) {
+				SpriteBase p = new SpriteBase(four_square);
+				p.Position = new Vector3d (new Vector2d (
+					rand.Next (10, _CanvasWidth - 10),
+					rand.Next (10, _CanvasHeight - 10)));
+				//p.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
 				TestSprites.Add (p);
 			}
 
@@ -266,6 +278,7 @@ namespace positron
 			UpdatingThread.IsBackground = true;
 			RenderingThread.Start();
 			UpdatingThread.Start();
+			TestWatch.Start();
 		}
 		
 		#endregion
@@ -431,17 +444,17 @@ namespace positron
 			RenderWatch.Start();
 			FrameWatch.Start();
 			while (!Exiting) {
+				// Sleep the thread for the most milliseconds less than the frame limit time
+				int millisleep = Math.Max(0, (int)(1000 * (FrameLimitTime - RenderWatch.Elapsed.TotalSeconds)));
+				Thread.Sleep (millisleep);
 				double frame_time = FrameWatch.Elapsed.TotalSeconds;
 				while (RenderWatch.Elapsed.TotalSeconds < FrameLimitTime);
-				FrameWatch.Reset ();
-				FrameWatch.Start ();
+				FrameWatch.Restart();
 				double update_time = UpdateWatch.Elapsed.TotalSeconds;
-				UpdateWatch.Reset ();
-				UpdateWatch.Start ();
+				UpdateWatch.Restart();
 				Update (update_time);
 				double render_time = RenderWatch.Elapsed.TotalSeconds;
-				RenderWatch.Reset ();
-				RenderWatch.Start ();
+				RenderWatch.Restart();
 				RenderView (render_time);
 				SwapBuffers();
 			}
@@ -451,42 +464,66 @@ namespace positron
 		#endregion
 		
 		#region Update
-		
-		void Update(double time)
+
+		void Update (double time)
 		{
-			if(KeysPressed.Contains(Key.Space))
+			SpriteBase zero = (SpriteBase)TestSprites [0];
+			int left_right_order = KeysPressed.IndexOf (Key.D) - KeysPressed.IndexOf (Key.A);
+			double sx = MathUtil.Clamp ((double)left_right_order, 1.0, -1.0);
+			zero.TileX = sx == 0 ? zero.TileX : sx;
+			zero.VelocityX = sx * 128;
+
+			if (TestWatch.Elapsed.TotalSeconds > 2.0) {
+				zero.VelocityY += 200;
+				TestWatch.Restart();
+			}
+
+			double fx = (KeysPressed.Contains(Key.A) ? -1.0 : 0.0) +
+				(KeysPressed.Contains(Key.D) ? 1.0 : 0.0);
+			double fy = (KeysPressed.Contains(Key.W) ? 1.0 : 0.0) +
+				(KeysPressed.Contains(Key.S) ? -1.0 : 0.0);
+			int num = Math.Min (TestSprites.Count, (int)(5000 * time));
+			for(int i = 0; i < num; i++)
 			{
-				int num = Math.Min (TestSprites.Count, (int)(5000 * time));
-				for(int i = 0; i < num; i++)
-				{
-					int idx = Randy.Next(TestSprites.Count);
-					Drawable p = TestSprites[idx]; // Functional, so it has to be copied...huh
-					p.VelocityY += (300.0 + Randy.NextDouble() * 80.0);
-					p.VelocityX += (Randy.NextDouble() * 80.0 - 40.0);
-					TestSprites[idx] = p;
-				}
+				int idx = Randy.Next(TestSprites.Count - 1) + 1; // Skip zero
+				Drawable p = TestSprites[idx]; // Functional, so it has to be copied...huh
+				p.VelocityY += (300.0 + Randy.NextDouble() * 80.0) * fy;
+				p.VelocityX += (300.0 + Randy.NextDouble() * 80.0) * fx;
+				TestSprites[idx] = p;
 			}
 			for (int i = 0; i < TestSprites.Count; i++)
 			{
 				Drawable p = TestSprites[i];
 
+				double dx = p.RenderSizeX() / _CanvasWidth;
+				double dy = p.RenderSizeY() / _CanvasHeight;
+
 				p.VelocityX /= _CanvasWidth;
 				p.VelocityY /= _CanvasHeight;
 				p.PositionX /= _CanvasWidth;
 				p.PositionY /= _CanvasHeight;
+
 				if (p.PositionY > 0.03)
 				{
 					p.VelocityY += (float)(GravityAccel * 0.1) * time;
 				}
 				p.Velocity *= 0.995f;
-				//p.Velocity.Y = Randy.Next() % 100 == 0 ? (float)((0x40 + (Randy.Next() & 0xFF)) * time) : p.Velocity.Y;
+
+				// Velocity is handled here
+				Vector3d position_delta = p.Position;
+				p.Position += p.Velocity * time;
+
+				p.PositionX = MathUtil.Clamp(p.PositionX, 1.0-dx, 0.0);
+				p.PositionY = MathUtil.Clamp(p.PositionY, 1.0-dy, 0.0);
+
+				position_delta = p.Position - position_delta;
+				p.Velocity = position_delta / time;
 
 				p.VelocityX *= _CanvasWidth;
 				p.VelocityY *= _CanvasHeight;
 				p.PositionX *= _CanvasWidth;
 				p.PositionY *= _CanvasHeight;
 
-				p.Position += p.Velocity * time;
 				if (p.PositionY <= 0.05)
 					p.PositionY = 0.05;
 				TestSprites[i] = p;
