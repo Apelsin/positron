@@ -20,6 +20,11 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <ConsolePause>False</ConsolePause>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="Execute" command="${TargetFile}" workingdir="${TargetDir}" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
@@ -35,15 +40,30 @@
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="MainWindow.cs" />
+    <Compile Include="RenderSet.cs" />
+    <Compile Include="IWorldObject.cs" />
+    <Compile Include="IRenderable.cs">
+      <DependentUpon>IRenderable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Drawables\Drawable.cs" />
+    <Compile Include="Drawables\Circle.cs" />
+    <Compile Include="IColorable.cs" />
+    <Compile Include="Texture.cs" />
+    <Compile Include="Drawables\SpriteBase.cs" />
+    <Compile Include="Configuration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
       <Project>{A37A7E14-0000-0000-0000-000000000000}</Project>
       <Name>OpenTK</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Drawables\" />
   </ItemGroup>
 </Project>

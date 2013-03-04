@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -13,7 +14,7 @@ namespace positron
 	public class ThreadedRendering : GameWindow
 	{
 		#region State
-		#region Member
+		#region Members
 		/// <summary>
 		/// GL handle for canvas FBO texture
 		/// </summary>
@@ -29,11 +30,11 @@ namespace positron
 		/// <summary>
 		/// Width of canvas in pixels
 		/// </summary>
-		int CanvasWidth = 512;
+		int _CanvasWidth = 512;
 		/// <summary>
 		/// Height of canvas in pixels
 		/// </summary>
-		int CanvasHeight = 320;
+		int _CanvasHeight = 320;
 		/// <summary>
 		/// Width of the viewport in pixels
 		/// </summary>
@@ -79,9 +80,23 @@ namespace positron
 		/// </summary>
 		Thread RenderingThread;
 		/// <summary>
+		/// Main updating thread
+		/// </summary>
+		Thread UpdatingThread;
+
+		Stopwatch RenderWatch = new Stopwatch();
+		Stopwatch UpdateWatch = new Stopwatch();
+		Stopwatch FrameWatch = new Stopwatch();
+
+		bool HasUpdated = false;
+
+		/// <summary>
 		/// Lock to synchronize rendering and updating
 		/// </summary>
 		object UpdateLock = new object();
+
+		double FrameLimitTime = 1.0 / 60.0;
+
 		/// <summary>
 		/// The acceleration due to gravity at sea level on Earth in m/s
 		/// </summary>
@@ -91,34 +106,48 @@ namespace positron
 		/// </summary>
 		Random Randy = new Random(4352453);
 		#endregion
-		#endregion
-		struct Particle
-		{
-			public Vector2 Position;
-			public Vector2 Velocity;
-			public Color4 Color;
+		#region Accessors
+		/// <summary>
+		/// Width of canvas in pixels
+		/// </summary>
+		public int CanvasWidth {
+			get { return _CanvasWidth; }
 		}
-		List<Particle> Particles = new List<Particle>();
+		/// <summary>
+		/// Height of canvas in pixels
+		/// </summary>
+		public int CanvasHeight {
+			get { return _CanvasHeight; }
+		}
+		#endregion
+		#endregion
+		RenderSet TestSprites = new RenderSet();
 		Random rand = new Random();
+		HashSet<Key> KeysPressed = new HashSet<Key>();	
 		
 		public ThreadedRendering ()
 			: base()
 		{
 			lock (UpdateLock)
 			{
-				this.Width = CanvasWidth;
-				this.Height = CanvasHeight;
+				this.Width = _CanvasWidth;
+				this.Height = _CanvasHeight;
 			}
 			Keyboard.KeyDown += delegate(object sender, KeyboardKeyEventArgs e)
 			{
 				if (e.Key == Key.Escape)
 					this.Exit();
+				else if(e.Key == Key.Space)
+				{
+
+				}
+				lock(UpdateLock)
+					KeysPressed.Add(e.Key);
 			};
 
-			/*
 			Keyboard.KeyUp += delegate(object sender, KeyboardKeyEventArgs e)
 			{
-				if (e.Key == Key.F)
+				/*if (e.Key == Key.F)
 				{
 					lock(UpdateLock)
 					{
@@ -128,9 +157,10 @@ namespace positron
 							this.WindowState = WindowState.Fullscreen;
 						OnResize(null);
 					}
-				}
+				}*/
+				lock(UpdateLock)
+					KeysPressed.Remove(e.Key);
 			};
-			*/
 			
 			Resize += delegate(object sender, EventArgs e)
 			{
@@ -138,15 +168,15 @@ namespace positron
 				// a flag and respond to it from the rendering thread.
 				lock (UpdateLock)
 				{
-					Width = Math.Max (Width, CanvasWidth);
-					Height = Math.Max (Height, CanvasHeight);
+					Width = Math.Max (Width, _CanvasWidth);
+					Height = Math.Max (Height, _CanvasHeight);
 					VieportChanged = true;
 					ViewportWidth = Width;
 					ViewportHeight = Height;
-					int multi = ViewportWidth / CanvasWidth;
-					multi = Math.Min(multi, ViewportHeight / CanvasHeight);
-					FBOScaleX = multi * (float)CanvasWidth / (float)ViewportWidth;
-					FBOScaleY = multi * (float)CanvasHeight / (float)ViewportHeight;
+					int multi = ViewportWidth / _CanvasWidth;
+					multi = Math.Min(multi, ViewportHeight / _CanvasHeight);
+					FBOScaleX = multi * (float)(_CanvasWidth*_CanvasWidth) / (float)ViewportWidth;
+					FBOScaleY = multi * (float)(_CanvasHeight*_CanvasHeight) / (float)ViewportHeight;
 				}
 			};
 			
@@ -187,16 +217,25 @@ namespace positron
 				Exit();
 			}
 
+			// Depth buffer init
 			GL.Enable(EnableCap.DepthTest);
 			GL.ClearDepth(1.0);
 			GL.DepthFunc(DepthFunction.Lequal);
-			
+
+			// Blending init
+			GL.Enable(EnableCap.Blend);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+			// Culling init
 			GL.Enable(EnableCap.CullFace);
-			
+
+			// Load textures into graphics memory space
+			Texture.Setup();
+
 			// Create Color Tex
 			GL.GenTextures(1, out CanvasTexture);
 			GL.BindTexture(TextureTarget.Texture2D, CanvasTexture);
-			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8, CanvasWidth, CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8, _CanvasWidth, _CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
@@ -212,9 +251,21 @@ namespace positron
 
 			Context.MakeCurrent(null); // Release the OpenGL context so it can be used on the new thread.
 
+			for (int i = 0; i < (1<<10); i++) {
+				SpriteBase p = new SpriteBase();
+				p.Position = new Vector3d (new Vector2d (
+					rand.Next (10, _CanvasWidth - 10),
+					rand.Next (10, _CanvasHeight - 10)));
+				p.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
+				TestSprites.Add (p);
+			}
+
 			RenderingThread = new Thread(RenderLoop);
+			UpdatingThread = new Thread(UpdateLoop);
 			RenderingThread.IsBackground = true;
+			UpdatingThread.IsBackground = true;
 			RenderingThread.Start();
+			UpdatingThread.Start();
 		}
 		
 		#endregion
@@ -229,6 +280,10 @@ namespace positron
 		{
 			Exiting = true; // Set a flag that the rendering thread should stop running.
 			RenderingThread.Join();
+			UpdatingThread.Join();
+
+			// Delete textures from graphics memory space
+			Texture.Teardown();
 
 			// Clean up what we allocated before exiting
 			if (CanvasTexture != 0)
@@ -344,49 +399,52 @@ namespace positron
 		}
 		
 		#endregion
-		
+
+		#region UpdateLoop
+		void UpdateLoop ()
+		{
+			// Updating is handled before render *for now*
+			/*UpdateWatch.Start ();
+			while (!Exiting) {
+				while (UpdateWatch.Elapsed.TotalSeconds < FrameLimitTime);
+				lock(UpdateLock)
+				{
+					double time = UpdateWatch.Elapsed.TotalSeconds;
+					UpdateWatch.Reset ();
+					UpdateWatch.Start ();
+					Update (time);
+				}
+			}*/
+		}
+		#endregion
 		#region RenderLoop
-		
 		void RenderLoop()
 		{
 			MakeCurrent(); // The context now belongs to this thread. No other thread may use it!
-			
-			//VSync = VSyncMode.On;
-			
-			for (int i = 0; i < (1<<8); i++)
-			{
-				Particle p = new Particle();
-				p.Position = new Vector2((float)rand.NextDouble() * 2 - 1, (float)rand.NextDouble() * 2 - 1);
-				p.Color.R = (float)rand.NextDouble();
-				p.Color.G = (float)rand.NextDouble();
-				p.Color.B = (float)rand.NextDouble();
-				Particles.Add(p);
-			}
-			
-			// Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
-			Stopwatch render_watch = new Stopwatch();
-			Stopwatch update_watch = new Stopwatch();
-			update_watch.Start();
-			render_watch.Start();
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.Enable(EnableCap.PointSmooth);
 			GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
-			GL.PointSize(10);
-			
-			while (!Exiting)
-			{
-				Update(update_watch.Elapsed.TotalSeconds);
-				update_watch.Reset();
-				update_watch.Start();
-				
-				Render(render_watch.Elapsed.TotalSeconds);
-				render_watch.Reset(); // Stopwatch may be inaccurate over larger intervals.
-				render_watch.Start(); // Plus, timekeeping is easier if we always start counting from 0.
-				
+
+			// Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
+			UpdateWatch.Start();
+			RenderWatch.Start();
+			FrameWatch.Start();
+			while (!Exiting) {
+				double frame_time = FrameWatch.Elapsed.TotalSeconds;
+				while (RenderWatch.Elapsed.TotalSeconds < FrameLimitTime);
+				FrameWatch.Reset ();
+				FrameWatch.Start ();
+				double update_time = UpdateWatch.Elapsed.TotalSeconds;
+				UpdateWatch.Reset ();
+				UpdateWatch.Start ();
+				Update (update_time);
+				double render_time = RenderWatch.Elapsed.TotalSeconds;
+				RenderWatch.Reset ();
+				RenderWatch.Start ();
+				RenderView (render_time);
 				SwapBuffers();
 			}
-			
 			Context.MakeCurrent(null);
 		}
 		
@@ -396,60 +454,45 @@ namespace positron
 		
 		void Update(double time)
 		{
-			lock (UpdateLock)
+			if(KeysPressed.Contains(Key.Space))
 			{
-				// When the user moves the window we make the particles react to
-				// this movement. The reaction is semi-random and not physically
-				// correct. It looks quite good, however.
-				if (PositionChanged)
+				int num = Math.Min (TestSprites.Count, (int)(5000 * time));
+				for(int i = 0; i < num; i++)
 				{
-					for (int i = 0; i < Particles.Count; i++)
-					{
-						Particle p = Particles[i];
-						p.Velocity += new Vector2(
-							16 * (PositiondX + 0.05f * (float)(rand.NextDouble() - 0.5)),
-							32 * (PositiondY + 0.05f * (float)(rand.NextDouble() - 0.5)));
-						Particles[i] = p;
-					}
-					
-					PositionChanged = false;
+					int idx = Randy.Next(TestSprites.Count);
+					Drawable p = TestSprites[idx]; // Functional, so it has to be copied...huh
+					p.VelocityY += (300.0 + Randy.NextDouble() * 80.0);
+					p.VelocityX += (Randy.NextDouble() * 80.0 - 40.0);
+					TestSprites[idx] = p;
 				}
 			}
-			
-			// For simplicity, we use simple Euler integration to simulate particle movement.
-			// This is not accurate, especially under varying timesteps (as is the case here).
-			// A better solution would have been time-corrected Verlet integration, as
-			// described here:
-			// http://www.gamedev.net/reference/programming/features/verlet/
+			for (int i = 0; i < TestSprites.Count; i++)
+			{
+				Drawable p = TestSprites[i];
 
-			for (int i = 0; i < Particles.Count; i++)
-			{
-				Particle p = Particles[i];
-				
-				p.Velocity.X = Math.Abs(p.Position.X) >= 1 ?-p.Velocity.X * 0.92f : p.Velocity.X * 0.97f;
-				p.Velocity.Y = Math.Abs(p.Position.Y) >= 1 ? -p.Velocity.Y * 0.92f : p.Velocity.Y * 0.97f;
-				if (p.Position.Y > -0.99)
+				p.VelocityX /= _CanvasWidth;
+				p.VelocityY /= _CanvasHeight;
+				p.PositionX /= _CanvasWidth;
+				p.PositionY /= _CanvasHeight;
+				if (p.PositionY > 0.03)
 				{
-					p.Velocity.Y += (float)(GravityAccel * time);
+					p.VelocityY += (float)(GravityAccel * 0.1) * time;
 				}
-				else
-				{
-					if (Math.Abs(p.Velocity.Y) < 0.02)
-					{
-						p.Velocity.Y = 0;
-						p.Position.Y = -1;
-					}
-					else
-					{
-						p.Velocity.Y *= 0.9f;
-					}
-				}
-				p.Velocity.Y = Randy.Next() % 100 == 0 ? (float)((0x40 + (Randy.Next() & 0xFF)) * time) : p.Velocity.Y;
-				p.Position += p.Velocity * (float)time;
-				if (p.Position.Y <= -1)
-					p.Position.Y = -1;
-				Particles[i] = p;
+				p.Velocity *= 0.995f;
+				//p.Velocity.Y = Randy.Next() % 100 == 0 ? (float)((0x40 + (Randy.Next() & 0xFF)) * time) : p.Velocity.Y;
+
+				p.VelocityX *= _CanvasWidth;
+				p.VelocityY *= _CanvasHeight;
+				p.PositionX *= _CanvasWidth;
+				p.PositionY *= _CanvasHeight;
+
+				p.Position += p.Velocity * time;
+				if (p.PositionY <= 0.05)
+					p.PositionY = 0.05;
+				TestSprites[i] = p;
 			}
+			//if(TestSprites.Count > 0)
+			//	TestSprites.RemoveAt(TestSprites.Count-1);
 		}
 		
 		#endregion
@@ -459,92 +502,94 @@ namespace positron
 		/// <summary>
 		/// This is our main rendering function, which executes on the rendering thread.
 		/// </summary>
-		public void Render(double time)
+		public void RenderView(double time)
 		{
-			lock (UpdateLock) // Lock for this stuff
+			#region Render Frame Buffer
+
+			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, CanvasFBO); // Bind canvas FBO
+			GL.PushAttrib(AttribMask.ViewportBit);
+			{
+				// FBO viewport
+				GL.Viewport(0, 0, _CanvasWidth, _CanvasHeight);
+				GL.ClearColor (Color.White); // Clear as white
+				GL.Clear(ClearBufferMask.ColorBufferBit); // Do clear
+				Matrix4 perspective = Matrix4.CreateOrthographic(CanvasWidth, CanvasHeight, -1, 1);
+				GL.MatrixMode(MatrixMode.Projection);
+				GL.LoadMatrix(ref perspective);
+				GL.MatrixMode(MatrixMode.Modelview);
+				GL.LoadIdentity();
+				GL.PushMatrix();
+				{
+					GL.Translate(-_CanvasWidth * 0.5, -_CanvasHeight * 0.5, 0f);
+					// Draw background gradient:
+					GL.Begin (BeginMode.Quads);
+					GL.Color4 (Color.OrangeRed);
+					GL.Vertex2(0, 0);
+					GL.Vertex2(_CanvasWidth, 0);
+					GL.Color4 (Color.MediumBlue);
+					GL.Vertex2(_CanvasWidth, _CanvasHeight);
+					GL.Vertex2(0, _CanvasHeight);
+					GL.End();
+
+					// Draw the meat and potatos
+					//GL.Enable( EnableCap.Lighting );
+					//GL.Enable( EnableCap.Light0 );
+					//GL.Enable( EnableCap.ColorMaterial );
+					TestSprites.Render();
+					GL.Color4(Color.White);
+					//GL.Disable( EnableCap.ColorMaterial );
+					//GL.Disable( EnableCap.Light0 );
+					//GL.Disable( EnableCap.Lighting );
+				}
+				GL.PopMatrix();
+
+			}
+			GL.PopAttrib();
+			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // unbind FBO
+
+
+			#endregion
+
+			#region Render Main Viewport
+
+			lock (UpdateLock)
 			{
 				if (VieportChanged)
 				{
-					// FBO viewport
 					GL.Viewport(0, 0, ViewportWidth, ViewportHeight);
+					//GL.ClearAccum(0.0f, 0.0f, 0.0f, 1.0f);
+					//GL.Clear(ClearBufferMask.AccumBufferBit);
 					VieportChanged = false;
 				}
 			}
 
-			#region Render Frame Buffer
-			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, CanvasFBO);
-			GL.PushAttrib(AttribMask.ViewportBit);
-			{	
-				// FBO viewport
-				GL.Viewport(0, 0, CanvasWidth, CanvasHeight);
-				GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.OneMinusSrcAlpha);
-				GL.ClearColor (Color.White);
-				GL.Clear(ClearBufferMask.ColorBufferBit);
-				Matrix4 perspective =
-					Matrix4.CreateOrthographic(2, 2, -1, 1);
-				GL.MatrixMode(MatrixMode.Projection);
-				GL.LoadMatrix(ref perspective);
-				
-				GL.MatrixMode(MatrixMode.Modelview);
-				GL.LoadIdentity();
-
-				GL.Begin (BeginMode.Quads);
-				GL.Color4 (Color.OrangeRed);
-				GL.Vertex2(1.0f, 1.0f);
-				GL.Vertex2(-1.0f, 1.0f);
-				GL.Color4 (Color.MediumBlue);
-				GL.Vertex2(-1.0f, -1.0f);
-				GL.Vertex2(1.0f, -1.0f);
-				GL.End();
-
-				// draw some complex object into the FBO's textures
-				//GL.Enable( EnableCap.Lighting );
-				//GL.Enable( EnableCap.Light0 );
-				//GL.Enable( EnableCap.ColorMaterial );
-
-				GL.Begin(BeginMode.Points);
-	            foreach (Particle p in Particles)
-	            {
-	                GL.Color4(p.Color);
-	                GL.Vertex2(p.Position);
-	            }
-				GL.Color4(Color.White);
-	            GL.End();
-				//GL.Disable( EnableCap.ColorMaterial );
-				//GL.Disable( EnableCap.Light0 );
-				//GL.Disable( EnableCap.Lighting );
-
-			}
-			GL.PopAttrib();
-			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // disable rendering into the FBO
-
-			#endregion
-
-
-			GL.BindTexture(TextureTarget.Texture2D, CanvasTexture);
+			GL.BindTexture(TextureTarget.Texture2D, CanvasTexture); // Bind the canvas
 			GL.ClearColor (Color.Black);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 			GL.PushMatrix();
 			{
+				GL.Translate(-FBOScaleX * 0.5, -FBOScaleY * 0.5, 0f);
 				// Draw the Color Texture
-				GL.Translate(0f, 0f, 0f);
-
 				GL.Begin(BeginMode.Quads);
 				{
-					GL.TexCoord2(0.0f, 1f);
-					GL.Vertex2(-FBOScaleX, FBOScaleY);
 					GL.TexCoord2(0.0f, 0.0f);
-					GL.Vertex2(-FBOScaleX, -FBOScaleY);
+					GL.Vertex2(0.0f, 0.0f);
 					GL.TexCoord2(1.0f, 0.0f);
-					GL.Vertex2(FBOScaleX, -FBOScaleY);
+					GL.Vertex2(FBOScaleX, 0.0f);
 					GL.TexCoord2(1.0f, 1.0f);
 					GL.Vertex2(FBOScaleX, FBOScaleY);
+					GL.TexCoord2(0.0f, 1.0f);
+					GL.Vertex2(0.0f, FBOScaleY);
 				}
 				GL.End();
-
 			}
 			GL.PopMatrix();
-			GL.BindTexture(TextureTarget.Texture2D, 0); // bind default texture
+			GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
+
+			
+			GL.Flush();
+
+			#endregion
 		}
 
 	}
