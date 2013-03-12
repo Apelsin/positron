@@ -4,6 +4,6 @@ namespace positron
 {
 	public interface IRenderable
 	{
-		void Render();
+		void Render(double time);
 	}
 }

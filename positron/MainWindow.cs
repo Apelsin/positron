@@ -1,20 +1,36 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
+
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Factories;
+
 namespace positron
 {
+	#region Event-related
+	public class KeysUpdateEventArgs : EventArgs
+	{
+		public KeysUpdateEventArgs(OrderedDictionary keys_and_times)
+		{
+			KeysPressedWhen = keys_and_times;
+		}
+		public OrderedDictionary KeysPressedWhen { get; set; }
+	}
+	public delegate void KeysUpdateEventHandler(object sender, KeysUpdateEventArgs e);
+	#endregion
 	public class ThreadedRendering : GameWindow
 	{
 		#region State
-		#region Members
+		#region Member
 		/// <summary>
 		/// GL handle for canvas FBO texture
 		/// </summary>
@@ -72,6 +88,10 @@ namespace positron
 		/// </summary>
 		float PositiondY;
 		/// <summary>
+		/// Ordered dictionary containing the current keyboard keys being pressed in time order
+		///w </summary>
+		OrderedDictionary KeysPressed = new OrderedDictionary();
+		/// <summary>
 		/// Signifies that the program is exiting
 		/// </summary>
 		bool Exiting = false;
@@ -84,28 +104,36 @@ namespace positron
 		/// </summary>
 		Thread UpdatingThread;
 
+		/// <summary>
+		/// The timer for render time
+		/// </summary>
 		Stopwatch RenderWatch = new Stopwatch();
+		/// <summary>
+		/// The timer for update time
+		/// </summary>
 		Stopwatch UpdateWatch = new Stopwatch();
+		/// <summary>
+		/// The timer for each frame (i.e. render and update)
+		/// </summary>
 		Stopwatch FrameWatch = new Stopwatch();
-		Stopwatch TestWatch = new Stopwatch();
-
-		bool HasUpdated = false;
 
 		/// <summary>
 		/// Lock to synchronize rendering and updating
 		/// </summary>
 		object UpdateLock = new object();
 
+		/// <summary>
+		/// Lock to synchronize user input controls
+		/// </summary>
+		object UserInputLock = new object();
+
 		double FrameLimitTime = 1.0 / 60.0;
 
-		/// <summary>
-		/// The acceleration due to gravity at sea level on Earth in m/s
-		/// </summary>
-		const float GravityAccel = -9.81f;
 		/// <summary>
 		/// Some random thing
 		/// </summary>
 		Random Randy = new Random(4352453);
+
 		#endregion
 		#region Accessors
 		/// <summary>
@@ -122,13 +150,24 @@ namespace positron
 		}
 		#endregion
 		#endregion
-		RenderSet TestSprites = new RenderSet();
-		Random rand = new Random();
-		List<Key> KeysPressed = new List<Key>();	
+		#region Event
+		public event KeysUpdateEventHandler KeysUpdate;
+		protected virtual void OnKeysUpdate ()
+		{
+			if (KeysUpdate != null) {
+				//TODO: Not sure if this respects UpdateLock (verify)
+				lock(UserInputLock)
+				{
+					KeysUpdate (this, new KeysUpdateEventArgs (KeysPressed));
+				}
+			}
+		}
+		#endregion
 		
 		public ThreadedRendering ()
 			: base()
 		{
+
 			lock (UpdateLock)
 			{
 				this.Width = _CanvasWidth;
@@ -140,12 +179,10 @@ namespace positron
 					this.Exit();
 				else if(e.Key == Key.Space)
 				{
-
 				}
-				lock(UpdateLock)
-					KeysPressed.Add(e.Key);
+				lock(UserInputLock)
+					KeysPressed.Add (e.Key, DateTime.Now);
 			};
-
 			Keyboard.KeyUp += delegate(object sender, KeyboardKeyEventArgs e)
 			{
 				/*if (e.Key == Key.F)
@@ -159,10 +196,9 @@ namespace positron
 						OnResize(null);
 					}
 				}*/
-				lock(UpdateLock)
+				lock(UserInputLock)
 					KeysPressed.Remove(e.Key);
 			};
-			
 			Resize += delegate(object sender, EventArgs e)
 			{
 				// Note that we cannot call any OpenGL methods directly. What we can do is set
@@ -180,7 +216,6 @@ namespace positron
 					FBOScaleY = multi * (float)(_CanvasHeight*_CanvasHeight) / (float)ViewportHeight;
 				}
 			};
-			
 			Move += delegate(object sender, EventArgs e)
 			{
 				// Note that we cannot call any OpenGL methods directly. What we can do is set
@@ -193,10 +228,8 @@ namespace positron
 					PositionX = X;
 					PositionY = Y;
 				}
-			};
-			
-			// Make sure initial position are correct, otherwise we'll give a huge
-			// initial velocity to the balls.
+			};	
+			// Make sure initial position are correct, otherwise there will be a great initial velocity
 			PositionX = X;
 			PositionY = Y;
 		}
@@ -230,9 +263,6 @@ namespace positron
 			// Culling init
 			GL.Enable(EnableCap.CullFace);
 
-			// Load textures into graphics memory space
-			Texture.Setup();
-
 			// Create Color Tex
 			GL.GenTextures(1, out CanvasTexture);
 			GL.BindTexture(TextureTarget.Texture2D, CanvasTexture);
@@ -252,33 +282,12 @@ namespace positron
 
 			Context.MakeCurrent(null); // Release the OpenGL context so it can be used on the new thread.
 
-			TestSprites.Add(new SpriteBase(Texture.Get("sprite_player")));
-
-			for (int i = 0; i < (1<<9); i++) {
-				SpriteBase p = new SpriteBase();
-				p.Position = new Vector3d (new Vector2d (
-					rand.Next (10, _CanvasWidth - 10),
-					rand.Next (10, _CanvasHeight - 10)));
-				p.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
-				TestSprites.Add (p);
-			}
-			Texture four_square = Texture.Get("sprite_four_square");
-			for (int i = 0; i < (1<<9); i++) {
-				SpriteBase p = new SpriteBase(four_square);
-				p.Position = new Vector3d (new Vector2d (
-					rand.Next (10, _CanvasWidth - 10),
-					rand.Next (10, _CanvasHeight - 10)));
-				//p.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
-				TestSprites.Add (p);
-			}
-
 			RenderingThread = new Thread(RenderLoop);
 			UpdatingThread = new Thread(UpdateLoop);
 			RenderingThread.IsBackground = true;
 			UpdatingThread.IsBackground = true;
 			RenderingThread.Start();
 			UpdatingThread.Start();
-			TestWatch.Start();
 		}
 		
 		#endregion
@@ -467,69 +476,11 @@ namespace positron
 
 		void Update (double time)
 		{
-			SpriteBase zero = (SpriteBase)TestSprites [0];
-			int left_right_order = KeysPressed.IndexOf (Key.D) - KeysPressed.IndexOf (Key.A);
-			double sx = MathUtil.Clamp ((double)left_right_order, 1.0, -1.0);
-			zero.TileX = sx == 0 ? zero.TileX : sx;
-			zero.VelocityX = sx * 128;
-
-			if (TestWatch.Elapsed.TotalSeconds > 2.0) {
-				zero.VelocityY += 200;
-				TestWatch.Restart();
-			}
-
-			double fx = (KeysPressed.Contains(Key.A) ? -1.0 : 0.0) +
-				(KeysPressed.Contains(Key.D) ? 1.0 : 0.0);
-			double fy = (KeysPressed.Contains(Key.W) ? 1.0 : 0.0) +
-				(KeysPressed.Contains(Key.S) ? -1.0 : 0.0);
-			int num = Math.Min (TestSprites.Count, (int)(5000 * time));
-			for(int i = 0; i < num; i++)
-			{
-				int idx = Randy.Next(TestSprites.Count - 1) + 1; // Skip zero
-				Drawable p = TestSprites[idx]; // Functional, so it has to be copied...huh
-				p.VelocityY += (300.0 + Randy.NextDouble() * 80.0) * fy;
-				p.VelocityX += (300.0 + Randy.NextDouble() * 80.0) * fx;
-				TestSprites[idx] = p;
-			}
-			for (int i = 0; i < TestSprites.Count; i++)
-			{
-				Drawable p = TestSprites[i];
-
-				double dx = p.RenderSizeX() / _CanvasWidth;
-				double dy = p.RenderSizeY() / _CanvasHeight;
-
-				p.VelocityX /= _CanvasWidth;
-				p.VelocityY /= _CanvasHeight;
-				p.PositionX /= _CanvasWidth;
-				p.PositionY /= _CanvasHeight;
-
-				if (p.PositionY > 0.03)
-				{
-					p.VelocityY += (float)(GravityAccel * 0.1) * time;
-				}
-				p.Velocity *= 0.995f;
-
-				// Velocity is handled here
-				Vector3d position_delta = p.Position;
-				p.Position += p.Velocity * time;
-
-				p.PositionX = MathUtil.Clamp(p.PositionX, 1.0-dx, 0.0);
-				p.PositionY = MathUtil.Clamp(p.PositionY, 1.0-dy, 0.0);
-
-				position_delta = p.Position - position_delta;
-				p.Velocity = position_delta / time;
-
-				p.VelocityX *= _CanvasWidth;
-				p.VelocityY *= _CanvasHeight;
-				p.PositionX *= _CanvasWidth;
-				p.PositionY *= _CanvasHeight;
-
-				if (p.PositionY <= 0.05)
-					p.PositionY = 0.05;
-				TestSprites[i] = p;
-			}
-			//if(TestSprites.Count > 0)
-			//	TestSprites.RemoveAt(TestSprites.Count-1);
+			// Really bad singleton implementation
+			Program.Game.Update(time);
+			// Objects subscribe to this event
+			// TODO: create managed KeyUp and KeyDown for MainWindow
+			OnKeysUpdate();
 		}
 		
 		#endregion
@@ -559,6 +510,7 @@ namespace positron
 				{
 					GL.Translate(-_CanvasWidth * 0.5, -_CanvasHeight * 0.5, 0f);
 					// Draw background gradient:
+					/*
 					GL.Begin (BeginMode.Quads);
 					GL.Color4 (Color.OrangeRed);
 					GL.Vertex2(0, 0);
@@ -567,12 +519,14 @@ namespace positron
 					GL.Vertex2(_CanvasWidth, _CanvasHeight);
 					GL.Vertex2(0, _CanvasHeight);
 					GL.End();
+					*/
 
 					// Draw the meat and potatos
 					//GL.Enable( EnableCap.Lighting );
 					//GL.Enable( EnableCap.Light0 );
 					//GL.Enable( EnableCap.ColorMaterial );
-					TestSprites.Render();
+					// "Singleton" object
+					Program.Game.Draw(time);
 					GL.Color4(Color.White);
 					//GL.Disable( EnableCap.ColorMaterial );
 					//GL.Disable( EnableCap.Light0 );

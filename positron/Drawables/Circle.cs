@@ -18,9 +18,10 @@ namespace positron
 
 		public Circle (float radius)
 		{
+			Color = Color.Black;
 			Radius = radius;
 		}
-		public override void Render()
+		public override void Render(double time)
 		{
 			GL.PointSize(Radius);
 			GL.Begin(BeginMode.Points);

@@ -48,6 +48,7 @@ namespace positron
 			this(0.0, 0.0, scalex, scaley, Texture.DefaultTexture)
 		{		
 		}
+		// Main constructor:
 		public SpriteBase (double scalex, double scaley, Texture texture):
 			this(0.0, 0.0, scalex, scaley, texture)
 		{
@@ -67,7 +68,7 @@ namespace positron
 		// TODO: rotation stuff here
 		public override double RenderSizeX () { return _Size.X * _Texture.Width; }
 		public override double RenderSizeY () { return _Size.Y * _Texture.Height; }
-		public override void Render ()
+		public override void Render (double time)
 		{
 			double w = Size.X * _Texture.Width;
 			double h = Size.Y * _Texture.Height;
@@ -84,9 +85,9 @@ namespace positron
 					GL.Vertex2(0.0, 0.0);
 					GL.TexCoord2(_TileX, 0.0);
 					GL.Vertex2(w, 0.0);
-					GL.TexCoord2(_TileX, -1.0);
+					GL.TexCoord2(_TileX, -_TileY);
 					GL.Vertex2(w, h);
-					GL.TexCoord2(0.0, -1.0);
+					GL.TexCoord2(0.0, -_TileY);
 					GL.Vertex2(0.0, h);
 				}
 				GL.End ();

@@ -1,3 +1,6 @@
 [submodule "opentk"]
 	path = opentk
 	url = https://github.com/andykorth/opentk.git
+[submodule "Farseer-Physics"]
+	path = Farseer-Physics
+	url = https://github.com/d-snp/Farseer-Physics

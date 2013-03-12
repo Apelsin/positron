@@ -42,7 +42,7 @@ namespace positron
 		}
 		#endregion
 		#region Static
-		public static void Setup ()
+		public static void InitialSetup ()
 		{
 			Textures = new Hashtable();
 			_DefaultTexture = LoadTexture ("sprite_small_disc", "sprite_small_disc.png");

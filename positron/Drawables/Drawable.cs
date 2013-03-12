@@ -3,11 +3,10 @@ using OpenTK;
 
 namespace positron
 {
-	public abstract class Drawable : IRenderable, IWorldObject
+	public abstract class Drawable : IRenderable
 	{
 		#region State
 		#region Member Variables
-
 		protected Vector3d _Position = new Vector3d();
 		protected Vector3d _Size = new Vector3d();
 		protected Vector3d _Velocity = new Vector3d();
@@ -58,8 +57,9 @@ namespace positron
 		#endregion
 		public Drawable ()
 		{
+
 		}
-		public abstract void Render();
+		public abstract void Render(double time);
 		public abstract double RenderSizeX();
 		public abstract double RenderSizeY();
 	}

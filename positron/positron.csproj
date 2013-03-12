@@ -45,23 +45,36 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="MainWindow.cs" />
-    <Compile Include="RenderSet.cs" />
     <Compile Include="IWorldObject.cs" />
     <Compile Include="IRenderable.cs">
       <DependentUpon>IRenderable.cs</DependentUpon>
     </Compile>
     <Compile Include="Drawables\Drawable.cs" />
-    <Compile Include="Drawables\Circle.cs" />
+    <Compile Include="Drawables\Circle.cs">
+      <DependentUpon>Circle.cs</DependentUpon>
+    </Compile>
     <Compile Include="IColorable.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="Drawables\SpriteBase.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
+    <Compile Include="Drawables\SpriteObject.cs" />
+    <Compile Include="Scene.cs" />
+    <Compile Include="IInputAccepter.cs" />
+    <Compile Include="Drawables\Player.cs" />
+    <Compile Include="MainGame.cs" />
+    <Compile Include="RenderSet.cs" />
+    <Compile Include="Drawables\Line.cs" />
+    <Compile Include="Helper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
       <Project>{A37A7E14-0000-0000-0000-000000000000}</Project>
       <Name>OpenTK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Farseer-Physics\Branches\Class\Farseer Physics.csproj">
+      <Project>{A4610E4C-DD34-428B-BABB-779CA0B5993A}</Project>
+      <Name>Farseer Physics</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
