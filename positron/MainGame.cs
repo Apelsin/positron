@@ -91,7 +91,7 @@ namespace positron
 			for(int i = 0; i < TestIndicators.Count; i++)
 			{
 				int t = ((int)TestWatch.Elapsed.TotalMilliseconds % (TestIndicators.Count * 100)) / 100;
-				TestIndicators[i].State = t == i;
+				TestIndicators[i].State = (t % 3) == (i % 3);
 			}
 		}
 		public void Draw(double time=0)
