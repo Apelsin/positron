@@ -66,6 +66,8 @@
     <Compile Include="RenderSet.cs" />
     <Compile Include="Drawables\Line.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="Drawables\LayeredSprite.cs" />
+    <Compile Include="Drawables\BooleanIndicator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

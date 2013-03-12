@@ -11,7 +11,6 @@ namespace positron
 	public class Player : SpriteObject, IInputAccepter
 	{
 		public bool OnPlatform { get; set; }
-		private Fixture StandingOn;
 		#region Behavior
 		public Player(Scene scene):
 			this(0.0, 0.0, 1.0, 1.0, Texture.DefaultTexture, Program.Game.CurrentScene)
@@ -51,27 +50,10 @@ namespace positron
 
 		protected bool HandleOnCollision (Fixture fixure_a, Fixture fixture_b, Contact contact)
 		{
-			var collision_normal = contact.Manifold.LocalNormal;
-			bool above = true;
-			for(int i = 0; i < contact.Manifold.PointCount; i++)
-				above &= contact.Manifold.Points[i].LocalPoint.Y > 0.0;
-			bool below = Math.Abs (collision_normal.Y) > 0.1f;
-			if (below && !above) {
-  				OnPlatform = true;
-				StandingOn = fixture_b;
-			}
 			return true;
 		}
 		protected void HandleOnSeparation (Fixture fixture_a, Fixture fixture_b)
 		{
-			if (fixture_b == StandingOn) {
- 				OnPlatform = false;
-				StandingOn = null;
-			}
-
-			//Microsoft.Xna.Framework.Vector2 collision_normal = contact.Manifold.LocalNormal;
-			//OnPlatform &= !(collision_normal.Y < 0.0f);
-			//return true;
 		}
 		public void KeyDown (object sender, KeyboardKeyEventArgs e)
 		{

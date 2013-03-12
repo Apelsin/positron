@@ -55,8 +55,9 @@ namespace positron
 				(float)(_Position.X / Configuration.MeterInPixels),
 				(float)(_Position.Y / Configuration.MeterInPixels));
 			_SpriteBody = BodyFactory.CreateBody(_Scene.World, msv2);
-			_SpriteFixture = FixtureFactory.AttachRectangle(w, h, 1.0f, half_w_h, _SpriteBody);
+			_SpriteFixture = FixtureFactory.AttachRectangle(w, h, 1000.0f, half_w_h, _SpriteBody);
 			_SpriteBody.BodyType = BodyType.Static;
+
 			_SpriteBody.FixedRotation = true;
 			_SpriteBody.Friction = 0.5f;
 		}

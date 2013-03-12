@@ -48,6 +48,8 @@ namespace positron
 			_DefaultTexture = LoadTexture ("sprite_small_disc", "sprite_small_disc.png");
 			LoadTexture ("sprite_four_square", "sprite_four_square.png");
 			LoadTexture ("sprite_player", "sprite_cool_guy.png");
+			LoadTexture ("indicator", "sprite_indicator.png");
+			LoadTexture ("indicator_gloss", "sprite_indicator_gloss.png");
 		}
 		public static void Teardown ()
 		{

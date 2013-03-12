@@ -25,6 +25,10 @@ namespace positron
 			get { return _Position.Y; }
 			set { _Position.Y = value; }
 		}
+		public double PositionZ {
+			get { return _Position.Z; }
+			set { _Position.Z = value; }
+		}
 		public Vector3d Velocity {
 			get { return _Velocity; }
 			set { _Velocity = value; }
