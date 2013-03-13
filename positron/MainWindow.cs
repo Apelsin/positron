@@ -454,16 +454,16 @@ namespace positron
 			UpdateWatch.Start();
 			RenderWatch.Start();
 			FrameWatch.Start();
-			int sleepy_head = Configuration.ThreadSleepTolerance;
+
+			// Store this in a local variable because accessors have overhead!
+			int caffeine = Configuration.ThreadSleepTolerance;
 			while (!Exiting) {
 				// Sleep the thread for the most milliseconds less than the frame limit time
 				double frame_time = FrameWatch.Elapsed.TotalSeconds;
 				// At least one dmillisecond will be in a loop (because Thread.Sleep is really shitty)
-				int millisleep = Math.Max(0, (int)(1000 * (FrameLimitTime - frame_time)) - sleepy_head);
+				int millisleep = Math.Max(0, (int)(1000 * (FrameLimitTime - frame_time)) - caffeine);
 				Thread.Sleep (millisleep);
 				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
-				if(millisleep > 0)
-					Console.WriteLine("millisleep == {0}", millisleep);
 				frame_time = UpdateWatch.Elapsed.TotalSeconds;
 				FrameWatch.Restart();
 
