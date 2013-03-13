@@ -31,6 +31,8 @@ namespace positron
 	{
 		#region State
 		#region Member
+		public int PlayerKeyUpdates = 0;
+		public int ThreadedUpdateCount = 0;
 		/// <summary>
 		/// GL handle for canvas FBO texture
 		/// </summary>
@@ -127,7 +129,7 @@ namespace positron
 		/// </summary>
 		object UserInputLock = new object();
 
-		double FrameLimitTime = 1.0 / 60.0;
+		double FrameLimitTime = 1.0 / Configuration.FrameRateCap;
 
 		/// <summary>
 		/// Some random thing
@@ -452,13 +454,19 @@ namespace positron
 			UpdateWatch.Start();
 			RenderWatch.Start();
 			FrameWatch.Start();
+			int sleepy_head = Configuration.ThreadSleepTolerance;
 			while (!Exiting) {
 				// Sleep the thread for the most milliseconds less than the frame limit time
-				int millisleep = Math.Max(0, (int)(1000 * (FrameLimitTime - RenderWatch.Elapsed.TotalSeconds)));
-				Thread.Sleep (millisleep);
 				double frame_time = FrameWatch.Elapsed.TotalSeconds;
-				while (RenderWatch.Elapsed.TotalSeconds < FrameLimitTime);
+				// At least one dmillisecond will be in a loop (because Thread.Sleep is really shitty)
+				int millisleep = Math.Max(0, (int)(1000 * (FrameLimitTime - frame_time)) - sleepy_head);
+				Thread.Sleep (millisleep);
+				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
+				if(millisleep > 0)
+					Console.WriteLine("millisleep == {0}", millisleep);
+				frame_time = UpdateWatch.Elapsed.TotalSeconds;
 				FrameWatch.Restart();
+
 				double update_time = UpdateWatch.Elapsed.TotalSeconds;
 				UpdateWatch.Restart();
 				Update (update_time);
@@ -476,11 +484,11 @@ namespace positron
 
 		void Update (double time)
 		{
-			// Really bad singleton implementation
-			Program.Game.Update(time);
 			// Objects subscribe to this event
 			// TODO: create managed KeyUp and KeyDown for MainWindow
-			OnKeysUpdate();
+			OnKeysUpdate ();
+			// Really bad singleton implementation
+			Program.Game.Update (time);
 		}
 		
 		#endregion

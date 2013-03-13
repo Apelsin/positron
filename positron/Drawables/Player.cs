@@ -66,27 +66,27 @@ namespace positron
 		}
 		public void KeysUpdate(object sender, KeysUpdateEventArgs e)
 		{
-			float vx = (e.KeysPressedWhen.Contains(Key.A) ? -1.0f : 0.0f) + (e.KeysPressedWhen.Contains(Key.D) ? 1.0f : 0.0f);
-			//float vy = (e.KeysPressed.Contains(Key.S) ? -1.0f : 0.0f) + (e.KeysPressed.Contains(Key.W) ? 1.0f : 0.0f);
-			vx *= 5f;
+			float fx = (e.KeysPressedWhen.Contains(Key.A) ? -1.0f : 0.0f) + (e.KeysPressedWhen.Contains(Key.D) ? 1.0f : 0.0f);
+			//float fy = (e.KeysPressed.Contains(Key.S) ? -1.0f : 0.0f) + (e.KeysPressed.Contains(Key.W) ? 1.0f : 0.0f);
+			fx *= 5f;
 			//vy *= 10f;
 			//this.Body.ApplyForce(new Microsoft.Xna.Framework.Vector2(vx * _SpriteBody.Mass, vy * _SpriteBody.Mass));
-			Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(vx, Body.LinearVelocity.Y);
+			Body.ApplyForce(new Microsoft.Xna.Framework.Vector2(fx * Body.Mass));
 			//Console.WriteLine("On Platform == {0}", OnPlatform);
 
 			// Time tolerance for input controls!
-			foreach(DictionaryEntry de in e.KeysPressedWhen)
-			{
-				if((Key)de.Key == Key.Space)
-				{
-					if(Helper.KeyPressedInTime((DateTime)de.Value, DateTime.Now))
-						Jump ();
-				}
-			}
+//			foreach(DictionaryEntry de in e.KeysPressedWhen)
+//			{
+//				if((Key)de.Key == Key.Space)
+//				{
+//					if(Helper.KeyPressedInTime((DateTime)de.Value, DateTime.Now))
+//						Jump ();
+//				}
+//			}
 		}
 		public void Jump()
 		{
-			if(OnPlatform)
+			//if(OnPlatform)
 			{
 				OnPlatform = false;
 				float jump_imp_y = 5.0f * Body.Mass;

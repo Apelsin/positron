@@ -13,11 +13,17 @@ namespace positron
 	public class SpriteObject: SpriteBase, IWorldObject
 	{
 		protected Scene _Scene;
+		protected bool _Preserve;
+		protected int _WorldIndex;
 		protected Body _SpriteBody;
 		protected Fixture _SpriteFixture;
 
 		public Scene Scene { get { return _Scene; } }
-		public bool Preserve { get; set; }
+		public int WorldIndex { get { return _WorldIndex; } }
+		public bool Preserve {
+			get { return _Preserve; }
+			set { _Preserve = value; }
+		}
 
 		public Body Body { get { return _SpriteBody; } }
 		public Fixture Fixture { get { return _SpriteFixture; } }
@@ -55,11 +61,10 @@ namespace positron
 				(float)(_Position.X / Configuration.MeterInPixels),
 				(float)(_Position.Y / Configuration.MeterInPixels));
 			_SpriteBody = BodyFactory.CreateBody(_Scene.World, msv2);
-			_SpriteFixture = FixtureFactory.AttachRectangle(w, h, 1000.0f, half_w_h, _SpriteBody);
+			_SpriteFixture = FixtureFactory.AttachRectangle(w, h, 100.0f, half_w_h, _SpriteBody);
 			_SpriteBody.BodyType = BodyType.Static;
-
 			_SpriteBody.FixedRotation = true;
-			_SpriteBody.Friction = 0.5f;
+			_SpriteBody.Friction = 0.0f;
 		}
 		public override void Render (double time)
 		{
@@ -97,9 +102,9 @@ namespace positron
 			}
 			GL.PopMatrix();
 		}
-		public void Update(double time)
+		public virtual void Update (double time)
 		{
-			// Do something!
+			// Put stuff here!
 		}
 		public void SceneChange (object sender, SceneChangeEventArgs e)
 		{

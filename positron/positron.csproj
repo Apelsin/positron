@@ -58,7 +58,9 @@
     <Compile Include="Drawables\SpriteBase.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
-    <Compile Include="Drawables\SpriteObject.cs" />
+    <Compile Include="Drawables\SpriteObject.cs">
+      <DependentUpon>SpriteObject.cs</DependentUpon>
+    </Compile>
     <Compile Include="Scene.cs" />
     <Compile Include="IInputAccepter.cs" />
     <Compile Include="Drawables\Player.cs" />

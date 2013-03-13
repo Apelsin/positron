@@ -51,9 +51,10 @@ namespace positron
 			_CurrentScene.Tests.Add(new Player(Texture.Get("sprite_player")));
 			int w_i = (int)Program.MainWindow.CanvasWidth;
 			int h_i = (int)Program.MainWindow.CanvasHeight;
+			Texture default_sprite = Texture.Get("sprite_small_disc");
 			for (int i = 0; i < (1<<7); i++)
 			{
-				SpriteObject sprite = new SpriteObject(rand.Next (10, w_i - 10), rand.Next (10, h_i - 10), _CurrentScene);
+				SpriteObject sprite = new SpriteObject(rand.Next (10, w_i - 10), rand.Next (10, h_i - 10), 2.0, 2.0, default_sprite, _CurrentScene);
 				//if(i % 20 != 0)
 					sprite.Body.BodyType = BodyType.Dynamic;
 				sprite.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
@@ -61,10 +62,10 @@ namespace positron
 			}
 			Texture four_square = Texture.Get("sprite_four_square");
 			for (int i = 0; i < (1<<7); i++) {
-				SpriteObject sprite = new SpriteObject(rand.Next (10, w_i - 10), rand.Next (10, h_i - 10), four_square, _CurrentScene);
+				SpriteObject sprite = new SpriteObject(rand.Next (10, w_i - 10), rand.Next (10, h_i - 10), 2.0, 2.0, four_square, _CurrentScene);
 				//if(i % 20 != 0)
 					sprite.Body.BodyType = BodyType.Dynamic;
-				sprite.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
+				//sprite.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
 				_CurrentScene.Tests.Add (sprite);
 			}
 			Vector3d b = new Vector3d(w_i, 0.0, 0.0);
@@ -88,10 +89,13 @@ namespace positron
 		public void Update (double time)
 		{
 			_CurrentScene.Update (time);
-			for(int i = 0; i < TestIndicators.Count; i++)
-			{
+			for (int i = 0; i < TestIndicators.Count; i++) {
 				int t = ((int)TestWatch.Elapsed.TotalMilliseconds % (TestIndicators.Count * 100)) / 100;
-				TestIndicators[i].State = (t % 3) == (i % 3);
+				TestIndicators [i].State = (t % 3) == (i % 3);
+			}
+			foreach (object o in _CurrentScene.Tests) {
+				if(o is SpriteObject)
+					((SpriteObject)o).Update(time);
 			}
 		}
 		public void Draw(double time=0)

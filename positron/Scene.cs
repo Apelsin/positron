@@ -73,6 +73,7 @@ namespace positron
 				new Microsoft.Xna.Framework.Vector2(0.0f, (float)Configuration.ForceDueToGravity);
 
 			_World = new World(gravity);
+			//_World.EnableSubStepping = true;
 		}
 //		public bool CheckIn(object o, )
 //		{
@@ -86,7 +87,7 @@ namespace positron
 		public void Update (double time)
 		{
 			// Update the world!
-			World.Step((float)time);
+			_World.Step((float)time);
 		}
 		public void Render (double time)
 		{

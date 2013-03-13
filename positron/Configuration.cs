@@ -13,6 +13,8 @@ namespace positron
 		private static double _MetersInPixels;
 		private static double _ForceDueToGravity;
 		private static double _KeyPressTimeTolerance;
+		private static double _FrameRateCap;
+		private static int _ThreadSleepTolerance;
 		#endregion
 
 		private static Dictionary<String, object> __dict__ = new Dictionary<String, object>();
@@ -23,6 +25,8 @@ namespace positron
 			_MetersInPixels = 64.0;
 			_ForceDueToGravity = -9.8;
 			_KeyPressTimeTolerance = 0.2;
+			_FrameRateCap = 30.0;
+			_ThreadSleepTolerance = 2;
 		}
 		#region Alias Accessors
 		public static string ArtworkPath {
@@ -50,6 +54,22 @@ namespace positron
 		public static double KeyPressTimeTolerance {
 			get { return _KeyPressTimeTolerance; }
 		}
+		/// <summary>
+		/// Maximum frame rate to work at
+		/// </summary>
+		public static double FrameRateCap {
+			get { return _FrameRateCap; }
+		}
+		/// <summary>
+		/// Time in milliseconds to shave off of update/render
+		/// Thread.Sleep call (and leave for a more accurate, timed loop)
+		/// Increasing this number may increase CPU usage.
+		/// Protip: Keep this number above 1 or you might
+		/// experience jumpiness
+		/// </summary>
+		public static int ThreadSleepTolerance {
+			get { return _ThreadSleepTolerance; }
+		}
 		public static void Set(String key, object value)
 		{
 			__dict__[key] = value;
@@ -68,6 +88,8 @@ namespace positron
 			yield return new KeyValuePair<String, object>("_MetersInPixels", _MetersInPixels);
 			yield return new KeyValuePair<String, object>("_ForceDueToGravity", _ForceDueToGravity);
 			yield return new KeyValuePair<String, object>("_KeyPressTimeTolerance", _KeyPressTimeTolerance);
+			yield return new KeyValuePair<String, object>("_FrameRateCap", _FrameRateCap);
+			yield return new KeyValuePair<String, object>("_FrameRateCap", _ThreadSleepTolerance);
 			foreach(KeyValuePair<String, object> e in __dict__)
 				yield return e;
 		}
