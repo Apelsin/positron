@@ -16,7 +16,8 @@ namespace positron
 		}
 		public float Radius { get; set; }
 
-		public Circle (float radius)
+		public Circle (RenderSet render_set, float radius):
+			base(render_set)
 		{
 			Color = Color.Black;
 			Radius = radius;

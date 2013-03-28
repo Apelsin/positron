@@ -12,12 +12,12 @@ namespace positron
 	{
 		public bool State { get; set; }
 		// Main constructor:
-		public BooleanIndicator (double x, double y):
-			base(x, y, 1.0, 1.0, Texture.Get("indicator"), null)
+		public BooleanIndicator (RenderSet render_set, double x, double y):
+			base(render_set, x, y, 1.0, 1.0, null, Texture.Get("sprite_indicator"))
 		{
 			State = false;
 			_Color = Color.SkyBlue;
-			_NextLayer = new LayeredSprite(x, y, 1.0, 1.0, Texture.Get ("indicator_gloss"), null);
+			_NextLayer = new LayeredSprite(render_set, x, y, 1.0, 1.0, null, Texture.Get ("sprite_indicator_gloss"));
 		}
 		// TODO: rotation stuff here
 		public override void Render (double time)
@@ -32,22 +32,11 @@ namespace positron
 		}
 		public override void DrawQuads()
 		{
-			double w = Size.X * _Texture.Width;
-			double h = Size.Y * _Texture.Height;
-			Texture.Bind(_Texture);
+			double w = Size.X * Texture.Width;
+			double h = Size.Y * Texture.Height;
+			Texture.Bind(Texture);
 			GL.Color4 (State ? _Color : Color.DarkSlateGray);
-			GL.Begin (BeginMode.Quads);
-			{
-				GL.TexCoord2(0.0, 0.0);
-				GL.Vertex2(0.0, 0.0);
-				GL.TexCoord2(_TileX, 0.0);
-				GL.Vertex2(w, 0.0);
-				GL.TexCoord2(_TileX, -_TileY);
-				GL.Vertex2(w, h);
-				GL.TexCoord2(0.0, -_TileY);
-				GL.Vertex2(0.0, h);
-			}
-			GL.End ();
+			DrawQuad ();
 			if(_NextLayer != null)
 				_NextLayer.DrawQuads();
 		}

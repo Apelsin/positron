@@ -19,11 +19,13 @@ namespace positron
 	#region Event-related
 	public class KeysUpdateEventArgs : EventArgs
 	{
-		public KeysUpdateEventArgs(OrderedDictionary keys_and_times)
+		public OrderedDictionary KeysPressedWhen;
+		public double Time { get; set; }
+		public KeysUpdateEventArgs(OrderedDictionary keys_and_times, double time)
 		{
 			KeysPressedWhen = keys_and_times;
+			Time = time;
 		}
-		public OrderedDictionary KeysPressedWhen { get; set; }
 	}
 	public delegate void KeysUpdateEventHandler(object sender, KeysUpdateEventArgs e);
 	#endregion
@@ -48,11 +50,11 @@ namespace positron
 		/// <summary>
 		/// Width of canvas in pixels
 		/// </summary>
-		int _CanvasWidth = 512;
+		int _CanvasWidth { get { return Configuration.CanvasWidth; } }
 		/// <summary>
 		/// Height of canvas in pixels
 		/// </summary>
-		int _CanvasHeight = 320;
+		int _CanvasHeight { get { return Configuration.CanvasHeight; } }
 		/// <summary>
 		/// Width of the viewport in pixels
 		/// </summary>
@@ -91,8 +93,8 @@ namespace positron
 		float PositiondY;
 		/// <summary>
 		/// Ordered dictionary containing the current keyboard keys being pressed in time order
-		///w </summary>
-		OrderedDictionary KeysPressed = new OrderedDictionary();
+		/// </summary>
+		public OrderedDictionary KeysPressed = new OrderedDictionary();
 		/// <summary>
 		/// Signifies that the program is exiting
 		/// </summary>
@@ -154,14 +156,21 @@ namespace positron
 		#endregion
 		#region Event
 		public event KeysUpdateEventHandler KeysUpdate;
-		protected virtual void OnKeysUpdate ()
+		protected virtual void OnKeysUpdate (double time)
 		{
-			if (KeysUpdate != null) {
-				//TODO: Not sure if this respects UpdateLock (verify)
-				lock(UserInputLock)
+			//TODO: Not sure if this respects UpdateLock (verify)
+			lock(UserInputLock)
+			{
+				KeysUpdateEventArgs args = new KeysUpdateEventArgs (KeysPressed, time);
+				if(KeysUpdate != null)
+					KeysUpdate (this, args);
+				lock(Program.Game.InputAccepterGroupsLock)
 				{
-					KeysUpdate (this, new KeysUpdateEventArgs (KeysPressed));
+					IInputAccepter[] accepters = Program.Game.InputAccepterGroup;
+					for(int i = 0; i < accepters.Length; i++)
+						accepters[i] .KeysUpdate(this, args); // Trickle down arguments
 				}
+
 			}
 		}
 		#endregion
@@ -179,11 +188,15 @@ namespace positron
 			{
 				if (e.Key == Key.Escape)
 					this.Exit();
-				else if(e.Key == Key.Space)
+				IInputAccepter[] accepters = Program.Game.InputAccepterGroup;
+				bool key_press = true;
+				for(int i = 0; i < accepters.Length; i++)
+					key_press = key_press && accepters[i].KeyDown(this, e);
+				if(key_press)
 				{
+					lock(UserInputLock)
+						KeysPressed.Add (e.Key, DateTime.Now);
 				}
-				lock(UserInputLock)
-					KeysPressed.Add (e.Key, DateTime.Now);
 			};
 			Keyboard.KeyUp += delegate(object sender, KeyboardKeyEventArgs e)
 			{
@@ -198,8 +211,15 @@ namespace positron
 						OnResize(null);
 					}
 				}*/
-				lock(UserInputLock)
-					KeysPressed.Remove(e.Key);
+				IInputAccepter[] accepters = Program.Game.InputAccepterGroup;
+				bool key_press = true;
+				for(int i = 0; i < accepters.Length; i++)
+					key_press = key_press && accepters[i].KeyUp(this, e);
+				if(key_press)
+				{
+					lock(UserInputLock)
+						KeysPressed.Remove (e.Key);
+				}
 			};
 			Resize += delegate(object sender, EventArgs e)
 			{
@@ -486,8 +506,7 @@ namespace positron
 		{
 			// Objects subscribe to this event
 			// TODO: create managed KeyUp and KeyDown for MainWindow
-			OnKeysUpdate ();
-			// Really bad singleton implementation
+			OnKeysUpdate (time);	// Really bad singleton implementation
 			Program.Game.Update (time);
 		}
 		

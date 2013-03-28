@@ -55,13 +55,11 @@
     </Compile>
     <Compile Include="IColorable.cs" />
     <Compile Include="Texture.cs" />
-    <Compile Include="Drawables\SpriteBase.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="Drawables\SpriteObject.cs">
       <DependentUpon>SpriteObject.cs</DependentUpon>
     </Compile>
-    <Compile Include="Scene.cs" />
     <Compile Include="IInputAccepter.cs" />
     <Compile Include="Drawables\Player.cs" />
     <Compile Include="MainGame.cs" />
@@ -70,6 +68,13 @@
     <Compile Include="Helper.cs" />
     <Compile Include="Drawables\LayeredSprite.cs" />
     <Compile Include="Drawables\BooleanIndicator.cs" />
+    <Compile Include="Drawables\SpriteBase.cs" />
+    <Compile Include="Dialog.cs" />
+    <Compile Include="Drawables\Spidey.cs" />
+    <Compile Include="TileMap.cs" />
+    <Compile Include="Drawables\BlueprintLine.cs" />
+    <Compile Include="Drawables\BlueprintQuad.cs" />
+    <Compile Include="Scene.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

@@ -15,6 +15,11 @@ namespace positron
 		private static double _KeyPressTimeTolerance;
 		private static double _FrameRateCap;
 		private static int _ThreadSleepTolerance;
+		private static float _MaxWorldTimeStep;
+		private static bool _AdaptiveTimeStep;
+		private static int _CanvasWidth;
+		private static int _CanvasHeight;
+		private static bool _DrawBlueprints;
 		#endregion
 
 		private static Dictionary<String, object> __dict__ = new Dictionary<String, object>();
@@ -22,11 +27,16 @@ namespace positron
 		{
 			string artwork_path = Path.Combine("..", "..", "Assets", "Artwork");
 			Set("ArtworkPath", artwork_path);
-			_MetersInPixels = 64.0;
+			_MetersInPixels = 96.0;
 			_ForceDueToGravity = -9.8;
-			_KeyPressTimeTolerance = 0.2;
-			_FrameRateCap = 30.0;
-			_ThreadSleepTolerance = 2;
+			_KeyPressTimeTolerance = 0.1;
+			_FrameRateCap = 60.0;
+			_ThreadSleepTolerance = 1;
+			_MaxWorldTimeStep = 0.03f;
+			_AdaptiveTimeStep = false;
+			_CanvasWidth = 600;
+			_CanvasHeight = 400;
+			_DrawBlueprints = true;
 		}
 		#region Alias Accessors
 		public static string ArtworkPath {
@@ -70,6 +80,31 @@ namespace positron
 		public static int ThreadSleepTolerance {
 			get { return _ThreadSleepTolerance; }
 		}
+		/// <summary>
+		/// Maximum time in seconds that the physics solver can
+		/// step through time.
+		/// High values may risk horrible physics lag whereas
+		/// lower values will cause slowness
+		/// </summary>
+		public static float MaxWorldTimeStep {
+			get { return _MaxWorldTimeStep; }
+		}
+		/// <summary>
+		/// Whether the world time step should adapt to the load
+		/// </summary>
+		public static bool AdaptiveTimeStep {
+			get { return _AdaptiveTimeStep; }
+		}
+		public static int CanvasWidth {
+			get { return _CanvasWidth; }
+		}
+		public static int CanvasHeight {
+			get { return _CanvasHeight; }
+		}
+		public static bool DrawBlueprints {
+			get { return _DrawBlueprints; }
+			set { _DrawBlueprints = value; }
+		}
 		public static void Set(String key, object value)
 		{
 			__dict__[key] = value;
@@ -90,8 +125,21 @@ namespace positron
 			yield return new KeyValuePair<String, object>("_KeyPressTimeTolerance", _KeyPressTimeTolerance);
 			yield return new KeyValuePair<String, object>("_FrameRateCap", _FrameRateCap);
 			yield return new KeyValuePair<String, object>("_FrameRateCap", _ThreadSleepTolerance);
+			yield return new KeyValuePair<String, object>("_MinWorldTimeStep", _MaxWorldTimeStep);
+			yield return new KeyValuePair<String, object>("_AdaptiveTimeStep", _AdaptiveTimeStep);
+			yield return new KeyValuePair<String, object>("_DrawBlueprints", _DrawBlueprints);
 			foreach(KeyValuePair<String, object> e in __dict__)
 				yield return e;
+		}
+		public static void DumpEverything ()
+		{
+			Console.WriteLine("{");
+			Console.WriteLine("\t\"Configuration\": {");
+			foreach (KeyValuePair<String, object> kvp in GetAllSettings()) {
+				Console.WriteLine("\t\t\"{0}\": \"{1}\",", kvp.Key, kvp.Value);
+			}
+			Console.WriteLine("\t}");
+			Console.WriteLine("}");
 		}
 		#endregion
 	}

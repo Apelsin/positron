@@ -15,11 +15,11 @@ namespace positron
 		private Color _Color;
 		private Vector3d _Direction;
 
-		private Scene _Scene;
+		private RenderSet _Scene;
 		private Body _LineBody;
 		private Fixture _LineFixture;
 		
-		public Scene Scene { get { return _Scene; } }
+		public RenderSet RenderSet { get { return _Scene; } }
 		public bool Preserve { get; set; }
 		
 		public Body Body { get { return _LineBody; } }
@@ -35,15 +35,15 @@ namespace positron
 		}
 		public float Thickness { get; set; }
 
-		public Line (Vector3d start, Vector3d end, Scene scene):
+		public Line (Vector3d start, Vector3d end, RenderSet scene):
 			this(start, end, 1.0f, scene)
 		{
 		}
-		public Line (Vector3d start, Vector3d end, float thickness, Scene scene)
+		public Line (Vector3d start, Vector3d end, float thickness, RenderSet render_set):
+			base(render_set)
 		{
 			_Position = start;
 			_Direction = end;
-			_Scene = scene;
 			Color = Color.Black;
 			Thickness = thickness;
 			InitPhysics();
@@ -56,7 +56,7 @@ namespace positron
 			var direction = new Microsoft.Xna.Framework.Vector2(
 				(float)(_Direction.X / Configuration.MeterInPixels),
 				(float)(_Direction.Y / Configuration.MeterInPixels));
-			_LineBody = BodyFactory.CreateBody(Scene.World, start);
+			_LineBody = BodyFactory.CreateBody(RenderSet.Scene.World, start);
 			_LineFixture = FixtureFactory.AttachEdge(Microsoft.Xna.Framework.Vector2.Zero, direction, _LineBody);
 			_LineBody.BodyType = BodyType.Static;
 		}
@@ -82,7 +82,7 @@ namespace positron
 		{
 			// Do something!
 		}
-		public void SceneChange (object sender, SceneChangeEventArgs e)
+		public void SetChange (object sender, SetChangeEventArgs e)
 		{
 			this._Scene = e.To;
 		}

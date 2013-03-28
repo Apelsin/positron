@@ -48,8 +48,27 @@ namespace positron
 			_DefaultTexture = LoadTexture ("sprite_small_disc", "sprite_small_disc.png");
 			LoadTexture ("sprite_four_square", "sprite_four_square.png");
 			LoadTexture ("sprite_player", "sprite_cool_guy.png");
-			LoadTexture ("indicator", "sprite_indicator.png");
-			LoadTexture ("indicator_gloss", "sprite_indicator_gloss.png");
+			LoadTexture ("sprite_indicator", "sprite_indicator.png");
+			LoadTexture ("sprite_indicator_gloss", "sprite_indicator_gloss.png");
+			LoadTexture ("sprite_spidey_0", "sprite_spidey_0.png");
+			LoadTexture ("sprite_spidey_1", "sprite_spidey_1.png");
+
+			// Dialog box
+			LoadTexture ("sprite_dialog_box_tl", 	"dialog_box",	"sprite_dialog_box_tl.png");
+			LoadTexture ("sprite_dialog_box_t",		"dialog_box",	"sprite_dialog_box_t.png");
+			LoadTexture ("sprite_dialog_box_tr", 	"dialog_box",	"sprite_dialog_box_tr.png");
+			LoadTexture ("sprite_dialog_box_l", 	"dialog_box",	"sprite_dialog_box_l.png");
+			LoadTexture ("sprite_dialog_box_c", 	"dialog_box",	"sprite_dialog_box_c_transparent.png");
+			LoadTexture ("sprite_dialog_box_r", 	"dialog_box",	"sprite_dialog_box_r.png");
+			LoadTexture ("sprite_dialog_box_bl", 	"dialog_box",	"sprite_dialog_box_bl.png");
+			LoadTexture ("sprite_dialog_box_b", 	"dialog_box",	"sprite_dialog_box_b.png");
+			LoadTexture ("sprite_dialog_box_br", 	"dialog_box",	"sprite_dialog_box_br.png");
+
+			// Background
+			LoadTexture("sprite_tile_bg_1",			"background", 	"sprite_tile_bg_1.png");
+			LoadTexture("sprite_tile_bg_2",			"background", 	"sprite_tile_bg_2.png");
+			LoadTexture("sprite_tile_bg_3",			"background", 	"sprite_tile_bg_3.png");
+
 		}
 		public static void Teardown ()
 		{
@@ -57,9 +76,14 @@ namespace positron
 				GL.DeleteTexture(((Texture)pair.Value).TextureID);
 		}
 
+		public void Bind()
+		{
+			GL.BindTexture(TextureTarget.Texture2D, TextureID);
+		}
+
 		public static void Bind(object key)
 		{
-			GL.BindTexture(TextureTarget.Texture2D, ((Texture)Textures[key]).TextureID);
+			((Texture)Textures[key]).Bind ();
 		}
 
 		public static void Bind(Texture t)
@@ -71,10 +95,12 @@ namespace positron
 		{
 			return (Texture)Textures[key];
 		}
-
-		public static Texture LoadTexture(string title, string file_name)
+		public static Texture LoadTexture(string title, params string[] path_components)
 		{
-			string path = Path.Combine(Configuration.ArtworkPath, file_name);
+			string[] all_path_components = new string[path_components.Length + 1];
+			all_path_components[0] = Configuration.ArtworkPath;
+			path_components.CopyTo(all_path_components, 1);
+			string path = Path.Combine(all_path_components);
 			return LoadTextureAbsolute(title, path);
 		}
 		protected static Texture LoadTextureAbsolute(string title, string file_path)

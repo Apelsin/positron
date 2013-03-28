@@ -15,30 +15,26 @@ namespace positron
 			get { return _NextLayer; }
 			set { _NextLayer = value; }
 		}
-		public LayeredSprite():
-			this(0.0, 0.0, 1.0, 1.0, Texture.DefaultTexture, null)
+		public LayeredSprite(RenderSet render_set, Texture texture, params Texture[] textures):
+			this(render_set, 0.0, 0.0, 1.0, 1.0, null, texture, textures)
 		{
 		}
-		public LayeredSprite(Texture texture):
-			this(0.0, 0.0, 1.0, 1.0, texture, null)
+		public LayeredSprite(RenderSet render_set, LayeredSprite next_layer, Texture texture, params Texture[] textures):
+			this(render_set, 0.0, 0.0, 1.0, 1.0, next_layer, texture, textures)
 		{
 		}
-		public LayeredSprite(Texture texture, LayeredSprite next_layer):
-			this(0.0, 0.0, 1.0, 1.0, texture, next_layer)
-		{
-		}
-		public LayeredSprite (double scalex, double scaley, LayeredSprite next_layer):
-			this(0.0, 0.0, scalex, scaley, Texture.DefaultTexture, next_layer)
+		public LayeredSprite (RenderSet render_set, double scalex, double scaley, LayeredSprite next_layer):
+			this(render_set, 0.0, 0.0, scalex, scaley, next_layer, Texture.DefaultTexture)
 		{		
 		}
 		
-		public LayeredSprite (double scalex, double scaley, Texture texture, LayeredSprite next_layer):
-			this(0.0, 0.0, scalex, scaley, texture, next_layer)
+		public LayeredSprite (RenderSet render_set, double scalex, double scaley, LayeredSprite next_layer, Texture texture, params Texture[] textures):
+			this(render_set, 0.0, 0.0, scalex, scaley, next_layer, texture, textures)
 		{
 		}
 		// Main constructor:
-		public LayeredSprite (double x, double y, double scalex, double scaley, Texture texture, LayeredSprite next_layer):
-			base(x, y, scalex, scaley, texture)
+		public LayeredSprite (RenderSet render_set, double x, double y, double scalex, double scaley, LayeredSprite next_layer, Texture texture, params Texture[] textures):
+			base(render_set, x, y, scalex, scaley, texture, textures)
 		{
 			_NextLayer = next_layer;
 		}
@@ -55,22 +51,9 @@ namespace positron
 		}
 		public virtual void DrawQuads()
 		{
-			double w = Size.X * _Texture.Width;
-			double h = Size.Y * _Texture.Height;
-			Texture.Bind(_Texture);
+			Texture.Bind(Texture);
 			GL.Color4 (_Color);
-			GL.Begin (BeginMode.Quads);
-			{
-				GL.TexCoord2(0.0, 0.0);
-				GL.Vertex2(0.0, 0.0);
-				GL.TexCoord2(_TileX, 0.0);
-				GL.Vertex2(w, 0.0);
-				GL.TexCoord2(_TileX, -_TileY);
-				GL.Vertex2(w, h);
-				GL.TexCoord2(0.0, -_TileY);
-				GL.Vertex2(0.0, h);
-			}
-			GL.End ();
+			DrawQuad ();
 			if(_NextLayer != null)
 				_NextLayer.DrawQuads();
 		}

@@ -7,7 +7,7 @@ namespace positron
 	public interface IWorldObject
 	{
 		void Update(double time);
-		Scene Scene { get; }
+		RenderSet RenderSet { get; }
 		bool Preserve { get; set; }
 
 		Body Body { get; }
@@ -16,7 +16,7 @@ namespace positron
 		/// <summary>
 		/// Raised when the scene this object is in changes
 		/// </summary>
-		void SceneChange (object sender, SceneChangeEventArgs e);
+		void SetChange (object sender, SetChangeEventArgs e);
 
 		double PositionX { get; set; }
 		double PositionY { get; set; }

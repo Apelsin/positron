@@ -22,6 +22,8 @@ namespace positron
 		/// </summary>
 		public static ThreadedRendering MainWindow;
 
+
+
 		[STAThread]
 		public static void Main ()
 		{
@@ -33,7 +35,10 @@ namespace positron
 			MainGame.InitialSetup();
 			// Instantiate a main game
 			Game = new MainGame();
+			Game.Setup();
 			Game.SetupTests();
+			// TEST: Dump all the settings:
+			Configuration.DumpEverything();
 			MainWindow.Run(); // Run the window thread
 		}
 	}

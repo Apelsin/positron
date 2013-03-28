@@ -6,19 +6,17 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using FarseerPhysics.Dynamics;
+using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 
 namespace positron
 {
 	public class SpriteObject: SpriteBase, IWorldObject
 	{
-		protected Scene _Scene;
 		protected bool _Preserve;
 		protected int _WorldIndex;
 		protected Body _SpriteBody;
 		protected Fixture _SpriteFixture;
-
-		public Scene Scene { get { return _Scene; } }
 		public int WorldIndex { get { return _WorldIndex; } }
 		public bool Preserve {
 			get { return _Preserve; }
@@ -28,49 +26,102 @@ namespace positron
 		public Body Body { get { return _SpriteBody; } }
 		public Fixture Fixture { get { return _SpriteFixture; } }
 
+		public override Vector3d Position {
+			get {
+				return new Vector3d(
+					_SpriteBody.Position.X * Configuration.MeterInPixels,
+					_SpriteBody.Position.Y * Configuration.MeterInPixels,
+					_Position.Z);
+			}
+			set {
+				_SpriteBody.Position =
+					new Microsoft.Xna.Framework.Vector2(
+						(float)(value.X / Configuration.MeterInPixels),
+						(float)(value.Y / Configuration.MeterInPixels));
+			}
+		}
+		public override double PositionX {
+			get { return (double)Body.Position.X; }
+			set { Body.Position = new Microsoft.Xna.Framework.Vector2((float)value, Body.Position.Y); }
+		}
+		public override double PositionY {
+			get { return (double)Body.Position.X; }
+			set { Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)value); }
+		}
+		public override Vector3d Velocity {
+			get {
+				return new Vector3d(
+					_SpriteBody.LinearVelocity.X * Configuration.MeterInPixels,
+					_SpriteBody.LinearVelocity.Y * Configuration.MeterInPixels,
+					_Velocity.Z);
+			}
+			set {
+				_SpriteBody.LinearVelocity =
+					new Microsoft.Xna.Framework.Vector2(
+						(float)(value.X / Configuration.MeterInPixels),
+						(float)(value.Y / Configuration.MeterInPixels));
+			}
+		}
+		public override double VelocityX {
+			get { return (double)Body.LinearVelocity.X; }
+			set { Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2((float)value, Body.LinearVelocity.Y); }
+		}
+		public override double VelocityY {
+			get { return (double)Body.LinearVelocity.X; }
+			set { Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2((float)value, Body.LinearVelocity.Y); }
+		}
+		public override double Theta {
+			get { return Body.Rotation; }
+			set { Body.Rotation = (float)value; }
+		}
+
 		#region Behavior
-		public SpriteObject(Scene scene):
-			this(0.0, 0.0, 1.0, 1.0, Texture.DefaultTexture, scene)
+		public SpriteObject(RenderSet render_set):
+			this(render_set, 0.0, 0.0, 1.0, 1.0, Texture.DefaultTexture)
 		{
 		}
-		public SpriteObject(Texture texture, Scene scene):
-			this(0.0, 0.0, 1.0, 1.0, texture, scene)
+		public SpriteObject(RenderSet render_set, Texture texture, params Texture[] textures):
+			this(render_set, 0.0, 0.0, 1.0, 1.0, texture, textures)
 		{
 		}
-		public SpriteObject (double x, double y, Scene scene):
-			this(x, y, 1.0, 1.0, Texture.DefaultTexture, scene)
-		{		
-		}
-		public SpriteObject (double x, double y, Texture texture, Scene scene):
-			this(x, y, 1.0, 1.0, texture, scene)
+		public SpriteObject (RenderSet render_set, double x, double y, Texture texture, params Texture[] textures):
+			this(render_set, x, y, 1.0, 1.0, texture, textures)
 		{		
 		}
 		// Main constructor:
-		public SpriteObject (double x, double y, double scalex, double scaley, Texture texture, Scene scene):
-			base(x, y, scalex, scaley, texture)
+		public SpriteObject (RenderSet render_set, double x, double y, double scalex, double scaley, Texture texture, params Texture[] textures):
+			base(render_set, x, y, scalex, scaley, texture, textures)
 		{
-			_Scene = scene;
+			_RenderSet = render_set;
 			InitPhysics();
+			Position = _Position; // Update body position from initial position
 		}
 		protected virtual void InitPhysics()
 		{
-			float w = (float)(_Size.X * _Texture.Width / Configuration.MeterInPixels);
-			float h = (float)(_Size.Y * _Texture.Height / Configuration.MeterInPixels);
+			float w = (float)(_Size.X * Texture.Width / Configuration.MeterInPixels);
+			float h = (float)(_Size.Y * Texture.Height / Configuration.MeterInPixels);
 			var half_w_h = new Microsoft.Xna.Framework.Vector2(w * 0.5f, h * 0.5f);
 			var msv2 = new Microsoft.Xna.Framework.Vector2(
 				(float)(_Position.X / Configuration.MeterInPixels),
 				(float)(_Position.Y / Configuration.MeterInPixels));
-			_SpriteBody = BodyFactory.CreateBody(_Scene.World, msv2);
+			_SpriteBody = BodyFactory.CreateBody(_RenderSet.Scene.World, msv2);
 			_SpriteFixture = FixtureFactory.AttachRectangle(w, h, 100.0f, half_w_h, _SpriteBody);
 			_SpriteBody.BodyType = BodyType.Static;
 			_SpriteBody.FixedRotation = true;
-			_SpriteBody.Friction = 0.0f;
+			_SpriteBody.Friction = 0.5f;
+			_SpriteBody.OnCollision += HandleOnCollision;
+		}
+
+		bool HandleOnCollision (Fixture fixtureA, Fixture fixtureB, Contact contact)
+		{
+
+			return true;
 		}
 		public override void Render (double time)
 		{
-			double w = _Size.X * _Texture.Width;
-			double h = _Size.Y * _Texture.Height;
-			Texture.Bind(_Texture);
+			//double w = _Size.X * Texture.Width;
+			//double h = _Size.Y * Texture.Height;
+			Texture.Bind(Texture);
 			GL.Color4 (_Color);
 			GL.PushMatrix();
 			{
@@ -87,28 +138,17 @@ namespace positron
 						;
 				GL.Rotate(r, 0.0, 0.0, 1.0);
 				//GL.Translate(Math.Floor (Position.X), Math.Floor (Position.Y), Math.Floor (Position.Z));
-				GL.Begin (BeginMode.Quads);
-				{
-					GL.TexCoord2(0.0, 0.0);
-					GL.Vertex2(0.0, 0.0);
-					GL.TexCoord2(_TileX, 0.0);
-					GL.Vertex2(w, 0.0);
-					GL.TexCoord2(_TileX, -_TileY);
-					GL.Vertex2(w, h);
-					GL.TexCoord2(0.0, -_TileY);
-					GL.Vertex2(0.0, h);
-				}
-				GL.End ();
+				DrawQuad();
 			}
 			GL.PopMatrix();
 		}
 		public virtual void Update (double time)
 		{
-			// Put stuff here!
+			base.Update(time);
 		}
-		public void SceneChange (object sender, SceneChangeEventArgs e)
+		public void SetChange (object sender, SetChangeEventArgs e)
 		{
-			this._Scene = e.To;
+			this._RenderSet = e.To;
 		}
 		#endregion
 	}
