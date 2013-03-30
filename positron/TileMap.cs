@@ -1,76 +1,83 @@
 using System;
+using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
 	public class TileMap: Drawable
 	{
-		protected Texture[] Textures;
+		protected Texture Texture;
 		protected int _CountX, _CountY;
 		protected int[,] IndexMap;
 		public int CountX { get { return _CountX; } }
 		public int CountY { get { return _CountY; } }
-		public TileMap (RenderSet render_set, int countx, int county, Texture texture, params Texture[] textures):
+		public TileMap (RenderSet render_set, int countx, int county, Texture texture):
 			base(render_set)
 		{
 			_CountX = countx;
 			_CountY = county;
-			Textures = new Texture[textures.Length + 1];
-			Textures[0] = texture;
-			for(int i = 0; i < textures.Length; i++)
-				Textures[i + 1] = textures[i];
+			Texture = texture;
 			IndexMap = new int[_CountX,_CountY];
 		}
 		public void RandomMap ()
 		{
 			Random random = new Random((int)DateTime.Now.Ticks);
-			int idx = 0;
 			for (int j = 0; j < _CountY; j++) {
 				for(int i = 0; i < _CountX; i++) {
-					//IndexMap[i,j] = (j + idx++) % Textures.Length;
-					IndexMap[i,j] = random.Next(Textures.Length);
+					IndexMap[i,j] = random.Next(Texture.Regions.Length);
 				}
 			}
 		}
+        public override void Build()
+        {
+            int idx = 0;
+            var vertices = new Vertex[4 * _CountX * _CountY]; // 4 for BeginMode.Quads
+            var tile_size = Texture.Regions[0].Size;
+            for (int j = 0; j < _CountY; j++)
+            {
+                for (int i = 0; i < _CountX; i++)
+                {
+                    double x0 = Texture.Regions[IndexMap[i, j]].Low.X / Texture.Width;
+                    double y0 = Texture.Regions[IndexMap[i, j]].Low.Y / Texture.Height;
+                    double x1 = Texture.Regions[IndexMap[i, j]].High.X / Texture.Width;
+                    double y1 = Texture.Regions[IndexMap[i, j]].High.Y / Texture.Height;
+                    var A = new Vertex(tile_size.X * i,         tile_size.Y * j,        0.0, 0.0, 0.0, 1.0, x0, -y0);
+                    var B = new Vertex(tile_size.X * (i + 1),   A.Position.Y,           0.0, 0.0, 0.0, 1.0, x1, -y0);
+                    var C = new Vertex(B.Position.X,            tile_size.Y * (j + 1),  0.0, 0.0, 0.0, 1.0, x1, -y1);
+                    var D = new Vertex(A.Position.X,            C.Position.Y,           0.0, 0.0, 0.0, 1.0, x0, -y1);
+                    vertices[idx++] = A;
+                    vertices[idx++] = B;
+                    vertices[idx++] = C;
+                    vertices[idx++] = D;
+                    //new BlueprintQuad(A.Position, B.Position, C.Position, D.Position, _RenderSet);
+                }
+            }
+            VBO = new VertexBuffer(vertices);
+        }
 		public override void Render(double time)
 		{
-			int idx = 0;
-			Texture t = Textures[0];
 			GL.PushMatrix();
 			{
 				// So much for DRY...
 				//GL.Scale(Size);
 				GL.Translate (_Position);
-				for(int j = 0; j < _CountY; j++)
-				{
-					GL.PushMatrix();
-					{
-						for(int i = 0; i < _CountX; i++)
-						{
-							// TODO: Map this to an array
-							(t = Textures[IndexMap[i,j]]).Bind ();
-							GL.Begin (BeginMode.Quads);
-							GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-							GL.TexCoord2(1.0,  0.0);		GL.Vertex2(t.Width,	0.0		);
-							GL.TexCoord2(1.0, -1.0);		GL.Vertex2(t.Width, t.Height);
-							GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	t.Height);
-							GL.End ();
-							GL.Translate(t.Width, 0.0f, 0.0f);
-						}
-					}
-					GL.PopMatrix();
-					GL.Translate(0.0f, t.Height, 0.0f);
-				}
+                Draw();
 			}
 			GL.PopMatrix();
 		}
+        public virtual void Draw()
+        {
+            GL.Color4(Color.White);
+            Texture.Bind(); // Bind to (current) sprite texture
+            VBO.Render(); // Render the vertex buffer object
+        }
 		public override double RenderSizeX()
 		{
-			return CountX * Textures[0].Width * SizeX;
+            return CountX * Texture.Regions[0].Size.X;
 		}
 		public override double RenderSizeY()
 		{
-			return CountY * Textures[0].Height * SizeY;
+            return CountY * Texture.Regions[0].Size.Y;
 		}
 	}
 }

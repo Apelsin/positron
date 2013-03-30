@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,13 +9,15 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>positron</RootNamespace>
     <AssemblyName>positron</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>False</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
@@ -25,6 +27,7 @@
         <Command type="Execute" command="${TargetFile}" workingdir="${TargetDir}" />
       </CustomCommands>
     </CustomCommands>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
@@ -43,23 +46,18 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Drawables\HUD\HUDQuad.cs" />
+    <Compile Include="IRenderable.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="IWorldObject.cs" />
-    <Compile Include="IRenderable.cs">
-      <DependentUpon>IRenderable.cs</DependentUpon>
-    </Compile>
     <Compile Include="Drawables\Drawable.cs" />
-    <Compile Include="Drawables\Circle.cs">
-      <DependentUpon>Circle.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Drawables\Circle.cs" />
     <Compile Include="IColorable.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
-    <Compile Include="Drawables\SpriteObject.cs">
-      <DependentUpon>SpriteObject.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Drawables\SpriteObject.cs" />
     <Compile Include="IInputAccepter.cs" />
     <Compile Include="Drawables\Player.cs" />
     <Compile Include="MainGame.cs" />
@@ -72,9 +70,10 @@
     <Compile Include="Dialog.cs" />
     <Compile Include="Drawables\Spidey.cs" />
     <Compile Include="TileMap.cs" />
-    <Compile Include="Drawables\BlueprintLine.cs" />
-    <Compile Include="Drawables\BlueprintQuad.cs" />
+    <Compile Include="Drawables\Blueprint\BlueprintLine.cs" />
+    <Compile Include="Drawables\Blueprint\BlueprintQuad.cs" />
     <Compile Include="Scene.cs" />
+    <Compile Include="VertexBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
@@ -87,6 +86,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Drawables\" />
+    <None Include="app.config" />
   </ItemGroup>
 </Project>

@@ -57,11 +57,15 @@ namespace positron
 		protected Stopwatch _FrameTimer;
 		protected double _TileX;
 		protected double _TileY;
+        /// <summary>
+        /// The blueprint vertex buffer object
+        /// </summary>
+        protected VertexBuffer BPVBO;
 		#endregion
 		#region Member Accessors
 		public Color Color {
-			get { return _Color; }
-			set { _Color = value; }
+            get { return _Frames[_FrameIndex].Color; }
+            set { _Frames[_FrameIndex].Color = value; }
 		}
 		public Texture Texture {
 			get { return _Frames[_FrameIndex].Texture; }
@@ -129,58 +133,69 @@ namespace positron
 			_TileY = 1.0;
 			_FrameIndex = 0;
 			_Frames = new SpriteFrame[textures.Length + 1];
-			_Frames[0] = new SpriteFrame(texture);;
+			_Frames[0] = new SpriteFrame(texture);
 			for(int i = 0; i < textures.Length; i++)
 				_Frames[i + 1] = new SpriteFrame(textures[i]);
 			if(textures.Length > 0)
 				_FrameTimer = new Stopwatch();
+            Build();
 		}
 		// TODO: rotation stuff here
 		public override double RenderSizeX () { return _Size.X * Texture.Width; }
 		public override double RenderSizeY () { return _Size.Y * Texture.Height; }
 		public override void Render (double time)
 		{
-			Texture.Bind(Texture);
-			GL.Color4 (_Color);
 			GL.PushMatrix();
 			{
 				GL.Translate (_Position);
+                //GL.Translate(Math.Floor (Position.X), Math.Floor (Position.Y), Math.Floor (Position.Z));
 				GL.Rotate(_Theta, 0.0, 0.0, 1.0);
-				//GL.Translate(Math.Floor (Position.X), Math.Floor (Position.Y), Math.Floor (Position.Z));
-				DrawQuad();
-			}
+                GL.Scale(_Size);
+                Draw();
+            }
 			GL.PopMatrix();
 		}
-		protected void DrawQuad ()
-		{
-			double w = Size.X * Texture.Width;
-			double h = Size.Y * Texture.Height;
-			GL.Begin (BeginMode.Quads);
-			{
-				GL.TexCoord2 (0.0, 0.0);
-				GL.Vertex2 (0.0, 0.0);
-				GL.TexCoord2 (_TileX, 0.0);
-				GL.Vertex2 (w, 0.0);
-				GL.TexCoord2 (_TileX, -_TileY);
-				GL.Vertex2 (w, h);
-				GL.TexCoord2 (0.0, -_TileY);
-				GL.Vertex2 (0.0, h);
-			}
-			GL.End ();
-			if (Configuration.DrawBlueprints) {
-				GL.BindTexture (TextureTarget.Texture2D, 0);
-				GL.LineWidth (1);
-				GL.Begin (BeginMode.LineLoop);
-				GL.Color4 (Color.Crimson);
-				GL.Vertex2 (0.0, 0.0);
-				GL.Color4 (Color.Gold);
-				GL.Vertex2 (w, 0.0);
-				GL.Color4 (Color.Crimson);
-				GL.Vertex2 (w, h);
-				GL.Color4 (Color.Gold);
-				GL.Vertex2 (0.0, h);
-				GL.End ();
-			}
+        protected virtual void Draw()
+        {
+            GL.Color4(_Color);
+            Texture.Bind(); // Bind to (current) sprite texture
+            VBO.Render(); // Render the vertex buffer object
+            if (Configuration.DrawBlueprints)
+            {
+                GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
+                BPVBO.Render(); // Render blueprint objects
+            }
+        }
+        public override void Build()
+        {
+            double w, h, x0, y0, x1, y1;
+            if (Texture.Regions != null && Texture.Regions.Length > 0)
+            {
+                x0 = Texture.Regions[0].Low.X;
+                y0 = Texture.Regions[0].Low.Y;
+                x1 = Texture.Regions[0].High.X;
+                y1 = Texture.Regions[0].High.Y;
+                w = x1 - x0;
+                h = y1 - y0;
+                x0 /= Texture.Width;
+                x1 /= Texture.Width;
+                y0 /= Texture.Height;
+                y1 /= Texture.Height;
+            }
+            else
+            {
+                w = Texture.Width;
+                h = Texture.Height;
+                x0 = 0.0;
+                y0 = 0.0;
+                x1 = 1.0;
+                y1 = 1.0;
+            }
+            var A = new Vertex(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, x0, -y0);
+            var B = new Vertex(w, 0.0, 0.0, 0.0, 0.0, 1.0, x1, -y0);
+            var C = new Vertex(w, h, 0.0, 0.0, 0.0, 1.0, x1, -y1);
+            var D = new Vertex(0.0, h, 0.0, 0.0, 0.0, 1.0, x0, -y1);
+            VBO = new VertexBuffer(A, B, C, D);
 		}
 		public virtual void Update (double time)
 		{

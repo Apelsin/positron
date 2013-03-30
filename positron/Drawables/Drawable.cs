@@ -1,5 +1,6 @@
 using System;
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
@@ -8,7 +9,13 @@ namespace positron
 		#region State
 		#region Member Variables
 		protected RenderSet _RenderSet;
-		protected Vector3d _Position = new Vector3d();
+        #region OpenGL
+        /// <summary>
+        /// Vertex Buffer Object this drawable will use in Render()
+        /// </summary>
+        protected VertexBuffer VBO;
+        #endregion
+        protected Vector3d _Position = new Vector3d();
 		protected Vector3d _Size = new Vector3d();
 		protected Vector3d _Velocity = new Vector3d();
 		protected double _Theta = 0.0;
@@ -73,9 +80,19 @@ namespace positron
 		public Drawable (RenderSet render_set)
 		{
 			_RenderSet = render_set;
-			if(_RenderSet != null)
-				_RenderSet.Add(this);
+            if(_RenderSet != null)
+			    _RenderSet.Add(this);
 		}
+        /// <summary>
+        /// Creates geometry information necessary for VBO
+        /// This is either called in the constructor or
+        /// called manually.
+        /// </summary>
+        public virtual void Build()
+        {
+            // Some inexpensive drawables are built each frame
+            // Therefore it is not required to implement Build()
+        }
 		public abstract void Render(double time);
 		public abstract double RenderSizeX();
 		public abstract double RenderSizeY();

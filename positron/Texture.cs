@@ -8,6 +8,16 @@ using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
+    public struct TextureRegion
+    {
+        public Vector2d Low, High;
+        public TextureRegion(Vector2d l, Vector2d h)
+        {
+            Low = l;
+            High = h;
+        }
+        public Vector2d Size { get { return High - Low; } }
+    }
 	public class Texture
 	{
 		#region State
@@ -16,6 +26,7 @@ namespace positron
 		protected String _Label = "Texture";
 		protected int _Width;
 		protected int _Height;
+        public TextureRegion[] Regions;
 		#endregion
 		#region Static Variables
 		private static Texture _DefaultTexture;
@@ -65,10 +76,10 @@ namespace positron
 			LoadTexture ("sprite_dialog_box_br", 	"dialog_box",	"sprite_dialog_box_br.png");
 
 			// Background
-			LoadTexture("sprite_tile_bg_1",			"background", 	"sprite_tile_bg_1.png");
-			LoadTexture("sprite_tile_bg_2",			"background", 	"sprite_tile_bg_2.png");
-			LoadTexture("sprite_tile_bg_3",			"background", 	"sprite_tile_bg_3.png");
-
+            // TODO: make this not-hardcoded
+            var bg = LoadTexture("sprite_tile_bg_atlas",     "background",   "sprite_tile_bg_atlas.png");
+            bg.Regions = new TextureRegion[3];
+            bg.Regions.BuildTiledRegions(4, 32, 32);
 		}
 		public static void Teardown ()
 		{

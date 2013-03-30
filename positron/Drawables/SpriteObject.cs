@@ -98,8 +98,18 @@ namespace positron
 		}
 		protected virtual void InitPhysics()
 		{
-			float w = (float)(_Size.X * Texture.Width / Configuration.MeterInPixels);
-			float h = (float)(_Size.Y * Texture.Height / Configuration.MeterInPixels);
+            float w, h;
+            if (Texture.Regions != null && Texture.Regions.Length > 0)
+            {
+                var size = Texture.Regions[0].Size;
+                w = (float)(_Size.X * size.X / Configuration.MeterInPixels);
+                h = (float)(_Size.Y * size.Y / Configuration.MeterInPixels);
+            }
+            else
+            {
+                w = (float)(_Size.X * Texture.Width / Configuration.MeterInPixels);
+                h = (float)(_Size.Y * Texture.Height / Configuration.MeterInPixels);
+            }
 			var half_w_h = new Microsoft.Xna.Framework.Vector2(w * 0.5f, h * 0.5f);
 			var msv2 = new Microsoft.Xna.Framework.Vector2(
 				(float)(_Position.X / Configuration.MeterInPixels),
@@ -114,35 +124,30 @@ namespace positron
 
 		bool HandleOnCollision (Fixture fixtureA, Fixture fixtureB, Contact contact)
 		{
-
 			return true;
 		}
 		public override void Render (double time)
 		{
-			//double w = _Size.X * Texture.Width;
-			//double h = _Size.Y * Texture.Height;
-			Texture.Bind(Texture);
-			GL.Color4 (_Color);
-			GL.PushMatrix();
-			{
-				GL.Translate (
-					//Math.Round
-					(_SpriteBody.Position.X * Configuration.MeterInPixels),
-				    //Math.Round
-					(_SpriteBody.Position.Y * Configuration.MeterInPixels), 0.0);
-				// Don't even read this line:
-				float r = (float)
-					//(45.0 * Math.Round(
-					(_Theta + (double)OpenTK.MathHelper.RadiansToDegrees(_SpriteBody.Rotation))
-					//	/ 45.0))
-						;
-				GL.Rotate(r, 0.0, 0.0, 1.0);
-				//GL.Translate(Math.Floor (Position.X), Math.Floor (Position.Y), Math.Floor (Position.Z));
-				DrawQuad();
-			}
-			GL.PopMatrix();
+            GL.PushMatrix();
+            {
+                GL.Translate(
+                    //Math.Round
+                    (_SpriteBody.Position.X * Configuration.MeterInPixels),
+                    //Math.Round
+                    (_SpriteBody.Position.Y * Configuration.MeterInPixels), 0.0);
+                // Don't even read this line:
+                float r = (float)
+                    //(45.0 * Math.Round(
+                    (_Theta + (double)OpenTK.MathHelper.RadiansToDegrees(_SpriteBody.Rotation))
+                    //	/ 45.0))
+                        ;
+                GL.Rotate(r, 0.0, 0.0, 1.0);
+                GL.Scale(_Size);
+                Draw();
+            }
+            GL.PopMatrix();
 		}
-		public virtual void Update (double time)
+		public override void Update (double time)
 		{
 			base.Update(time);
 		}

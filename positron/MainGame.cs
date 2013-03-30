@@ -96,15 +96,13 @@ namespace positron
 			int w_i = (int)Program.MainWindow.CanvasWidth;
 			int h_i = (int)Program.MainWindow.CanvasHeight;
 			Vector3d q = new Vector3d (0.0, 0.25 * h_i, 0.0);
-			BackgroundTiles = new TileMap(_CurrentScene.Background, 18, 18,
-			                              Texture.Get("sprite_tile_bg_1"),
-								          Texture.Get("sprite_tile_bg_2"),
-			                              Texture.Get("sprite_tile_bg_3"));
+			BackgroundTiles = new TileMap(_CurrentScene.Background, 64, 18, Texture.Get("sprite_tile_bg_atlas"));
 			BackgroundTiles.RandomMap();
+            BackgroundTiles.Build();
 			Player1.Position += q;
 			_CurrentScene.Follow(Player1);
 			Texture default_sprite = Texture.Get ("sprite_small_disc");
-			for (int i = 0; i < (1<<4); i++) {
+			for (int i = 0; i < (1<<6); i++) {
 				SpriteObject sprite = new SpriteObject (_CurrentScene.Tests, rand.Next (10, w_i - 10), rand.Next (10, h_i / 2 - 10), 1.0, 1.0, default_sprite);
 				sprite.Position += q;
 				//if(i % 20 != 0)
@@ -112,7 +110,7 @@ namespace positron
 				sprite.Color = Color.FromArgb ((int)(rand.Next () | 0xFF000000));
 			}
 			Texture four_square = Texture.Get ("sprite_four_square");
-			for (int i = 0; i < (1<<4); i++) {
+			for (int i = 0; i < (1<<6); i++) {
 				SpriteObject sprite = new SpriteObject (_CurrentScene.Tests, rand.Next (10, w_i - 10), rand.Next (10, h_i / 2 - 10), 2.0, 2.0, four_square);
 				sprite.Position += q;
 				//if(i % 20 != 0)
@@ -133,17 +131,17 @@ namespace positron
 				var bi = new BooleanIndicator (_CurrentScene.HUD, bi_x += 18, bi_y);
 				TestIndicators.Add (bi);
 			}
-			for (int i = 0; i < 3; i++) {
-				var spidey = new Spidey(_CurrentScene.Tests, 10 * i + 30, h_i / 4);
-				spidey.Position += q;
-				spidey.Animate = true;
-				spidey.Body.BodyType = BodyType.Dynamic;
-			}
+			//for (int i = 0; i < 3; i++) {
+			//	var spidey = new Spidey(_CurrentScene.Tests, 10 * i + 30, h_i / 4);
+			//	spidey.Position += q;
+			//	spidey.Animate = true;
+			//	spidey.Body.BodyType = BodyType.Dynamic;
+			//}
 			for (int i = 0; i < 100; i++)
 			{
 				double x = 20 * i;
 				double y = rand.NextDouble() * 30;
-				var ground = new SpriteObject(_CurrentScene.Tests, x, y, Texture.Get("sprite_tile_bg_1"));
+				var ground = new SpriteObject(_CurrentScene.Tests, x, y, Texture.Get("sprite_tile_bg_atlas"));
 			}
 			TestDialog = new Dialog(_CurrentScene.HUD, "Test", null);
 			TestDialog.RenderSet = _CurrentScene.HUD;
@@ -169,6 +167,11 @@ namespace positron
 				if(o is SpriteObject)
 					((SpriteObject)o).Update(time * TimeStepCoefficient);
 			}
+            foreach (object o in _CurrentScene.HUD)
+            {
+                if (o is SpriteObject)
+                    ((SpriteObject)o).Update(time * TimeStepCoefficient);
+            }
 		}
 		public void Draw(double time)
 		{

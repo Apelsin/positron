@@ -45,17 +45,11 @@ namespace positron
 			{
 				GL.Translate (_Position);
 				GL.Rotate(_Theta, 0.0, 0.0, 1.0);
-				DrawQuads();
+                Draw();
+                if (_NextLayer != null)
+                    _NextLayer.Draw();
 			}
 			GL.PopMatrix();
-		}
-		public virtual void DrawQuads()
-		{
-			Texture.Bind(Texture);
-			GL.Color4 (_Color);
-			DrawQuad ();
-			if(_NextLayer != null)
-				_NextLayer.DrawQuads();
 		}
 	}
 }

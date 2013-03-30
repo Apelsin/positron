@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using FarseerPhysics.Dynamics;
 
 using OpenTK;
@@ -17,6 +18,10 @@ namespace positron
 		protected Vector3d _ViewPosition;
 		protected World _World;
 		protected Drawable _FollowTarget;
+        protected HUDQuad FrameTimeMeter;
+        protected HUDQuad UpdateTimeMeter;
+        protected HUDQuad RenderTimeMeter;
+        protected HUDQuad RenderDrawingMeter;
 		protected Object _RenderLock = new Object();
 		/// <summary>
 		/// All of the render sets
@@ -119,7 +124,46 @@ namespace positron
 
 			_World = new World(gravity);
 			//_World.EnableSubStepping = true;
+
+            SetupHUD();
 		}
+        private void SetupHUD()
+        {
+            var p = new Vector3d(5.0, 5.0, 0.0);
+            var s = new Vector3d(5.0, 12, 0.0);
+            FrameTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+            FrameTimeMeter.Color = Color.DarkSlateBlue;
+            UpdateTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+            UpdateTimeMeter.Color = Color.DarkCyan;
+            RenderTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+            RenderTimeMeter.Color = Color.DarkRed;
+            RenderDrawingMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+            RenderDrawingMeter.Color = Color.Red;
+        }
+        private void UpdateHUDStats()
+        {
+            double w_x, w = 4000.0;
+            w_x = w * Program.MainWindow.LastFrameTime;
+            FrameTimeMeter.B.X = FrameTimeMeter.A.X + w_x;
+            FrameTimeMeter.C.X = FrameTimeMeter.D.X + w_x;
+            w_x = w * Program.MainWindow.LastUpdateTime;
+            UpdateTimeMeter.B.X = FrameTimeMeter.A.X + w_x;
+            UpdateTimeMeter.C.X = FrameTimeMeter.D.X + w_x;
+            w_x = w * Program.MainWindow.LastRenderTime;
+            RenderTimeMeter.A.X = UpdateTimeMeter.B.X;
+            RenderTimeMeter.D.X = UpdateTimeMeter.C.X;
+            RenderTimeMeter.B.X = RenderTimeMeter.A.X + w_x;
+            RenderTimeMeter.C.X = RenderTimeMeter.D.X + w_x;
+            w_x = w * Program.MainWindow.LastRenderDrawingTime;
+            RenderDrawingMeter.A.Y = RenderTimeMeter.A.Y + 3;
+            RenderDrawingMeter.B.Y = RenderTimeMeter.B.Y + 3;
+            RenderDrawingMeter.C.Y = RenderTimeMeter.C.Y - 3;
+            RenderDrawingMeter.D.Y = RenderTimeMeter.D.Y - 3;
+            RenderDrawingMeter.A.X = RenderTimeMeter.A.X;
+            RenderDrawingMeter.D.X = RenderTimeMeter.D.X;
+            RenderDrawingMeter.B.X = RenderDrawingMeter.A.X + w_x;
+            RenderDrawingMeter.C.X = RenderDrawingMeter.D.X + w_x;
+        }
 //		public bool CheckIn(object o, )
 //		{
 //		}
@@ -135,6 +179,7 @@ namespace positron
 			}
 			else
 				_World.Step(Math.Min ((float)time, Configuration.MaxWorldTimeStep));
+            UpdateHUDStats();
 		}
 		public void Render (double time)
 		{
@@ -142,12 +187,14 @@ namespace positron
 			{
 				GL.PushMatrix ();
 				{
-					if (_FollowTarget != null) {
-						Vector3d pan = new Vector3d (0.5 * ViewWidth, 0.375 * ViewHeight, 0.0) - _FollowTarget.Position;
-						float a = (float)time + 1.0f / Math.Max (1.0f, (float)(pan - ScenePan).LengthFast);
-						ScenePan = Vector3d.Lerp(ScenePan, pan, a);
-						GL.Translate (Math.Round (ScenePan.X), Math.Round (ScenePan.Y), Math.Round (ScenePan.Z));
-					}
+                    if (_FollowTarget != null)
+                    {
+                        Vector3d pan = new Vector3d(0.5 * ViewWidth, 0.375 * ViewHeight, 0.0) - _FollowTarget.Position;
+                        float a = (float)time + 1.0f / Math.Max(1.0f, (float)(pan - ScenePan).LengthFast);
+                        ScenePan = Vector3d.Lerp(ScenePan, pan, a);
+                        GL.Translate(Math.Round(ScenePan.X), Math.Round(ScenePan.Y), Math.Round(ScenePan.Z));
+                        //GL.Translate(ScenePan);
+                    }
 					Background.Render (time);
 					Rear.Render (time);
 					Stage.Render (time);

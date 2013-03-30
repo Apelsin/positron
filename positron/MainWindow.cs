@@ -121,6 +121,10 @@ namespace positron
 		/// </summary>
 		Stopwatch FrameWatch = new Stopwatch();
 
+        Stopwatch RenderDrawingWatch = new Stopwatch();
+
+        Stopwatch TestWatch = new Stopwatch();
+
 		/// <summary>
 		/// Lock to synchronize rendering and updating
 		/// </summary>
@@ -132,6 +136,9 @@ namespace positron
 		object UserInputLock = new object();
 
 		double FrameLimitTime = 1.0 / Configuration.FrameRateCap;
+
+        double _LastFrameTime, _LastUpdateTime, _LastRenderTime;
+        double _LastRenderDrawingTime;
 
 		/// <summary>
 		/// Some random thing
@@ -152,6 +159,13 @@ namespace positron
 		public int CanvasHeight {
 			get { return _CanvasHeight; }
 		}
+
+        public double LastFrameTime { get { return _LastFrameTime; } }
+        public double LastUpdateTime { get { return _LastUpdateTime; } }
+        public double LastRenderTime { get { return _LastRenderTime; } }
+
+        public double LastRenderDrawingTime { get { return _LastRenderDrawingTime; } }
+
 		#endregion
 		#endregion
 		#region Event
@@ -279,8 +293,8 @@ namespace positron
 			GL.DepthFunc(DepthFunction.Lequal);
 
 			// Blending init
-			GL.Enable(EnableCap.Blend);
-			GL.BlendFunc(BlendingFactorSrc.DstAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			// Culling init
 			GL.Enable(EnableCap.CullFace);
@@ -291,14 +305,15 @@ namespace positron
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8, _CanvasWidth, _CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Clamp);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdgeSgis);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdgeSgis);
 			// GL.Ext.GenerateMipmap( GenerateMipmapTarget.Texture2D );
 			
 			// Create a FBO and attach the textures
 			GL.Ext.GenFramebuffers(1, out CanvasFBO);
 			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, CanvasFBO);
-			GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, CanvasTexture, 0);
+			GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
+                FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, CanvasTexture, 0);
 
 			FBOSafety(); // Make sure things won't explode!
 
@@ -447,18 +462,6 @@ namespace positron
 		#region UpdateLoop
 		void UpdateLoop ()
 		{
-			// Updating is handled before render *for now*
-			/*UpdateWatch.Start ();
-			while (!Exiting) {
-				while (UpdateWatch.Elapsed.TotalSeconds < FrameLimitTime);
-				lock(UpdateLock)
-				{
-					double time = UpdateWatch.Elapsed.TotalSeconds;
-					UpdateWatch.Reset ();
-					UpdateWatch.Start ();
-					Update (time);
-				}
-			}*/
 		}
 		#endregion
 		#region RenderLoop
@@ -474,25 +477,26 @@ namespace positron
 			UpdateWatch.Start();
 			RenderWatch.Start();
 			FrameWatch.Start();
+            TestWatch.Start();
+            RenderDrawingWatch.Start();
 
 			// Store this in a local variable because accessors have overhead!
 			int caffeine = Configuration.ThreadSleepTolerance;
+            // Bear with me...this will get a bit tricky to explain pefrectly...
 			while (!Exiting) {
 				// Sleep the thread for the most milliseconds less than the frame limit time
-				double frame_time = FrameWatch.Elapsed.TotalSeconds;
-				// At least one dmillisecond will be in a loop (because Thread.Sleep is really shitty)
-				int millisleep = Math.Max(0, (int)(1000 * (FrameLimitTime - frame_time)) - caffeine);
+                _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
+                int millisleep = Math.Max(0, (int)(1000 * (FrameLimitTime - _LastFrameTime)) - caffeine);
 				Thread.Sleep (millisleep);
 				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
-				frame_time = UpdateWatch.Elapsed.TotalSeconds;
+				_LastFrameTime = UpdateWatch.Elapsed.TotalSeconds;
 				FrameWatch.Restart();
-
-				double update_time = UpdateWatch.Elapsed.TotalSeconds;
-				UpdateWatch.Restart();
-				Update (update_time);
-				double render_time = RenderWatch.Elapsed.TotalSeconds;
+                UpdateWatch.Restart();
+                Update(_LastFrameTime);
+                _LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
 				RenderWatch.Restart();
-				RenderView (render_time);
+                RenderView(_LastRenderTime);
+                _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
 				SwapBuffers();
 			}
 			Context.MakeCurrent(null);
@@ -528,36 +532,18 @@ namespace positron
 				GL.Viewport(0, 0, _CanvasWidth, _CanvasHeight);
 				GL.ClearColor (Color.White); // Clear as white
 				GL.Clear(ClearBufferMask.ColorBufferBit); // Do clear
-				Matrix4 perspective = Matrix4.CreateOrthographic(CanvasWidth, CanvasHeight, -1, 1);
+				Matrix4 zperspective = Matrix4.CreateOrthographic(CanvasWidth, CanvasHeight, -1, 1);
 				GL.MatrixMode(MatrixMode.Projection);
-				GL.LoadMatrix(ref perspective);
+				GL.LoadMatrix(ref zperspective);
 				GL.MatrixMode(MatrixMode.Modelview);
 				GL.LoadIdentity();
 				GL.PushMatrix();
 				{
 					GL.Translate(-_CanvasWidth * 0.5, -_CanvasHeight * 0.5, 0f);
-					// Draw background gradient:
-					/*
-					GL.Begin (BeginMode.Quads);
-					GL.Color4 (Color.OrangeRed);
-					GL.Vertex2(0, 0);
-					GL.Vertex2(_CanvasWidth, 0);
-					GL.Color4 (Color.MediumBlue);
-					GL.Vertex2(_CanvasWidth, _CanvasHeight);
-					GL.Vertex2(0, _CanvasHeight);
-					GL.End();
-					*/
-
-					// Draw the meat and potatos
-					//GL.Enable( EnableCap.Lighting );
-					//GL.Enable( EnableCap.Light0 );
-					//GL.Enable( EnableCap.ColorMaterial );
-					// "Singleton" object
+                    RenderDrawingWatch.Restart();
 					Program.Game.Draw(time);
-					GL.Color4(Color.White);
-					//GL.Disable( EnableCap.ColorMaterial );
-					//GL.Disable( EnableCap.Light0 );
-					//GL.Disable( EnableCap.Lighting );
+                    _LastRenderDrawingTime = RenderDrawingWatch.Elapsed.TotalSeconds;
+                    GL.Color4(Color.White);
 				}
 				GL.PopMatrix();
 
@@ -575,8 +561,6 @@ namespace positron
 				if (VieportChanged)
 				{
 					GL.Viewport(0, 0, ViewportWidth, ViewportHeight);
-					//GL.ClearAccum(0.0f, 0.0f, 0.0f, 1.0f);
-					//GL.Clear(ClearBufferMask.AccumBufferBit);
 					VieportChanged = false;
 				}
 			}
@@ -587,7 +571,6 @@ namespace positron
 			GL.PushMatrix();
 			{
 				GL.Translate(-FBOScaleX * 0.5, -FBOScaleY * 0.5, 0f);
-				// Draw the Color Texture
 				GL.Begin(BeginMode.Quads);
 				{
 					GL.TexCoord2(0.0f, 0.0f);

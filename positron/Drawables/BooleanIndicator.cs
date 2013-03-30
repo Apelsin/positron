@@ -19,26 +19,16 @@ namespace positron
 			_Color = Color.SkyBlue;
 			_NextLayer = new LayeredSprite(render_set, x, y, 1.0, 1.0, null, Texture.Get ("sprite_indicator_gloss"));
 		}
-		// TODO: rotation stuff here
-		public override void Render (double time)
+		protected override void Draw ()
 		{
-			GL.PushMatrix();
-			{
-				GL.Translate (_Position);
-				GL.Rotate(_Theta, 0.0, 0.0, 1.0);
-				DrawQuads();
-			}
-			GL.PopMatrix();
-		}
-		public override void DrawQuads()
-		{
-			double w = Size.X * Texture.Width;
-			double h = Size.Y * Texture.Height;
-			Texture.Bind(Texture);
-			GL.Color4 (State ? _Color : Color.DarkSlateGray);
-			DrawQuad ();
-			if(_NextLayer != null)
-				_NextLayer.DrawQuads();
+            GL.Color4(State ? _Color : Color.SlateGray);
+            Texture.Bind();
+            VBO.Render();
+            if (Configuration.DrawBlueprints)
+            {
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                BPVBO.Render();
+            }
 		}
 	}
 }

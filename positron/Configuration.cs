@@ -32,11 +32,11 @@ namespace positron
 			_KeyPressTimeTolerance = 0.1;
 			_FrameRateCap = 60.0;
 			_ThreadSleepTolerance = 1;
-			_MaxWorldTimeStep = 0.03f;
+			_MaxWorldTimeStep = 0.04f;
 			_AdaptiveTimeStep = false;
 			_CanvasWidth = 600;
 			_CanvasHeight = 400;
-			_DrawBlueprints = true;
+			_DrawBlueprints = false;
 		}
 		#region Alias Accessors
 		public static string ArtworkPath {
