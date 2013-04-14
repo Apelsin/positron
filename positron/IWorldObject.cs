@@ -4,29 +4,28 @@ using FarseerPhysics.Dynamics;
 
 namespace positron
 {
-	public interface IWorldObject
+	public interface IWorldObject : ISceneObject
 	{
 		void Update(double time);
-		RenderSet RenderSet { get; }
-		bool Preserve { get; set; }
-
-		Body Body { get; }
-		Fixture Fixture { get; }
 
 		/// <summary>
-		/// Raised when the scene this object is in changes
+		/// Connects the Body object with this IWorldObject by
+		/// setting the body's user data variable to this object
 		/// </summary>
-		void SetChange (object sender, SetChangeEventArgs e);
+		void ConnectBody();
+		void Derez();
+
+		Body Body { get; set; }
 
 		double PositionX { get; set; }
 		double PositionY { get; set; }
 		//double PositionZ { get; set; }
 		Vector3d Position { get; set; }
 		
-		double SizeX { get; set; }
-		double SizeY { get; set; }
-		//double SizeZ { get; set; }
-		Vector3d Size { get; set; }
+		double ScaleX { get; set; }
+		double ScaleY { get; set; }
+		//double ScaleZ { get; set; }
+		Vector3d Scale { get; set; }
 		
 		double VelocityX { get; set; }
 		double VelocityY { get; set; }

@@ -14,7 +14,7 @@ namespace positron
 		/// <summary>
 		/// Game supplies the game mechanics
 		/// </summary>
-		public static MainGame Game;
+		public static PositronGame MainGame;
 		/// <summary>
 		/// The main window supplies the means of handling the game,
 		/// that is, calling Update and Render for the game object and
@@ -22,24 +22,34 @@ namespace positron
 		/// </summary>
 		public static ThreadedRendering MainWindow;
 
-
+		/// <summary>
+		/// Lock to synchronize rendering and updating
+		/// </summary>
+		public static object MainUpdateLock = new object();
+		
+		/// <summary>
+		/// Lock to synchronize user input controls
+		/// </summary>
+		public static object MainUserInputLock = new object();
 
 		[STAThread]
 		public static void Main ()
 		{
-			// Instantiate the main window
-			// this also sets up OpenGL
-			MainWindow = new ThreadedRendering();
-			// Prepare game resources
-			// This makes OpenGL calls
-			MainGame.InitialSetup();
-			// Instantiate a main game
-			Game = new MainGame();
-			Game.Setup();
-			Game.SetupTests();
-			// TEST: Dump all the settings:
-			Configuration.DumpEverything();
-			MainWindow.Run(); // Run the window thread
+			lock (MainUpdateLock) {
+				// Instantiate the main window
+				// this also sets up OpenGL
+				MainWindow = new ThreadedRendering ();
+				// Prepare game resources
+				// This makes OpenGL calls
+				PositronGame.InitialSetup ();
+				// Instantiate a main game
+				MainGame = new PositronGame ();
+				MainGame.Setup ();
+				MainGame.SetupTests ();
+				// TEST: Dump all the settings:
+				Configuration.DumpEverything ();
+			}
+			MainWindow.Run (); // Run the window thread
 		}
 	}
 }

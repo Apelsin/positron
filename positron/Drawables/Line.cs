@@ -15,15 +15,12 @@ namespace positron
 		private Color _Color;
 		private Vector3d _Direction;
 
-		private RenderSet _Scene;
 		private Body _LineBody;
-		private Fixture _LineFixture;
-		
-		public RenderSet RenderSet { get { return _Scene; } }
-		public bool Preserve { get; set; }
-		
-		public Body Body { get { return _LineBody; } }
-		public Fixture Fixture { get { return _LineFixture; } }
+
+		public Body Body {
+			get { return _LineBody; }
+			set { _LineBody = value; }
+		}
 
 		public Color Color {
 			get { return _Color; }
@@ -57,7 +54,7 @@ namespace positron
 				(float)(_Direction.X / Configuration.MeterInPixels),
 				(float)(_Direction.Y / Configuration.MeterInPixels));
 			_LineBody = BodyFactory.CreateBody(RenderSet.Scene.World, start);
-			_LineFixture = FixtureFactory.AttachEdge(Microsoft.Xna.Framework.Vector2.Zero, direction, _LineBody);
+			FixtureFactory.AttachEdge(Microsoft.Xna.Framework.Vector2.Zero, direction, _LineBody);
 			_LineBody.BodyType = BodyType.Static;
 		}
 		public override void Render (double time)
@@ -82,12 +79,21 @@ namespace positron
 		{
 			// Do something!
 		}
-		public void SetChange (object sender, SetChangeEventArgs e)
+		public virtual void SetChange (object sender, SetChangeEventArgs e)
 		{
-			this._Scene = e.To;
+			this._RenderSet = e.To;
 		}
-		public override double RenderSizeX() { return _Size.X; }
-		public override double RenderSizeY() { return _Size.Y; }
+		public virtual void ConnectBody ()
+		{
+			Body.UserData = this;
+		}
+		public virtual void Derez ()
+		{
+			this._RenderSet.Scene.World.RemoveBody(Body);
+			this._RenderSet.Remove(this);
+		}
+		public override double RenderSizeX() { return _Scale.X; }
+		public override double RenderSizeY() { return _Scale.Y; }
 	}
 }
 

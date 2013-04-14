@@ -10,13 +10,32 @@ namespace positron
 {
     public struct TextureRegion
     {
+		public string Label;
         public Vector2d Low, High;
-        public TextureRegion(Vector2d l, Vector2d h)
-        {
-            Low = l;
-            High = h;
-        }
+        
+		public TextureRegion(Vector2d l, Vector2d h):
+			this("Region", l, h)
+		{
+		}
+		public TextureRegion(double x, double y, double w, double h):
+			this("Region", x, y, w, h)
+		{
+		}
+		public TextureRegion(string label, double x, double y, double w, double h)
+		{
+			Label = label;
+			Low = new Vector2d(x, y);
+			High = Low + new Vector2d(w, h);
+		}
+		public TextureRegion(string label, Vector2d l, Vector2d h)
+		{
+			Label = label;
+			Low = l;
+			High = h;
+		}
         public Vector2d Size { get { return High - Low; } }
+		public double SizeX { get { return High.X- Low.X; } }
+		public double SizeY { get { return High.Y- Low.Y; } }
     }
 	public class Texture
 	{
@@ -56,13 +75,63 @@ namespace positron
 		public static void InitialSetup ()
 		{
 			Textures = new Hashtable();
-			_DefaultTexture = LoadTexture ("sprite_small_disc", "sprite_small_disc.png");
+			_DefaultTexture = LoadTexture ("sprite_null", "sprite_null.png");
 			LoadTexture ("sprite_four_square", "sprite_four_square.png");
-			LoadTexture ("sprite_player", "sprite_cool_guy.png");
 			LoadTexture ("sprite_indicator", "sprite_indicator.png");
 			LoadTexture ("sprite_indicator_gloss", "sprite_indicator_gloss.png");
 			LoadTexture ("sprite_spidey_0", "sprite_spidey_0.png");
 			LoadTexture ("sprite_spidey_1", "sprite_spidey_1.png");
+
+			// Scene Elements
+			LoadTexture ("sprite_doorway", 			"scene_element",	"sprite_doorway.png");
+			var floor_switch = LoadTexture ("sprite_floor_switch", 	"scene_element",	"sprite_floor_switch.png");
+			floor_switch.Regions = new TextureRegion[4];
+			floor_switch.Regions.BuildTiledRegions(4, 32, 10);
+			var gateway = LoadTexture ("sprite_gateway",	 		"scene_element",	"sprite_gateway.png");
+			gateway.Regions = new TextureRegion[4];
+			gateway.Regions.BuildTiledRegions(4, 32, 72);
+
+			// Props
+			LoadTexture ("sprite_metal_ball",		"prop",				"sprite_metal_ball.png");
+
+			// Projectiles
+			LoadTexture ("sprite_first_bullet", 	"projectile",		"sprite_first_bullet.png");
+
+			var bunker_floor = LoadTexture("sprite_bunker_floor",		"scene_element",   "sprite_bunker_floor.png");
+			bunker_floor.Regions = new TextureRegion[4];
+			bunker_floor.Regions.BuildTiledRegions(4, 32, 32);
+
+			var bunker_wall = LoadTexture("sprite_bunker_wall",		"scene_element",   "sprite_bunker_wall.png");
+			bunker_wall.Regions = new TextureRegion[4];
+			bunker_wall.Regions.BuildTiledRegions(16, 16, 32);
+
+			// Character
+			var character = LoadTexture ("sprite_player", "character", "sprite_protagonist.png");
+			int w = character.Width, h = character.Height;
+			character.Regions = new TextureRegion[20];
+			character.Regions[0] =	new TextureRegion(0, 	h-64, 	21, 	64);
+			character.Regions[1] =	new TextureRegion(30, 	h-64, 	21, 	64);
+			character.Regions[2] =	new TextureRegion(59, 	h-64, 	30, 	64);
+			character.Regions[3] =	new TextureRegion(93, 	h-64, 	21, 	64);
+			character.Regions[4] =	new TextureRegion(124, 	h-64, 	30, 	64);
+
+			character.Regions[5] =	new TextureRegion(0, 	h-135, 	21, 	64);
+			character.Regions[6] =	new TextureRegion(30, 	h-135, 	21, 	64);
+			character.Regions[7] =	new TextureRegion(59, 	h-135, 	30, 	64);
+			character.Regions[8] =	new TextureRegion(93, 	h-135, 	21, 	64);
+			character.Regions[9] =	new TextureRegion(124, 	h-135, 	30, 	64);
+
+			character.Regions[10] = new TextureRegion(0,	h-210, 	21, 	64);
+			character.Regions[11] = new TextureRegion(30, 	h-210, 	21, 	64);
+			character.Regions[12] = new TextureRegion(59, 	h-210, 	30, 	64);
+			character.Regions[13] = new TextureRegion(93, 	h-210, 	21, 	64);
+			character.Regions[14] = new TextureRegion(124, 	h-210, 	30, 	64);
+
+			character.Regions[15] = new TextureRegion(31,	h-285, 	27, 	42);
+			character.Regions[16] = new TextureRegion(70, 	h-284, 	39, 	64);
+			character.Regions[17] = new TextureRegion(125, 	h-283, 	26, 	64);
+			character.Regions[18] = new TextureRegion(161, 	h-284, 	19, 	64);
+			character.Regions[19] = new TextureRegion(191, 	h-285, 	27, 	64);
 
 			// Dialog box
 			LoadTexture ("sprite_dialog_box_tl", 	"dialog_box",	"sprite_dialog_box_tl.png");
@@ -75,11 +144,25 @@ namespace positron
 			LoadTexture ("sprite_dialog_box_b", 	"dialog_box",	"sprite_dialog_box_b.png");
 			LoadTexture ("sprite_dialog_box_br", 	"dialog_box",	"sprite_dialog_box_br.png");
 
+			// User interface
+			var health_meter = LoadTexture ("sprite_health_meter_atlas",	"user_interface",	"sprite_health_meter_atlas.png");
+			health_meter.Regions = new TextureRegion[18];
+			health_meter.Regions.BuildTiledRegions(6, 32, 32);
+
 			// Background
             // TODO: make this not-hardcoded
-            var bg = LoadTexture("sprite_tile_bg_atlas",     "background",   "sprite_tile_bg_atlas.png");
-            bg.Regions = new TextureRegion[3];
+            var bg = LoadTexture("sprite_tile_bg_atlas",		"background",   "sprite_tile_bg_atlas.png");
+            bg.Regions = new TextureRegion[32];
             bg.Regions.BuildTiledRegions(4, 32, 32);
+
+			var bg2 = LoadTexture("sprite_tile_bg2_atlas",		"background",   "sprite_tile_bg2_atlas.png");
+			bg2.Regions = new TextureRegion[32];
+			bg2.Regions.BuildTiledRegions(4, 32, 32);
+
+			var floor = LoadTexture("sprite_tile_floor_atlas",		"background",   "sprite_tile_floor_atlas.png");
+			floor.Regions = new TextureRegion[3];
+			floor.Regions.BuildTiledRegions(4, 32, 32);
+
 		}
 		public static void Teardown ()
 		{
@@ -104,7 +187,9 @@ namespace positron
 
 		public static Texture Get (object key)
 		{
-			return (Texture)Textures[key];
+			if(Textures.ContainsKey(key))
+				return (Texture)Textures[key];
+			return _DefaultTexture;
 		}
 		public static Texture LoadTexture(string title, params string[] path_components)
 		{

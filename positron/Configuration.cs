@@ -14,7 +14,8 @@ namespace positron
 		private static double _ForceDueToGravity;
 		private static double _KeyPressTimeTolerance;
 		private static double _FrameRateCap;
-		private static int _ThreadSleepTolerance;
+		private static int _ThreadSleepTimeStep;
+		private static int _ThreadSleepToleranceStep;
 		private static float _MaxWorldTimeStep;
 		private static bool _AdaptiveTimeStep;
 		private static int _CanvasWidth;
@@ -31,7 +32,7 @@ namespace positron
 			_ForceDueToGravity = -9.8;
 			_KeyPressTimeTolerance = 0.1;
 			_FrameRateCap = 60.0;
-			_ThreadSleepTolerance = 1;
+			_ThreadSleepTimeStep = 1;
 			_MaxWorldTimeStep = 0.04f;
 			_AdaptiveTimeStep = false;
 			_CanvasWidth = 600;
@@ -71,14 +72,11 @@ namespace positron
 			get { return _FrameRateCap; }
 		}
 		/// <summary>
-		/// Time in milliseconds to shave off of update/render
-		/// Thread.Sleep call (and leave for a more accurate, timed loop)
-		/// Increasing this number may increase CPU usage.
-		/// Protip: Keep this number above 1 or you might
-		/// experience jumpiness
+		/// Time in milliseconds to sleep at a time
+		/// during the frame rate cap loop
 		/// </summary>
-		public static int ThreadSleepTolerance {
-			get { return _ThreadSleepTolerance; }
+		public static int ThreadSleepTimeStep {
+			get { return _ThreadSleepTimeStep; }
 		}
 		/// <summary>
 		/// Maximum time in seconds that the physics solver can
@@ -124,7 +122,7 @@ namespace positron
 			yield return new KeyValuePair<String, object>("_ForceDueToGravity", _ForceDueToGravity);
 			yield return new KeyValuePair<String, object>("_KeyPressTimeTolerance", _KeyPressTimeTolerance);
 			yield return new KeyValuePair<String, object>("_FrameRateCap", _FrameRateCap);
-			yield return new KeyValuePair<String, object>("_FrameRateCap", _ThreadSleepTolerance);
+			yield return new KeyValuePair<String, object>("_FrameRateCap", _ThreadSleepTimeStep);
 			yield return new KeyValuePair<String, object>("_MinWorldTimeStep", _MaxWorldTimeStep);
 			yield return new KeyValuePair<String, object>("_AdaptiveTimeStep", _AdaptiveTimeStep);
 			yield return new KeyValuePair<String, object>("_DrawBlueprints", _DrawBlueprints);

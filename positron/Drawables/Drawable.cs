@@ -4,21 +4,18 @@ using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
-	public abstract class Drawable : IRenderable
+	public abstract class Drawable : IRenderable, ISceneObject
 	{
 		#region State
 		#region Member Variables
 		protected RenderSet _RenderSet;
         #region OpenGL
-        /// <summary>
-        /// Vertex Buffer Object this drawable will use in Render()
-        /// </summary>
-        protected VertexBuffer VBO;
         #endregion
         protected Vector3d _Position = new Vector3d();
-		protected Vector3d _Size = new Vector3d();
+		protected Vector3d _Scale = new Vector3d();
 		protected Vector3d _Velocity = new Vector3d();
 		protected double _Theta = 0.0;
+		protected bool _Preserve = false;
 		#endregion
 		#region Accessors
 		public virtual Vector3d Position {
@@ -49,17 +46,17 @@ namespace positron
 			get { return _Velocity.Y; }
 			set { _Velocity.Y = value; }
 		}
-		public virtual Vector3d Size {
-			get { return _Size; }
-			set { _Size = value; }
+		public virtual Vector3d Scale {
+			get { return _Scale; }
+			set { _Scale = value; }
 		}
-		public virtual double SizeX {
-			get { return _Size.X; }
-			set { _Size.X = value; }
+		public virtual double ScaleX {
+			get { return _Scale.X; }
+			set { _Scale.X = value; }
 		}
-		public virtual double SizeY {
-			get { return _Size.Y; }
-			set { _Size.Y = value; }
+		public virtual double ScaleY {
+			get { return _Scale.Y; }
+			set { _Scale.Y = value; }
 		}
 		public virtual double Theta {
 			get { return _Theta; }
@@ -74,6 +71,10 @@ namespace positron
 		public RenderSet RenderSet {
 			get { return _RenderSet; }
 			set { _RenderSet = value; }
+		}
+		public bool Preserve {
+			get { return _Preserve; }
+			set { _Preserve = value; }
 		}
 		#endregion
 		#endregion
@@ -96,5 +97,9 @@ namespace positron
 		public abstract void Render(double time);
 		public abstract double RenderSizeX();
 		public abstract double RenderSizeY();
+		public virtual void SetChange (object sender, SetChangeEventArgs e)
+		{
+			this._RenderSet = e.To;
+		}
 	}
 }

@@ -60,8 +60,8 @@ namespace positron
 			Stanzas = stanzas;
 			_RenderSet = render_set;
 			_Shown = false;
-			SizeX = _RenderSet.Scene.ViewSize.X;
-			SizeY = (int)(_RenderSet.Scene.ViewSize.Y * 0.25);
+			ScaleX = _RenderSet.Scene.ViewSize.X;
+			ScaleY = (int)(_RenderSet.Scene.ViewSize.Y * 0.25);
 			// TODO: use one texture and use texture mapping
 			BackTL = Texture.Get ("sprite_dialog_box_tl");
 			BackT = Texture.Get ("sprite_dialog_box_t");
@@ -76,13 +76,13 @@ namespace positron
 		public override void Render (double time)
 		{
 			Texture t;
-			double sx = Math.Max (1.0, SizeX - BackL.Width - BackR.Width);
-			double sy = Math.Max (1.0, SizeY - BackT.Height - BackB.Width);
+			double sx = Math.Max (1.0, ScaleX - BackL.Width - BackR.Width);
+			double sy = Math.Max (1.0, ScaleY - BackT.Height - BackB.Width);
 			GL.Color4(Color.White);
 			GL.PushMatrix();
 			{
 				// So much for DRY...
-				GL.Translate (_Position.X, _Position.Y + SizeY - BackT.Height, _Position.Z);
+				GL.Translate (_Position.X, _Position.Y + ScaleY - BackT.Height, _Position.Z);
 				GL.PushMatrix();
 				{
 					/**********************/		(t = BackTL).Bind ();
@@ -167,11 +167,11 @@ namespace positron
 		}
 		public override double RenderSizeX()
 		{
-			return SizeX;
+			return ScaleX;
 		}
 		public override double RenderSizeY()
 		{
-			return SizeY;
+			return ScaleY;
 		}
 		public override string ToString ()
 		{
@@ -179,12 +179,12 @@ namespace positron
 		}
 		public void Begin()
 		{
-			_RevertTime = Program.Game.TimeStepCoefficient;
-			Program.Game.TimeStepCoefficient = _PauseTime;
+			_RevertTime = Program.MainGame.TimeStepCoefficient;
+			Program.MainGame.TimeStepCoefficient = _PauseTime;
 			_RenderSet.Add(this);
 			_Shown = true;
 			StanzaIndex = 0;
-			Program.Game.SetInputAccepters(ToString(), this);
+			Program.MainGame.SetInputAccepters(ToString(), this);
 		}
 		public void Next ()
 		{
@@ -197,10 +197,10 @@ namespace positron
 		public void End()
 		{
 
-			Program.Game.RemoveInputAccepter(ToString());
+			Program.MainGame.RemoveInputAccepter(ToString());
 			_Shown = false;
 			_RenderSet.Remove(this);
-			Program.Game.TimeStepCoefficient = _RevertTime;
+			Program.MainGame.TimeStepCoefficient = _RevertTime;
 		}
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{

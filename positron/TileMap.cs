@@ -11,6 +11,7 @@ namespace positron
 		protected int[,] IndexMap;
 		public int CountX { get { return _CountX; } }
 		public int CountY { get { return _CountY; } }
+		protected VertexBuffer VBO;
 		public TileMap (RenderSet render_set, int countx, int county, Texture texture):
 			base(render_set)
 		{

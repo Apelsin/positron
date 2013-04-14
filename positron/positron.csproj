@@ -9,13 +9,11 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>positron</RootNamespace>
     <AssemblyName>positron</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -27,7 +25,7 @@
         <Command type="Execute" command="${TargetFile}" workingdir="${TargetDir}" />
       </CustomCommands>
     </CustomCommands>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
@@ -59,8 +57,6 @@
     <Compile Include="MathUtil.cs" />
     <Compile Include="Drawables\SpriteObject.cs" />
     <Compile Include="IInputAccepter.cs" />
-    <Compile Include="Drawables\Player.cs" />
-    <Compile Include="MainGame.cs" />
     <Compile Include="RenderSet.cs" />
     <Compile Include="Drawables\Line.cs" />
     <Compile Include="Helper.cs" />
@@ -68,12 +64,31 @@
     <Compile Include="Drawables\BooleanIndicator.cs" />
     <Compile Include="Drawables\SpriteBase.cs" />
     <Compile Include="Dialog.cs" />
-    <Compile Include="Drawables\Spidey.cs" />
     <Compile Include="TileMap.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintLine.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintQuad.cs" />
-    <Compile Include="Scene.cs" />
     <Compile Include="VertexBuffer.cs" />
+    <Compile Include="Drawables\ISceneObject.cs" />
+    <Compile Include="IInteractiveObject.cs" />
+    <Compile Include="Drawables\HUD\HealthMeter.cs" />
+    <Compile Include="PositronGame.cs" />
+    <Compile Include="Drawables\SceneElements\BunkerFloor.cs">
+      <DependentUpon>BunkerFloor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Drawables\SceneElements\BunkerWall.cs" />
+    <Compile Include="Drawables\IVariant.cs" />
+    <Compile Include="Scene\SceneOne.cs" />
+    <Compile Include="Scene\Scene.cs" />
+    <Compile Include="Scene\SceneTwo.cs" />
+    <Compile Include="Scene\SceneBasicBox.cs" />
+    <Compile Include="Drawables\BasicBullet.cs" />
+    <Compile Include="Drawables\SceneElements\FloorTile.cs" />
+    <Compile Include="Drawables\SceneElements\Door.cs" />
+    <Compile Include="Drawables\SceneElements\Player.cs" />
+    <Compile Include="Drawables\SceneElements\FloorSwitch.cs" />
+    <Compile Include="SharedState.cs" />
+    <Compile Include="Drawables\SceneElements\Gateway.cs" />
+    <Compile Include="Drawables\SceneElements\Spidey.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
@@ -87,5 +102,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Drawables\SceneElements\" />
+    <Folder Include="Scene\" />
   </ItemGroup>
 </Project>
