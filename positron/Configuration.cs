@@ -24,9 +24,33 @@ namespace positron
 		#endregion
 
 		private static Dictionary<String, object> __dict__ = new Dictionary<String, object>();
-		static Configuration()
+		static Configuration ()
 		{
-			string artwork_path = Path.Combine("..", "..", "Assets", "Artwork");
+			// Development path
+			string artwork_path = Path.Combine ("..", "..", "Assets", "Artwork");
+			if (!Directory.Exists (artwork_path)) {
+				// Release path
+				artwork_path = Path.Combine ("..", "Assets", "Artwork");
+			}
+			if (!Directory.Exists (artwork_path)) {
+				// Alternative PWD path
+				artwork_path = Path.Combine ("Assets", "Artwork");
+			}
+
+			// Absolute executable path
+			// This is not working on OS X, but it would be nice if it were
+			/*
+			if(!Directory.Exists(artwork_path))
+			{
+				string exe_location = System.Reflection.Assembly.GetExecutingAssembly().Location;
+				//Console.WriteLine("Executable location is {0}", exe_location);
+				string exe_directory = Path.GetDirectoryName(exe_location);
+				//Console.WriteLine("Executable directory is {0}", exe_directory);
+				artwork_path = Path.Combine(exe_directory, "Assets", "Artwork");
+				//Console.WriteLine("Using artwork path {0}", artwork_path);
+			}
+			*/
+			Console.WriteLine ("Using artwork path {0}", artwork_path);
 			Set("ArtworkPath", artwork_path);
 			_MetersInPixels = 96.0;
 			_ForceDueToGravity = -9.8;
