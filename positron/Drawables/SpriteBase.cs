@@ -15,6 +15,7 @@ namespace positron
 		#region SpriteAnimation
 		public class SpriteAnimation
 		{
+            protected static int _FrameTimeDefault = 200;
 			protected SpriteFrame[] _Frames;
 			protected bool _Looping = false;
 			protected bool _PingPong = false;
@@ -42,25 +43,24 @@ namespace positron
 				}
 			}
 			public SpriteAnimation(Texture texture, params int[] region_incices):
-				this(texture, false, false, region_incices)
-			{
-			}
-			public SpriteAnimation(Texture texture, int frame_time, params int[] region_incices):
-				this(texture, frame_time, false, region_incices)
-			{
-			}
-			public SpriteAnimation(Texture texture, int frame_time, bool looping, params int[] region_incices):
-				this(texture, frame_time, looping, false, region_incices)
+				this(texture, false, region_incices)
 			{
 			}
 			public SpriteAnimation(Texture texture, bool looping, params int[] region_incices):
 				this(texture, looping, false, region_incices)
 			{
 			}
-			public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params int[] region_incices):
-				this(texture, 200, looping, ping_pong, region_incices)
-			{
-			}
+            public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params int[] region_incices) :
+                this(texture, _FrameTimeDefault, looping, ping_pong, region_incices)
+            {
+            }
+            public SpriteAnimation(Texture texture, int frame_time, params int[] region_incices) :
+                this(texture,
+                region_incices != null && region_incices.Length > 0 ? frame_time : _FrameTimeDefault,
+                false, false,
+                region_incices != null && region_incices.Length > 0 ? region_incices : new int[1] { frame_time })
+            {
+            }
 			public SpriteAnimation(bool looping, bool ping_pong, params SpriteFrame[] frames):
 				this(looping, ping_pong)
 			{

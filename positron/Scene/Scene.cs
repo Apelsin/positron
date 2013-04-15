@@ -312,7 +312,7 @@ namespace positron
 			IEnumerable<RenderSet> current_sets = current_scene.AllRenderSetsInOrder ();
 			IEnumerable<RenderSet> next_sets = next_scene.AllRenderSetsInOrder ();
 			IEnumerator<RenderSet> next_set_enum = next_sets.GetEnumerator ();
-			lock (Program.MainGame.UpdateLock) {										// Don't even think about not locking this threaded monstrosity
+			lock (Program.MainUpdateLock) {										// Don't even think about not locking this threaded monstrosity
 				foreach (RenderSet render_set in current_sets) {					// For each render set
 					if (!next_set_enum.MoveNext ())									// Advance enumerator; if passed end...
 						break;														// ...get the hell out of Dodge

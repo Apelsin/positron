@@ -102,11 +102,11 @@ namespace positron
 		/// <summary>
 		/// Main OpenGL-calling thread for rendering
 		/// </summary>
-		Thread RenderingThread;
+		Thread _RenderingThread;
 		/// <summary>
 		/// Main updating thread
 		/// </summary>
-		Thread UpdatingThread;
+		Thread _UpdatingThread;
 
 		/// <summary>
 		/// The timer for render time
@@ -151,6 +151,9 @@ namespace positron
 
         public double LastRenderDrawingTime { get { return _LastRenderDrawingTime; } }
 
+        public Thread RenderingThread { get { return _RenderingThread; } }
+        public Thread UpdatingThread { get { return _UpdatingThread; } }
+
 		#endregion
 		#endregion
 		#region Event
@@ -161,8 +164,10 @@ namespace positron
 			lock(Program.MainUserInputLock)
 			{
 				KeysUpdateEventArgs args = new KeysUpdateEventArgs (KeysPressed, time);
-				if(KeysUpdate != null)
-					KeysUpdate (this, args);
+                if (KeysUpdate != null)
+                {
+                    KeysUpdate(this, args);
+                }
 				lock(Program.MainGame.InputAccepterGroupsLock)
 				{
 					IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
@@ -283,8 +288,8 @@ namespace positron
 
 			// Blending init
 			GL.Enable (EnableCap.Blend);
-			GL.BlendFunc (BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
-			//GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One);
+			//GL.BlendFunc (BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+			GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One);
 
 			// Culling init
 			GL.Enable (EnableCap.CullFace);
@@ -309,12 +314,12 @@ namespace positron
 
 			Context.MakeCurrent (null); // Release the OpenGL context so it can be used on the new thread.
 			lock (Program.MainUpdateLock) {
-				RenderingThread = new Thread (RenderLoop);
-				UpdatingThread = new Thread (UpdateLoop);
-				RenderingThread.IsBackground = true;
-				UpdatingThread.IsBackground = true;
-				RenderingThread.Start ();
-				UpdatingThread.Start ();
+				_RenderingThread = new Thread (RenderLoop);
+				_UpdatingThread = new Thread (UpdateLoop);
+				_RenderingThread.IsBackground = true;
+				_UpdatingThread.IsBackground = true;
+				_RenderingThread.Start ();
+				_UpdatingThread.Start ();
 			}
 		}
 		
@@ -329,8 +334,10 @@ namespace positron
 		protected override void OnUnload(EventArgs e)
 		{
 			Exiting = true; // Set a flag that the rendering thread should stop running.
-			RenderingThread.Join();
-			UpdatingThread.Join();
+			_RenderingThread.Join();
+			_UpdatingThread.Join ();
+
+            MakeCurrent();
 
 			// Delete textures from graphics memory space
 			Texture.Teardown();

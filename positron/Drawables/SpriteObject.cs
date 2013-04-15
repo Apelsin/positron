@@ -175,7 +175,7 @@ namespace positron
 		}
 		public virtual void Derez()
 		{
-			_RenderSet.Scene.World.RemoveBody(Body);
+            _SpriteBody.Dispose();
 			_RenderSet.Remove(this);
 		}
 		#endregion

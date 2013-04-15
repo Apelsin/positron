@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Drawables\HUD\HUDQuad.cs" />
+    <Compile Include="Drawables\IUpdateSync.cs" />
     <Compile Include="IRenderable.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MainWindow.cs" />
@@ -78,9 +79,7 @@
     <Compile Include="IInteractiveObject.cs" />
     <Compile Include="Drawables\HUD\HealthMeter.cs" />
     <Compile Include="PositronGame.cs" />
-    <Compile Include="Drawables\SceneElements\BunkerFloor.cs">
-      <DependentUpon>BunkerFloor.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Drawables\SceneElements\BunkerFloor.cs" />
     <Compile Include="Drawables\SceneElements\BunkerWall.cs" />
     <Compile Include="Drawables\IVariant.cs" />
     <Compile Include="Scene\SceneOne.cs" />
@@ -109,8 +108,5 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Drawables\SceneElements\" />
-    <Folder Include="Scene\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

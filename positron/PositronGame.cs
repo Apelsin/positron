@@ -16,12 +16,16 @@ using FarseerPhysics.Factories;
 
 namespace positron
 {
-	public class PositronGame
-	{
-		#region Member Variables
+	public class PositronGame: IUpdateSync
+    {
+        #region Event-Related
+        protected Queue<UpdateEventHandler> _UpdateEventQueue = new Queue<UpdateEventHandler>();
+        public Queue<UpdateEventHandler> UpdateEventQueue { get { return _UpdateEventQueue; } }
+        #endregion
+        #region Member Variables
 
-		#region Test stuff
-		Stopwatch TestWatch = new Stopwatch();
+        #region Test stuff
+        Stopwatch TestWatch = new Stopwatch();
 		Random rand = new Random();
 		//public List<BooleanIndicator> TestIndicators = new List<BooleanIndicator>();
 		public Dialog TestDialog;
@@ -35,11 +39,6 @@ namespace positron
 		protected OrderedDictionary InputAccepterGroups;
 		protected readonly Object _InputAccepterGroupsLock = new Object();
 		protected int InputAccepterGroupIdx = 0;
-
-		/// <summary>
-		/// Lock to synchronize rendering and updating
-		/// </summary>
-		public readonly Object UpdateLock = new Object();
 
 		#endregion
 		#region Static Variables
@@ -120,17 +119,19 @@ namespace positron
 		}
 		public void Update (double time)
 		{
-			lock (UpdateLock) {
-				//BackgroundTiles.RandomMap();
-				time = Math.Round(time, 4);
-				_CurrentScene.Update (time * TimeStepCoefficient);
-
-				foreach(RenderSet render_set in _CurrentScene.UpdateRenderSetsInOrder())
-				{
-					foreach (object o in render_set) {
-						if (o is SpriteObject)
-							((SpriteObject)o).Update (time * TimeStepCoefficient);
-					}
+			//BackgroundTiles.RandomMap();
+			time = Math.Round(time, 4);
+			_CurrentScene.Update (time * TimeStepCoefficient);
+            lock (_UpdateEventQueue)
+            {
+                while (_UpdateEventQueue.Count > 0)
+                    _UpdateEventQueue.Dequeue()(this, new UpdateEventArgs(time));
+            }
+			foreach(RenderSet render_set in _CurrentScene.UpdateRenderSetsInOrder())
+			{
+				foreach (object o in render_set) {
+					if (o is SpriteObject)
+						((SpriteObject)o).Update (time * TimeStepCoefficient);
 				}
 			}
 		}

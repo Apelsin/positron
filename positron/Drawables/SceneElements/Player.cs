@@ -200,7 +200,12 @@ namespace positron
 			} else if (e.Key == Key.E) {
 				DoActionHere ();
 			} else if (e.Key == Key.F) {
-				var bullet = new BasicBullet(this._RenderSet.Scene, this.PositionX + (SizeX) * TileX, this.PositionY, 500 * TileX, 0);
+                UpdateEventHandler late;
+                late = (u_sender, u_e) =>
+                {
+                    var bullet = new BasicBullet(this._RenderSet.Scene, this.PositionX + (SizeX) * TileX, this.PositionY, 500 * TileX, 0);
+                };
+                Program.MainGame.UpdateEventQueue.Enqueue(late);
 			}
 			return true;
 		}
@@ -308,7 +313,7 @@ namespace positron
 				// TODO: Have these values be not hard-coded
 				if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
 				{
-					JumpTimer.Restart();
+                    JumpTimer.Restart();
 					float jump_imp_y = 3.0f;
 					Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, jump_imp_y);
 					GoneDown = false;
