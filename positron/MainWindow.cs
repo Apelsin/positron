@@ -481,8 +481,6 @@ namespace positron
 			// Store this in a local variable because accessors have overhead!
             // Bear with me...this will get a bit tricky to explain pefrectly...
 			while (!Exiting) {
-				_LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
-
 				// Sleep the thread for the most milliseconds less than the frame limit time
 				double time_until = FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001;
 				while (FrameWatch.Elapsed.TotalSeconds < time_until)
@@ -490,7 +488,8 @@ namespace positron
 				// Hard-loop the remainder
 				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
 
-				_LastFrameTime = UpdateWatch.Elapsed.TotalSeconds;
+                _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
+                Console.WriteLine(_LastFrameTime);
 				FrameWatch.Restart();
                 UpdateWatch.Restart();
 				lock(Program.MainUpdateLock)
@@ -498,9 +497,10 @@ namespace positron
 				_LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
 				RenderWatch.Restart();
 				lock(Program.MainUpdateLock)
-					RenderView(_LastRenderTime);
-                _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
+					RenderView(_LastFrameTime);
+                // TODO: Figure out why this does wild shit if FPS > 60
 				SwapBuffers();
+                _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
 			}
 			Context.MakeCurrent(null);
 		}
