@@ -32,19 +32,18 @@ namespace positron
 
 			// Setup background tiles
 			var BackgroundTiles = new TileMap(Background, 48, 24, Texture.Get("sprite_tile_bg2_atlas"));
-			BackgroundTiles.PositionX = -320 + 16;
-			BackgroundTiles.PositionY = -256 + 16;
+			BackgroundTiles.PositionX = -320;
+			BackgroundTiles.PositionY = -256;
+			BackgroundTiles.PositionZ = 2.0;
 			BackgroundTiles.RandomMap();
 			BackgroundTiles.Build();
 
 			Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
-			_DoorToPreviousScene = new Door(Rear, 512 - 68, 48, prev_scene);
+			_DoorToPreviousScene = new Door(Rear, 512 - 68, 32, prev_scene);
 
 			// Get cross-scene variables
 			Scene previous_scene = (Scene)Scene.Scenes["SceneOne"];
 			Player player_1 = Program.MainGame.Player1;
-
-
 
 			for (int i = 0; i < 3; i++) {
 				var spidey = new Spidey(Stage, 10 * i - 100, 20);

@@ -10,13 +10,24 @@ namespace positron
 			set { _Variant = value; }
 		}
 		public BunkerFloor (Scene scene, double x, double y):
-			base(scene.Stage, x, y, Texture.Get("sprite_bunker_floor"))
+			this(scene, x, y, Texture.Get("sprite_bunker_floor"))
+		{
+		}
+		protected BunkerFloor (Scene scene, double x, double y, Texture texture):
+			base(scene.Stage, x, y, texture)
 		{
 		}
 		protected override void Draw()
 		{
 			//TODO: Update variant
 			base.Draw();
+		}
+	}
+	public class BunkerFloor2 : BunkerFloor
+	{
+		public BunkerFloor2 (Scene scene, double x, double y):
+			base(scene, x, y, Texture.Get("sprite_bunker_floor_2"))
+		{
 		}
 	}
 }

@@ -101,5 +101,12 @@ namespace positron
 		{
 			this._RenderSet = e.To;
 		}
+		protected virtual Vector3d CalculateMovementParallax ()
+		{
+			if(this._RenderSet == this._RenderSet.Scene.HUD)
+				return Vector3d.Zero;
+			double depth = 10.0 / MathUtil.Clamp(_Position.Z + 10.0, 1000.0, 0.1) - 1.0;
+			return this._RenderSet.Scene.ViewPosition * (depth);
+		}
 	}
 }

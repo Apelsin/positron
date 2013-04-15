@@ -19,7 +19,7 @@ namespace positron
 			int next_idx = region_idx + 1; // Hard-coded
 			if (e.HealthWas != e.HealthNow) {
 				int step = e.HealthWas > e.HealthNow ? 6 : -6;
-				_AnimationCurrent = new SpriteAnimation(Texture, region_idx, region_idx + step,  region_idx + 2 * step, next_idx);
+				_AnimationCurrent = new SpriteAnimation(Texture, 100, region_idx, region_idx + step,  region_idx + 2 * step, next_idx);
 				_AnimationFrameIndex = 0;
 				_FrameTimer.Restart ();
 			}

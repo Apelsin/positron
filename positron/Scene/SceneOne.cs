@@ -33,13 +33,14 @@ namespace positron
 
 			// Setup background tiles
 			var BackgroundTiles = new TileMap(Background, 48, 24, Texture.Get("sprite_tile_bg_atlas"));
-			BackgroundTiles.PositionX = -320 + 16;
-			BackgroundTiles.PositionY = -256 + 16;
+			BackgroundTiles.PositionX = -320;
+			BackgroundTiles.PositionY = -256;
+			BackgroundTiles.PositionZ = 2.0;
 			BackgroundTiles.RandomMap();
 			BackgroundTiles.Build();
 
 			Scene next_scene = (Scene)Scene.Scenes["SceneTwo"];
-			_DoorToNextScene = new Door(Rear, 512 - 68, 48, next_scene);
+			_DoorToNextScene = new Door(Rear, 512 - 68, 32, next_scene);
 
 			// Get cross-scene variables
 			Player player_1 = Program.MainGame.Player1;
@@ -52,37 +53,39 @@ namespace positron
 			var health_meter = new HealthMeter(HUD, 64, h_i - 64, player_1);
 			health_meter.Preserve = true;
 
+			double floor_y = 32.0;
+			double floor_sw_y = -4.0;
 
 			// Stage elements
 			new FloorTile(Rear, 0, 32 * 1);
 			new FloorTile(Rear, 32, 32 * 0.5);
 
-			var gw1 = new Gateway(Front, 32 * 4, 32 * 1 + 20, false);
-			var gw2 = new Gateway(Front, 32 * 10, 32 * 1 + 20, false);
+			var gw1 = new Gateway(Front, 32 * 4, floor_y, false);
+			var gw2 = new Gateway(Front, 32 * 10, floor_y, false);
 
-			var fs00 = new FloorSwitch(Front, 32 * 3, 32 * 1 - 14, (sender, e) => {
+			var fs00 = new FloorSwitch(Front, 32 * 3, floor_y + floor_sw_y, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw1.OnAction(e.Self, new ActionEventArgs(bstate, gw1));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			} );
-			var fs01 = new FloorSwitch(Front, 32 * 5, 32 * 1 - 14, (sender, e) => {
+			var fs01 = new FloorSwitch(Front, 32 * 5, floor_y + floor_sw_y, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw1.OnAction(e.Self, new ActionEventArgs(bstate, gw1));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs00);
 
-			var fs10 = new FloorSwitch(Front, 32 * 7, 32 * 1 - 14, (sender, e) => {
+			var fs10 = new FloorSwitch(Front, 32 * 7, floor_y + floor_sw_y, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw2.OnAction(e.Self, new ActionEventArgs(bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, 0.2);
-			var fs11 = new FloorSwitch(Front, 32 * 9 + 14, 32 * 3 + 4, (sender, e) => {
+			var fs11 = new FloorSwitch(Front, 32 * 9 + 14, floor_y + floor_sw_y + 32 * 3, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw2.OnAction(e.Self, new ActionEventArgs(bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs10, 3.0);
 			fs11.Theta = Math.PI * 0.5;
-			var fs12 = new FloorSwitch(Front, 32 * 12, 32 * 1 - 14, (sender, e) => {
+			var fs12 = new FloorSwitch(Front, 32 * 12, floor_y + floor_sw_y, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw2.OnAction(e.Self, new ActionEventArgs(bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);

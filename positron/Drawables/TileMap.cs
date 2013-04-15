@@ -61,7 +61,7 @@ namespace positron
 			{
 				// So much for DRY...
 				//GL.Scale(Size);
-				GL.Translate (_Position);
+				GL.Translate (_Position + CalculateMovementParallax());
                 Draw();
 			}
 			GL.PopMatrix();

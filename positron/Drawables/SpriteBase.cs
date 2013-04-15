@@ -42,10 +42,6 @@ namespace positron
 						_Frames[i] = new SpriteFrame(texture, region_incices[i], Color.White, frame_time);
 				}
 			}
-			public SpriteAnimation(Texture texture, params int[] region_incices):
-				this(texture, false, region_incices)
-			{
-			}
 			public SpriteAnimation(Texture texture, bool looping, params int[] region_incices):
 				this(texture, looping, false, region_incices)
 			{
@@ -54,6 +50,11 @@ namespace positron
                 this(texture, _FrameTimeDefault, looping, ping_pong, region_incices)
             {
             }
+			/// <summary>
+			/// Initializes a new instance of the <see cref="positron.SpriteBase+SpriteAnimation"/> class.
+			/// If region_indices is empty, frame_time instead defines first frame and default frame time is used,
+			/// otherwise frame time is the first integer parameter followed by texture region indices for frames.
+			/// </summary>
             public SpriteAnimation(Texture texture, int frame_time, params int[] region_incices) :
                 this(texture,
                 region_incices != null && region_incices.Length > 0 ? frame_time : _FrameTimeDefault,
@@ -109,10 +110,10 @@ namespace positron
 				get { return _TextureRegionIndex; }
 			}
 			public double SizeX {
-				get { return _Texture.Regions [_TextureRegionIndex].SizeX; }
+				get { return _Texture.Regions == null ? _Texture.Width : _Texture.Regions [_TextureRegionIndex].SizeX; }
 			}
 			public double SizeY {
-				get { return _Texture.Regions [_TextureRegionIndex].SizeY; }
+				get { return _Texture.Regions == null ? _Texture.Height : _Texture.Regions [_TextureRegionIndex].SizeY; }
 			}
 			public VertexBuffer VBO { get { return _VBO; } }
 			public VertexBuffer BPVBO { get { return _BPVBO; } }
@@ -237,11 +238,11 @@ namespace positron
 		}
 		public double TileX {
 			get { return _TileX; }
-			//set { _TileX = value; }
+			set { _TileX = value; }
 		}
 		public double TileY {
 			get { return _TileY; }
-			//set { _TileY = value; }
+			set { _TileY = value; }
 		}
 		public double SizeX {
 			get { return _Scale.X * FrameCurrent.SizeX; }
@@ -280,13 +281,19 @@ namespace positron
 			_Color = Color.White;
 			_Scale.X = scalex;
 			_Scale.Y = scaley;
-			_Position.X = x;
-			_Position.Y = y;
 			_TileX = 1.0;
 			_TileY = 1.0;
 			_AnimationFrameIndex = 0;
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
+			_Position.X = x + FrameCurrent.SizeX * 0.5;
+			_Position.Y = y + FrameCurrent.SizeY * 0.5;
+		}
+		public SpriteBase CenterShift ()
+		{
+			_Position.X -= FrameCurrent.SizeX * 0.5;
+			_Position.Y -= FrameCurrent.SizeY * 0.5;
+			return this;
 		}
 		// TODO: rotation stuff here
 		public override double RenderSizeX () { return _Scale.X * Texture.Width; }
@@ -295,7 +302,7 @@ namespace positron
 		{
 			GL.PushMatrix();
 			{
-				GL.Translate (_Position);
+				GL.Translate (_Position + CalculateMovementParallax());
                 //GL.Translate(Math.Floor (Position.X), Math.Floor (Position.Y), Math.Floor (Position.Z));
 				GL.Rotate(_Theta, 0.0, 0.0, 1.0);
                 GL.Scale(_Scale);

@@ -101,6 +101,10 @@ namespace positron
 			bunker_floor.Regions = new TextureRegion[4];
 			bunker_floor.Regions.BuildTiledRegions(4, 32, 32);
 
+			var bunker_floor_2 = LoadTexture("sprite_bunker_floor_2",		"scene_element",   "sprite_bunker_floor_2.png");
+			bunker_floor_2.Regions = new TextureRegion[4];
+			bunker_floor_2.Regions.BuildTiledRegions(4, 32, 128);
+
 			var bunker_wall = LoadTexture("sprite_bunker_wall",		"scene_element",   "sprite_bunker_wall.png");
 			bunker_wall.Regions = new TextureRegion[4];
 			bunker_wall.Regions.BuildTiledRegions(16, 16, 32);

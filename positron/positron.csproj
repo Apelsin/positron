@@ -70,8 +70,6 @@
     <Compile Include="Drawables\LayeredSprite.cs" />
     <Compile Include="Drawables\BooleanIndicator.cs" />
     <Compile Include="Drawables\SpriteBase.cs" />
-    <Compile Include="Dialog.cs" />
-    <Compile Include="TileMap.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintLine.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintQuad.cs" />
     <Compile Include="VertexBuffer.cs" />
@@ -94,6 +92,8 @@
     <Compile Include="SharedState.cs" />
     <Compile Include="Drawables\SceneElements\Gateway.cs" />
     <Compile Include="Drawables\SceneElements\Spidey.cs" />
+    <Compile Include="Drawables\TileMap.cs" />
+    <Compile Include="Drawables\Dialog.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

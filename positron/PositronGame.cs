@@ -130,8 +130,8 @@ namespace positron
 			foreach(RenderSet render_set in _CurrentScene.UpdateRenderSetsInOrder())
 			{
 				foreach (object o in render_set) {
-					if (o is SpriteObject)
-						((SpriteObject)o).Update (time * TimeStepCoefficient);
+					if (o is SpriteBase)
+						((SpriteBase)o).Update (time * TimeStepCoefficient);
 				}
 			}
 		}

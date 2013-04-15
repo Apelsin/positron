@@ -150,9 +150,9 @@ namespace positron
             {
                 GL.Translate(
                     //Math.Round
-                    (_SpriteBody.Position.X * Configuration.MeterInPixels),
+					(_SpriteBody.Position.X * Configuration.MeterInPixels),
                     //Math.Round
-                    (_SpriteBody.Position.Y * Configuration.MeterInPixels), 0.0);
+					(_SpriteBody.Position.Y * Configuration.MeterInPixels), 0.0);
                 // Don't even read this line:
                 float r = (float)
                     //(45.0 * Math.Round(

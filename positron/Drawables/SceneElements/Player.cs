@@ -203,7 +203,7 @@ namespace positron
                 UpdateEventHandler late;
                 late = (u_sender, u_e) =>
                 {
-                    var bullet = new BasicBullet(this._RenderSet.Scene, this.PositionX + (SizeX) * TileX, this.PositionY, 500 * TileX, 0);
+					var bullet = new BasicBullet(this._RenderSet.Scene, this.PositionX + (SizeX + 3) * TileX, this.PositionY, 500 * TileX, 0);
                 };
                 Program.MainGame.UpdateEventQueue.Enqueue(late);
 			}
