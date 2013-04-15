@@ -35,7 +35,7 @@ namespace positron
 			var BackgroundTiles = new TileMap(Background, 48, 24, Texture.Get("sprite_tile_bg_atlas"));
 			BackgroundTiles.PositionX = -320;
 			BackgroundTiles.PositionY = -256;
-			BackgroundTiles.PositionZ = 2.0;
+			BackgroundTiles.PositionZ = 1.0;
 			BackgroundTiles.RandomMap();
 			BackgroundTiles.Build();
 

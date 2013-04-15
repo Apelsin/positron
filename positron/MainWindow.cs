@@ -489,7 +489,7 @@ namespace positron
 				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
 
                 _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
-                Console.WriteLine(_LastFrameTime);
+                //Console.WriteLine(_LastFrameTime);
 				FrameWatch.Restart();
                 UpdateWatch.Restart();
 				lock(Program.MainUpdateLock)
