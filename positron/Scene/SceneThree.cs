@@ -39,7 +39,7 @@ namespace positron
             BackgroundTiles.Build();
 
             Scene prev_scene = (Scene)Scene.Scenes["SceneTwo"];
-            _DoorToPreviousScene = new Door(Rear, 512 - 68, 32, prev_scene);
+            _DoorToPreviousScene = new Door(Rear, 0, 32, prev_scene);
 
             // Get cross-scene variables
             Scene previous_scene = (Scene)Scene.Scenes["SceneTwo"];

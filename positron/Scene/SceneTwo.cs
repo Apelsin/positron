@@ -41,7 +41,7 @@ namespace positron
 			Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
 			_DoorToPreviousScene = new Door(Rear, 512 - 68, 32, prev_scene);
             Scene next_scene = (Scene)Scene.Scenes["SceneThree"];
-            _DoorToNextScene = new Door(Rear, 256, 32, next_scene);
+            _DoorToNextScene = new Door(Rear, 0, 32, next_scene);
 
 			// Get cross-scene variables
 			Scene previous_scene = (Scene)Scene.Scenes["SceneOne"];
