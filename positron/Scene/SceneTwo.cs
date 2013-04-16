@@ -40,12 +40,14 @@ namespace positron
 
 			Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
 			_DoorToPreviousScene = new Door(Rear, 512 - 68, 32, prev_scene);
+            Scene next_scene = (Scene)Scene.Scenes["SceneThree"];
+            _DoorToNextScene = new Door(Rear, 256, 32, next_scene);
 
 			// Get cross-scene variables
 			Scene previous_scene = (Scene)Scene.Scenes["SceneOne"];
 			Player player_1 = Program.MainGame.Player1;
 
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 5; i++) {
 				var spidey = new Spidey(Stage, 10 * i - 100, 20);
 				spidey.Position += DoorToPreviousScene.Position;
 				spidey.Body.BodyType = BodyType.Dynamic;

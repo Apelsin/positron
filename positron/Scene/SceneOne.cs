@@ -90,7 +90,7 @@ namespace positron
 				gw2.OnAction(e.Self, new ActionEventArgs(bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs11);
-
+            
 			new FloorTile(Rear, 32 * 4, 32 * 3 + 8);
 			new FloorTile(Rear, 32 * 4, 32 * 4 + 8);
 			new FloorTile(Rear, 32 * 4, 32 * 5 + 8);
@@ -102,7 +102,7 @@ namespace positron
 			new FloorTile(Rear, 32 * 10, 32 * 5 + 8);
 			new FloorTile(Rear, 32 * 10, 32 * 6 + 8);
 			new FloorTile(Rear, 32 * 10, 32 * 7 + 8);
-			
+            
 			//var TestDialog = new Dialog(HUD, "Test", null);
 			//TestDialog.RenderSet = HUD;
 			//TestDialog.PauseTime = 1.0f;
