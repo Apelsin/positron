@@ -39,14 +39,21 @@ namespace positron
 		public event HealthChangedEventHandler HealthChanged;
 		#endregion
 
+		protected Fixture FixtureUpper;
+		protected Fixture FixtureLower;
+
 		protected int _HealthMax = 4;
 		protected int _Health;
 		protected int MoveXIdx = 0;
 		protected int MoveYIdx = 0;
 		protected float _MovementDamping = 3.0f;
+
+		protected bool _WieldingGun = false;
+
 		protected Vector3d _DampVeloNormal = new Vector3d();
 		protected Stopwatch JumpTimer = new Stopwatch();
 		protected Stopwatch WalkAnimationTimer = new Stopwatch();
+		protected Stopwatch GunStowTimer = new Stopwatch();
 
 		protected SpriteAnimation AnimationStationary;
 		protected SpriteAnimation AnimationWalk;
@@ -58,6 +65,13 @@ namespace positron
 		protected SpriteAnimation AnimationPreJump;
 		protected SpriteAnimation AnimationJumping;
 		protected SpriteAnimation AnimationEndJump;
+
+		protected SpriteAnimation AnimationAimGunFwd;
+		protected SpriteAnimation AnimationAimGunFwdUp;
+		protected SpriteAnimation AnimationAimGunFwdDown;
+		protected SpriteAnimation AnimationAimGunFwdCrouch;
+		protected SpriteAnimation AnimationAimGunFwdJump;
+
 
 		protected ManualResetEvent JumpRayMRE = new ManualResetEvent(false);
 		protected float[] JumpRayXDirections = new float[] { 0.0f, 0.2f, -0.2f, 0.45f, -0.45f };
@@ -72,6 +86,10 @@ namespace positron
 		}
 		public int Health {
 			get { return _Health; }
+		}
+		public bool WieldingGun {
+			get { return _WieldingGun; }
+			set { _WieldingGun = value; }
 		}
 		#region Behavior
 		public Player(RenderSet render_set, Texture texture):
@@ -99,6 +117,12 @@ namespace positron
 			AnimationPreJump = 		new SpriteAnimation(texture, 15);
 			AnimationJumping = 		new SpriteAnimation(texture, 17);
 			AnimationEndJump = 		new SpriteAnimation(texture, 19);
+
+			AnimationAimGunFwd = 		new SpriteAnimation(texture, 20);
+			AnimationAimGunFwdUp = 		new SpriteAnimation(texture, 21);
+			AnimationAimGunFwdDown = 	new SpriteAnimation(texture, 22);
+			AnimationAimGunFwdCrouch = 	new SpriteAnimation(texture, 23);
+			AnimationAimGunFwdJump = 	new SpriteAnimation(texture, 24);
 
 			AnimationPreJump.Frames[0].FrameTime = 100;
 			//AnimationPreJump.Frames[1].FrameTime = 50;
@@ -138,20 +162,19 @@ namespace positron
 				(float)(_Position.Y / Configuration.MeterInPixels));
 			_SpriteBody = BodyFactory.CreateBody(_RenderSet.Scene.World, msv2);
 
-			Microsoft.Xna.Framework.Vector2 a, b, c, d;
+			Microsoft.Xna.Framework.Vector2 a, b, c, d, e00, e01, e10, e11;
 
 			// Attach the main part of the body
 			var verts = new Vertices(new Microsoft.Xna.Framework.Vector2[] {
-				new Microsoft.Xna.Framework.Vector2(corner_clip_x, 0.0f) - half_w_h,
-				new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, 0.0f) - half_w_h,
+				e00 = new Microsoft.Xna.Framework.Vector2(corner_clip_x, 0.0f) - half_w_h,
+				e10 = new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, 0.0f) - half_w_h,
 				b = new Microsoft.Xna.Framework.Vector2(w, corner_clip_y) - half_w_h,
 				c = new Microsoft.Xna.Framework.Vector2(w, h - corner_clip_y) - half_w_h,
-				new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, h) - half_w_h,
-				new Microsoft.Xna.Framework.Vector2(corner_clip_x, h) - half_w_h,
+				e11 = new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, h) - half_w_h,
+				e01 = new Microsoft.Xna.Framework.Vector2(corner_clip_x, h) - half_w_h,
 				d = new Microsoft.Xna.Framework.Vector2(0.0f, h - corner_clip_y) - half_w_h,
 				a = new Microsoft.Xna.Framework.Vector2(0.0f, corner_clip_y) - half_w_h
 			});
-
 			FixtureFactory.AttachPolygon(verts, 100.0f, _SpriteBody);
 
 			//FixtureFactory.AttachRectangle(w, h, 100.0f, new Microsoft.Xna.Framework.Vector2(w * 0.5f, h * 0.5f), _SpriteBody);
@@ -203,7 +226,14 @@ namespace positron
                 UpdateEventHandler late;
                 late = (u_sender, u_e) =>
                 {
-					var bullet = new BasicBullet(this._RenderSet.Scene, this.PositionX + (SizeX + 3) * TileX, this.PositionY, 500 * TileX, 0);
+					// TODO: Un-hard-code this:
+					Vector2d shot_offset = new Vector2d((SizeX + 3) * TileX, SizeY * 0.23);
+					var bullet = new BasicBullet(this._RenderSet.Scene,
+					                             this.PositionX + shot_offset.X,
+					                             this.PositionY + shot_offset.Y,
+					                             1000 * TileX, 0);
+					WieldingGun = true;
+					GunStowTimer.Restart();
                 };
                 Program.MainGame.UpdateEventQueue.Enqueue(late);
 			}
@@ -218,9 +248,9 @@ namespace positron
 					var world_object = fixture.Body.GetWorldObject ();
 					if(world_object != null)
 					{
-						if(world_object is IInteractiveObject)
+						if(world_object is IActuator)
 						{
-							var interactive_object = (IInteractiveObject)world_object;
+							var interactive_object = (IActuator)world_object;
 							interactive_object.OnAction(this, new ActionEventArgs());
 							break;
 						}
@@ -256,7 +286,10 @@ namespace positron
 					PlayAnimation (AnimationWalk);
 				} else if (v__x_mag < 0.01)
 				{
-					PlayAnimation (AnimationStationary);
+					if(WieldingGun)
+						PlayAnimation(AnimationAimGunFwd);
+					else
+						PlayAnimation (AnimationStationary);
 				}
 			}
 
@@ -324,8 +357,12 @@ namespace positron
 			};
 			BodyPlatformRayCast(callback);
 		}
-		public override void Update(double time)
+		public override void Update (double time)
 		{
+			if (GunStowTimer.Elapsed.TotalSeconds > 0.2) {
+				GunStowTimer.Reset();
+				WieldingGun = false;
+			}
 			base.Update(time);
 			GoneDown = GoneDown || Body.LinearVelocity.Y < 0.0f;
 			//((BooleanIndicator)Program.MainGame.TestIndicators[0]).State = GoneDown;

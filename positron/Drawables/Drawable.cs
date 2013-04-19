@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
@@ -9,6 +10,7 @@ namespace positron
 		#region State
 		#region Member Variables
 		protected RenderSet _RenderSet;
+		protected List<IRenderable> _Blueprints;
         #region OpenGL
         #endregion
         protected Vector3d _Position = new Vector3d();
@@ -62,6 +64,9 @@ namespace positron
 			get { return _Theta; }
 			set { _Theta = value; }
 		}
+		public virtual List<IRenderable> Blueprints {
+			get { return _Blueprints; }
+		}
 		/// <summary>
 		/// Gets the render set associated with this drawable.
 		/// Specifying a null render set in the constructor
@@ -97,7 +102,7 @@ namespace positron
 		public abstract void Render(double time);
 		public abstract double RenderSizeX();
 		public abstract double RenderSizeY();
-		public virtual void SetChange (object sender, SetChangeEventArgs e)
+		public virtual void SetChange (object sender, RenderSetChangeEventArgs e)
 		{
 			this._RenderSet = e.To;
 		}

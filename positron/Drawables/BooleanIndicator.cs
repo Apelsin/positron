@@ -24,10 +24,10 @@ namespace positron
             GL.Color4(State ? _Color : Color.SlateGray);
             Texture.Bind();
             VBO.Render();
-            if (Configuration.DrawBlueprints && BPVBO != null)
+            if (Configuration.DrawBlueprints /*&& BPVBO != null*/)
             {
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-                BPVBO.Render();
+                //BPVBO.Render();
             }
 		}
 	}

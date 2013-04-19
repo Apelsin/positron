@@ -83,7 +83,7 @@ namespace positron
 			protected int _FrameTime;
 			protected int _TextureRegionIndex;
 			protected VertexBuffer _VBO;
-			protected VertexBuffer _BPVBO;
+			//protected VertexBuffer _BPVBO;
 			protected double _TileX;
 			protected double _TileY;
 			public Color Color {
@@ -116,7 +116,7 @@ namespace positron
 				get { return _Texture.Regions == null ? _Texture.Height : _Texture.Regions [_TextureRegionIndex].SizeY; }
 			}
 			public VertexBuffer VBO { get { return _VBO; } }
-			public VertexBuffer BPVBO { get { return _BPVBO; } }
+			//public VertexBuffer BPVBO { get { return _BPVBO; } }
 			public SpriteFrame (Texture texture, int idx):
 				this(texture, idx, Color.White)
 			{
@@ -190,6 +190,8 @@ namespace positron
 		protected SpriteAnimation _AnimationDefault;
 		protected SpriteAnimation _AnimationCurrent;
 		protected SpriteAnimation _AnimationNext;
+
+		protected SpriteFrame _FrameStatic;
         /// <summary>
         /// The blueprint vertex buffer object
         /// </summary>
@@ -206,7 +208,7 @@ namespace positron
 			get { return _AnimationNext; }
 		}
 		public SpriteFrame FrameCurrent {
-			get { return _AnimationCurrent.Frames[_AnimationFrameIndex]; }
+			get { return _AnimationCurrent == null ? _FrameStatic : _AnimationCurrent.Frames[_AnimationFrameIndex]; }
 		}
 //		public bool Animate {
 //			get { return _FrameTimer != null && _FrameTimer.IsRunning; }
@@ -252,7 +254,7 @@ namespace positron
 		}
 
 		public VertexBuffer VBO { get { return FrameCurrent.VBO; } }
-		public VertexBuffer BPVBO { get { return FrameCurrent.BPVBO; } }
+		//public VertexBuffer BPVBO { get { return FrameCurrent.BPVBO; } }
 
 		#endregion
 		#endregion
@@ -286,13 +288,14 @@ namespace positron
 			_AnimationFrameIndex = 0;
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
+			_FrameStatic = _AnimationDefault.Frames[0];
 			_Position.X = x + FrameCurrent.SizeX * 0.5;
 			_Position.Y = y + FrameCurrent.SizeY * 0.5;
 		}
 		public SpriteBase CenterShift ()
 		{
-			_Position.X -= FrameCurrent.SizeX * 0.5;
-			_Position.Y -= FrameCurrent.SizeY * 0.5;
+			PositionX -= FrameCurrent.SizeX * 0.5;
+			PositionY -= FrameCurrent.SizeY * 0.5;
 			return this;
 		}
 		// TODO: rotation stuff here
@@ -321,15 +324,18 @@ namespace positron
             GL.Color4(_Color);
             Texture.Bind(); // Bind to (current) sprite texture
             VBO.Render(); // Render the vertex buffer object
-            if (Configuration.DrawBlueprints && BPVBO != null)
+            if (Configuration.DrawBlueprints /*&& BPVBO != null*/)
             {
                 GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
-				BPVBO.Render(); // Render blueprint objects
+				//BPVBO.Render(); // Render blueprint objects
+				if(_Blueprints != null)
+					foreach(IRenderable r in _Blueprints)
+						r.Render(0.0);
             }
         }
         public override void Build()
         {
-			// SpriteFrame handles Build();
+			// SpriteFrame handles Build() for frames
 		}
 		public virtual void Update (double time)
 		{

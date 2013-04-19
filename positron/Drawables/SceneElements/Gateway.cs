@@ -2,7 +2,7 @@ using System;
 
 namespace positron
 {
-	public class Gateway : SpriteObject, IInteractiveObject
+	public class Gateway : SpriteObject, IActuator
 	{
 		public event ActionEventHandler Action;
 		protected SharedState<bool> _State;

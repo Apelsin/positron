@@ -10,8 +10,36 @@ using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
+	#region EventArgs
+	public class RenderSetChangeEventArgs : EventArgs
+	{
+		public RenderSet From { get; set; }
+		public RenderSet To { get; set; }
+		public RenderSetChangeEventArgs(RenderSet from, RenderSet to)
+		{
+			From = from;
+			To = to;
+		}
+	}
+	public class SceneChangeEventArgs : EventArgs
+	{
+		public Scene From { get; set; }
+		public Scene To { get; set; }
+		public SceneChangeEventArgs(Scene from, Scene to)
+		{
+			From = from;
+			To = to;
+		}
+	}
+	#endregion
+	public delegate void SceneEntryEventHandler(object sender, SceneChangeEventArgs e);
+	public delegate void SceneExitEventHandler(object sender, SceneChangeEventArgs e);
 	public class Scene
 	{
+		#region Events
+		public event SceneEntryEventHandler SceneEntry;
+		public event SceneExitEventHandler SceneExit;
+		#endregion
 		#region State
 		#region Member Variables
 		protected string Name;
@@ -134,13 +162,31 @@ namespace positron
 			// This should contain everything AllRednerSetsInOrder would contain
 			// This is an optimization over using an enumerable
 			All = new RenderSet(this, Background, Rear, Stage, Tests, Front, HUD, HUDBlueprint);
+
+			SceneEntry += (sender, e) => 
+			{
+				foreach(RenderSet render_set in AllRenderSetsInOrder())
+				{
+					render_set.ForEach (element => {
+						if(element is IWorldObject)
+						{
+							IWorldObject w_o = (IWorldObject)element;
+							//Console.WriteLine("Rotation for {0} sprite with rotation {1}", w_o, w_o.Theta);
+						}
+					});
+				}
+			};
+
 		}
 		protected Scene ():
 			this("Scene", _WorldMain)
 		{
 			Name = GetType ().Name;
 		}
-		protected virtual void Initialize ()
+		protected virtual void InitializeConnections ()
+		{
+		}
+		protected virtual void InitializeScene ()
 		{
 			SetupHUD();
 		}
@@ -148,13 +194,13 @@ namespace positron
         {
             var p = new Vector3d(5.0, 5.0, 0.0);
             var s = new Vector3d(5.0, 12, 0.0);
-            FrameTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+			FrameTimeMeter = new HUDQuad(HUDBlueprint, p, s);
             FrameTimeMeter.Color = Color.DarkSlateBlue;
-            UpdateTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+			UpdateTimeMeter = new HUDQuad(HUDBlueprint, p, s);
             UpdateTimeMeter.Color = Color.DarkCyan;
-            RenderTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+			RenderTimeMeter = new HUDQuad(HUDBlueprint, p, s);
             RenderTimeMeter.Color = Color.DarkRed;
-            RenderDrawingMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+			RenderDrawingMeter = new HUDQuad(HUDBlueprint, p, s);
             RenderDrawingMeter.Color = Color.Red;
         }
         private void UpdateHUDStats()
@@ -307,55 +353,61 @@ namespace positron
 		{
 			if (current_scene == next_scene)
 				return;
-			// TODO: Make this better
-			// Get the enumerable for the render sets; these need to be in the same order!
-			IEnumerable<RenderSet> current_sets = current_scene.AllRenderSetsInOrder ();
-			IEnumerable<RenderSet> next_sets = next_scene.AllRenderSetsInOrder ();
-			IEnumerator<RenderSet> next_set_enum = next_sets.GetEnumerator ();
-			lock (Program.MainUpdateLock) {										// Don't even think about not locking this threaded monstrosity
-				foreach (RenderSet render_set in current_sets) {					// For each render set
-					if (!next_set_enum.MoveNext ())									// Advance enumerator; if passed end...
-						break;														// ...get the hell out of Dodge
-					
-					// Process this scene
-					for (int i = 0; i < render_set.Count;) {						// For each renderable in render set
-						var renderable = render_set [i];
-						if (renderable is ISceneObject) {							// If object also implements scene object
-							ISceneObject scene_object = (ISceneObject)renderable;	// Cast to scene object
-							if (scene_object is IWorldObject) {
-								IWorldObject world_object = (IWorldObject)scene_object;
-								// Have the object be enabled if it is preserved
-								world_object.Body.Enabled = world_object.Preserve;
+			SceneChangeEventArgs scea = new SceneChangeEventArgs(current_scene, next_scene);
+			if(next_scene.SceneEntry != null)
+				next_scene.SceneEntry(current_scene, scea);
+			if (current_scene != null) {
+				if (current_scene.SceneExit != null)
+					current_scene.SceneExit (next_scene, scea);
+				// TODO: Make this better
+				// Get the enumerable for the render sets; these need to be in the same order!
+				IEnumerable<RenderSet> current_sets = current_scene.AllRenderSetsInOrder ();
+				IEnumerable<RenderSet> next_sets = next_scene.AllRenderSetsInOrder ();
+				IEnumerator<RenderSet> next_set_enum = next_sets.GetEnumerator ();
+				lock (Program.MainUpdateLock) {										// Don't even think about not locking this threaded monstrosity
+					foreach (RenderSet render_set in current_sets) {					// For each render set
+						if (!next_set_enum.MoveNext ())									// Advance enumerator; if passed end...
+							break;														// ...get the hell out of Dodge
+						// Process this scene
+						for (int i = 0; i < render_set.Count;) {						// For each renderable in render set
+							var renderable = render_set [i];
+							if (renderable is ISceneObject) {							// If object also implements scene object
+								ISceneObject scene_object = (ISceneObject)renderable;	// Cast to scene object
+								if (scene_object is IWorldObject) {
+									IWorldObject world_object = (IWorldObject)scene_object;
+									// Have the object be enabled if it is preserved
+									world_object.Body.Enabled = world_object.Preserve;
+								}
+								if (scene_object.Preserve) { 							// If scene object is preserved
+									next_set_enum.Current.Add (renderable);				// Add in this object
+									render_set.RemoveAt (i);							// Remove from previous 
+									RenderSetChangeEventArgs rscea =
+										new RenderSetChangeEventArgs(render_set, next_set_enum.Current);
+									scene_object.SetChange (null, rscea);
+									continue;
+								}
 							}
-							if (scene_object.Preserve) { 							// If scene object is preserved
-								next_set_enum.Current.Add (renderable);				// Add in this object
-								render_set.RemoveAt (i);							// Remove from previous 
-								SetChangeEventArgs scea = new SetChangeEventArgs ();
-								scea.From = render_set;
-								scea.To = next_set_enum.Current;
-								scene_object.SetChange (null, scea);
-								continue;
-							}
+							i++;
 						}
-						i++;
-					}
 					
-					// Process next scene
-					foreach (IRenderable renderable in next_set_enum.Current) {
-						if (renderable is IWorldObject) {
-							IWorldObject world_object = (IWorldObject)renderable;
-							world_object.Body.Enabled = true;
+						// Process next scene
+						foreach (IRenderable renderable in next_set_enum.Current) {
+							if (renderable is IWorldObject) {
+								IWorldObject world_object = (IWorldObject)renderable;
+								world_object.Body.Enabled = true;
+							}
 						}
 					}
 				}
-			}
 			
-			next_scene._World = current_scene._World;				// World is -always- preserved
-			if (current_scene.FollowTarget.Preserve) {
-				next_scene.Follow (current_scene.FollowTarget, true);
-				//next_scene._ViewPosition = current_scene._ViewPosition;
+				next_scene._World = current_scene._World;				// World is -always- preserved
+				if (current_scene.FollowTarget != null && current_scene.FollowTarget.Preserve) {
+					next_scene.Follow (current_scene.FollowTarget, true);
+					//next_scene._ViewPosition = current_scene._ViewPosition;
+				}
+
 			}
-			current_scene = next_scene;								// Update the scene reference
+			current_scene = next_scene;	// Update the scene reference
 		}
 		/// <summary>
 		/// Instantiates and initializes one instnace
@@ -379,15 +431,12 @@ namespace positron
 		public static void InitializeAll()
 		{
 			foreach(Scene scene in Scenes.Values)
-				scene.Initialize();
+				scene.InitializeConnections();
+			foreach(Scene scene in Scenes.Values)
+				scene.InitializeScene();
 		}
 		#endregion
 		#endregion
-	}
-	public class SetChangeEventArgs : EventArgs
-	{
-		public RenderSet From { get; set; }
-		public RenderSet To { get; set; }
 	}
 }
 

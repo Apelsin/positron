@@ -4,8 +4,12 @@ using System.Drawing;
 
 using OpenTK;
 
-using FarseerPhysics.Dynamics;
+using FarseerPhysics.Collision;
 using FarseerPhysics.Common;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Dynamics.Contacts;
+using FarseerPhysics.Factories;
+
 
 namespace positron
 {
@@ -64,6 +68,17 @@ namespace positron
 					}
 				}
 			}
+		}
+//		public static Microsoft.Xna.Framework.Vector2 ContactNormalAbsolute(this Contact contact)
+//		{
+//			FarseerPhysics.Collision.Manifold manifold = new Manifold();
+//			FixedArray2<Microsoft.Xna.Framework.Vector2> points = new FixedArray2<Microsoft.Xna.Framework.Vector2 >();
+//			contact.GetWorldManifold(out manifold.LocalNormal, out points); // Oh God why
+//			return manifold.LocalNormal;
+//		}
+		public static float ConactNormalError(this Contact contact, Microsoft.Xna.Framework.Vector2 v2)
+		{
+			return Microsoft.Xna.Framework.Vector2.Distance(contact.Manifold.LocalNormal, v2);
 		}
 	}
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace positron
 {
-	public class Door : SpriteObject, IInteractiveObject
+	public class Door : SpriteObject, IActuator
 	{
 		public event ActionEventHandler Action;
 		protected Scene _NextScene;
@@ -37,7 +37,8 @@ namespace positron
 				Player player = (Player)sender;
 				if(_Destination != null)
 				{
-					player.Position = _Destination._Position;
+					// TODO: make this work
+					//player.Position = _Destination._Position + player.Position - Position;
 				}
 				Program.MainGame.ChangeScene(_Destination == null ? _NextScene == null ?  null : _NextScene : _Destination.RenderSet.Scene);
 			}

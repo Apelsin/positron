@@ -4,30 +4,33 @@ namespace positron
 {
 	public class SceneBasicBox : Scene
 	{
-		protected override void Initialize()
+		protected int PerimeterOffsetX = 0;
+		protected int PerimeterOffsetY = 0;
+		protected int PerimeterX = 18;
+		protected int PerimeterY = 8;
+		protected double TileSize = 32;
+		protected override void InitializeScene()
 		{
-			base.Initialize();
+			base.InitializeScene();
 
 			// Basic perimeter:
-			int perim_x = 18;
-			int perim_y = 8;
-			double x0 = -64;
-			double y0 = 0;
-			for (int i = 0; i < perim_x; i++)
+			double x0 = PerimeterOffsetX * TileSize;
+			double y0 = PerimeterOffsetY * TileSize;
+			for (int i = 0; i < PerimeterX; i++)
 			{
-				var block = new BunkerFloor(this, x0 + 32 * i, y0);
-				block = new BunkerFloor2(this, x0 + 32 * i, y0 - 128);
+				var block = new BunkerFloor(this, x0 + TileSize * i, y0);
+				block = new BunkerFloor2(this, x0 + TileSize * i, y0 - 4 * TileSize);
 			}
-			for (int i = 0; i <= perim_y; i++)
+			for (int i = 0; i <= PerimeterY; i++)
 			{
-				var block = new BunkerWall(this, x0 + 32 * perim_x, y0 + 32 * i);
+				var block = new BunkerWall(this, x0 + TileSize * PerimeterX, y0 + TileSize * i);
 				block.TileX = -1.0;
-				block = new BunkerWall(this, x0 - 16, y0 + 32 * (perim_y - i));
+				block = new BunkerWall(this, x0 - 0.5 * TileSize, y0 + TileSize * (PerimeterY - i));
 
 			}
-			for (int i = 0; i < perim_x; i++)
+			for (int i = 0; i < PerimeterX; i++)
 			{
-				var block = new SpriteObject(Stage, x0 + 32 * (perim_x - i - 1), y0 + 32 * perim_y, Texture.Get("sprite_tile_floor_atlas"));
+				var block = new SpriteObject(Stage, x0 + TileSize * (PerimeterX - i - 1), y0 + TileSize * PerimeterY, Texture.Get("sprite_tile_floor_atlas"));
 			}
 		}
 	}
