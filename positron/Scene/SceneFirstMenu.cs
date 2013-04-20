@@ -28,17 +28,20 @@ namespace positron
 		{
 			base.InitializeScene();
 			var texture = Texture.Get ("sprite_main_menu_buttons");
-			double btn_center_x = (ViewWidth - texture.Regions[0].SizeX) * 0.5;
-			double btn_center_y = (ViewHeight - texture.Regions[0].SizeY) * 0.5;
-			new UIButton(this, btn_center_x, btn_center_y + 32,
+			double x_center = (ViewWidth) * 0.5;
+			double y_center = (ViewHeight) * 0.5;
+			((UIButton) new UIButton(this, x_center, y_center + 32,
 			             new SpriteBase.SpriteFrame(texture, 4),
-			             new SpriteBase.SpriteFrame(texture, 2), UIGroup).Action += (sender, e) =>
+			             new SpriteBase.SpriteFrame(texture, 2), UIGroup).CenterShift()).Action += (sender, e) =>
 			{
 				Program.MainGame.CurrentScene = (Scene)Scene.Scenes[(string)Configuration.Get("SceneBeginning")];
 			};
-			new UIButton(this, btn_center_x, btn_center_y - 32,
+			((UIButton) new UIButton(this, x_center, y_center - 32,
 			             new SpriteBase.SpriteFrame(texture, 5),
-			             new SpriteBase.SpriteFrame(texture, 3), UIGroup);
+			                         new SpriteBase.SpriteFrame(texture, 3), UIGroup).CenterShift()).Action += (sender, e) =>
+			{
+				Program.MainGame.CurrentScene = (Scene)Scene.Scenes[(string)Configuration.Get("SceneBeginning")];
+			};
 		}
 	}
 }

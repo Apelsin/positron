@@ -25,10 +25,14 @@ namespace positron
 		{
 		}
 		public Door (RenderSet render_set, double x, double y, Scene next_scene):
+			this(render_set, x, y)
+		{
+			_NextScene = next_scene;
+		}
+		public Door (RenderSet render_set, double x, double y):
 			base(render_set, x, y, Texture.Get("sprite_doorway"))
 		{
 			_SpriteBody.CollisionCategories = FarseerPhysics.Dynamics.Category.None;
-			_NextScene = next_scene;
 		}
 		public void OnAction (object sender, ActionEventArgs e)
 		{

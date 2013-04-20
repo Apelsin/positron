@@ -59,6 +59,7 @@
     <Compile Include="Drawables\Drawable.cs" />
     <Compile Include="Drawables\Circle.cs" />
     <Compile Include="IColorable.cs" />
+    <Compile Include="Scene\SceneThree.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />

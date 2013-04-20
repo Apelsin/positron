@@ -289,8 +289,8 @@ namespace positron
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
 			_FrameStatic = _AnimationDefault.Frames[0];
-			_Position.X = x + FrameCurrent.SizeX * 0.5;
-			_Position.Y = y + FrameCurrent.SizeY * 0.5;
+			_Position.X = x + SizeX * 0.5;
+			_Position.Y = y + SizeY * 0.5;
 		}
 		public SpriteBase CenterShift ()
 		{

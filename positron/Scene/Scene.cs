@@ -183,7 +183,7 @@ namespace positron
 		{
 			Name = GetType ().Name;
 		}
-		protected virtual void InitializeConnections ()
+		protected virtual void InstantiateConnections ()
 		{
 		}
 		protected virtual void InitializeScene ()
@@ -329,11 +329,10 @@ namespace positron
 			if (Configuration.DrawBlueprints) {
 				lock(RenderLock)
 				{
-					WorldBlueprint.Add (
-						new BlueprintLine (
-						new Vector3d (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0),
-						new Vector3d (point2.X * Configuration.MeterInPixels, point2.Y * Configuration.MeterInPixels, 0.0),
-							WorldBlueprint));
+					new BlueprintLine (
+					new Vector3d (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0),
+					new Vector3d (point2.X * Configuration.MeterInPixels, point2.Y * Configuration.MeterInPixels, 0.0),
+						WorldBlueprint);
 				}
 			}
 		}
@@ -431,7 +430,7 @@ namespace positron
 		public static void InitializeAll()
 		{
 			foreach(Scene scene in Scenes.Values)
-				scene.InitializeConnections();
+				scene.InstantiateConnections();
 			foreach(Scene scene in Scenes.Values)
 				scene.InitializeScene();
 		}

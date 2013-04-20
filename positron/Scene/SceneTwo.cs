@@ -21,30 +21,36 @@ namespace positron
 		protected SceneTwo ():
 			base()
 		{
-			Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
-			_DoorToPreviousScene = new Door(Rear, 512 - 68, 32, prev_scene);
 		}
-		protected override void InitializeConnections()
+		protected override void InstantiateConnections()
 		{
-			//Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
-			//_DoorToPreviousScene = prev_scene.DoorToPreviousScene;
+			_DoorToPreviousScene = new Door(Rear, 512 - 68, 0);
+			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 7 * TileSize, TileSize);
 		}
 		protected override void InitializeScene ()
 		{
-			// Define these before calling the base class initializer
+			// Assign base class variables here, before calling the base class initializer
 			PerimeterOffsetX = -3;
 			PerimeterOffsetY = -1;
 			PerimeterX = 32;
 			PerimeterY = 16;
-			
-			// Store width and height in local variables
+
+			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;
 			int h_i = (int)ViewHeight;
-			
+
+			// X and Y positioner variables
 			double xp = TileSize * PerimeterOffsetX;
 			double yp = TileSize * PerimeterOffsetY;
 			
 			yp += TileSize;
+
+			// Set up doors:
+			Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
+			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
+			Scene next_scene = (Scene)Scene.Scenes["SceneThree"];
+			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
+			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
 
 			// Setup background tiles
 			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg2_atlas"));
@@ -108,6 +114,7 @@ namespace positron
 				new FloorTile (Stage, xp, yp + TileSize);
 			}
 
+			// Call the base class initializer
 			base.InitializeScene ();
 		}
 	}

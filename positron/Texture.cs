@@ -34,7 +34,7 @@ namespace positron
 			High = h;
 		}
         public Vector2d Size { get { return High - Low; } }
-		public double SizeX { get { return High.X- Low.X; } }
+		public double SizeX { get { return High.X - Low.X; } }
 		public double SizeY { get { return High.Y -  Low.Y; } }
     }
 	public class Texture
@@ -174,6 +174,10 @@ namespace positron
 			var bg2 = LoadTexture("sprite_tile_bg2_atlas",		"background",   "sprite_tile_bg2_atlas.png");
 			bg2.Regions = new TextureRegion[32];
 			bg2.Regions.BuildTiledRegions(4, 32, 32);
+
+			var bg3 = LoadTexture("sprite_tile_bg3_atlas",		"background",   "sprite_tile_bg3_atlas.png");
+			bg3.Regions = new TextureRegion[32];
+			bg3.Regions.BuildTiledRegions(4, 32, 32);
 
 			var floor = LoadTexture("sprite_tile_floor_atlas",		"background",   "sprite_tile_floor_atlas.png");
 			floor.Regions = new TextureRegion[3];

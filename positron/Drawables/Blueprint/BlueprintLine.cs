@@ -20,6 +20,7 @@ namespace positron
 		public BlueprintLine (Vector3d a, Vector3d b, RenderSet render_set, int millis)
 		{
 			RenderSet = render_set;
+			RenderSet.Add(this);
 			Lifespan = millis;
 			A = a;
 			B = b;
