@@ -190,7 +190,13 @@ namespace positron
 			Keyboard.KeyDown += delegate(object sender, KeyboardKeyEventArgs e)
 			{
 				if (e.Key == Key.Escape)
+				{
 					this.Exit();
+				}
+				else if(e.Key == Key.B)
+				{
+					Configuration.DrawBlueprints ^= true;
+				}
 				IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
 				bool key_press = true;
 				lock(Program.MainUpdateLock)

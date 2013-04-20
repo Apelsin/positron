@@ -18,28 +18,47 @@ namespace positron
 {
     public class SceneThree : SceneBasicBox
     {
-        //		protected SceneThree ():
-        //			base()
-        //		{
-        //		}
-        protected override void Initialize()
+		protected SceneThree ():
+			base()
+		{
+			Scene prev_scene = (Scene)Scene.Scenes["SceneTwo"];
+			_DoorToPreviousScene = new Door(Rear, 512 - 68, 0, prev_scene);
+		}
+		protected override void InstantiateConnections()
+		{
+			//Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
+			//_DoorToPreviousScene = prev_scene.DoorToPreviousScene;
+		}
+        protected override void InitializeScene()
         {
-            base.Initialize();
+			// Define these before calling the base class initializer
+			PerimeterOffsetX = 5;
+			PerimeterOffsetY = 0;
 
-            // Store width and height in local variables
-            int w_i = (int)ViewWidth;
-            int h_i = (int)ViewHeight;
+			// Store width and height in local variables for easy access
+			int w_i = (int)ViewWidth;
+			int h_i = (int)ViewHeight;
+			
+			// X and Y positioner variables
+			double xp = TileSize * PerimeterOffsetX;
+			double yp = TileSize * PerimeterOffsetY;
+			
+			yp += TileSize;
+			
+			// Set up doors:
+			Scene prev_scene = (Scene)Scene.Scenes["SceneTwo"];
+			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
+//			Scene next_scene = (Scene)Scene.Scenes["SceneThree"];
+//			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
+//			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
 
             // Setup background tiles
-            var BackgroundTiles = new TileMap(Background, 48, 24, Texture.Get("sprite_tile_bg2_atlas"));
+            var BackgroundTiles = new TileMap(Background, 48, 24, Texture.Get("sprite_tile_bg3_atlas"));
             BackgroundTiles.PositionX = -320;
             BackgroundTiles.PositionY = -256;
             BackgroundTiles.PositionZ = 1.0;
             BackgroundTiles.RandomMap();
             BackgroundTiles.Build();
-
-            Scene prev_scene = (Scene)Scene.Scenes["SceneTwo"];
-            _DoorToPreviousScene = new Door(Rear, 512 - 68, 32, prev_scene);
 
             // Get cross-scene variables
             Scene previous_scene = (Scene)Scene.Scenes["SceneTwo"];
@@ -52,6 +71,8 @@ namespace positron
                 spidey.Body.BodyType = BodyType.Dynamic;
             }
 
+			// Call the base class initializer
+			base.InitializeScene();
         }
     }
 }

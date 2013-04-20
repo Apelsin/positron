@@ -72,10 +72,8 @@
     <Compile Include="Drawables\BooleanIndicator.cs" />
     <Compile Include="Drawables\SpriteBase.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintLine.cs" />
-    <Compile Include="Drawables\Blueprint\BlueprintQuad.cs" />
     <Compile Include="VertexBuffer.cs" />
     <Compile Include="Drawables\ISceneObject.cs" />
-    <Compile Include="IInteractiveObject.cs" />
     <Compile Include="Drawables\HUD\HealthMeter.cs" />
     <Compile Include="PositronGame.cs" />
     <Compile Include="Drawables\SceneElements\BunkerFloor.cs" />
@@ -95,6 +93,12 @@
     <Compile Include="Drawables\SceneElements\Spidey.cs" />
     <Compile Include="Drawables\TileMap.cs" />
     <Compile Include="Drawables\Dialog.cs" />
+    <Compile Include="Scene\SceneFirstMenu.cs" />
+    <Compile Include="Drawables\HUD\UIButton.cs" />
+    <Compile Include="Drawables\HUD\UIElementGroup.cs" />
+    <Compile Include="Drawables\HUD\IUIElement.cs" />
+    <Compile Include="IActuator.cs" />
+    <Compile Include="Drawables\Blueprint\BlueprintLineLoop.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

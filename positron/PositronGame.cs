@@ -44,11 +44,19 @@ namespace positron
 		#region Static Variables
 		#endregion
 		#region Member Accessors
-		public Scene CurrentScene { get { return _CurrentScene; } }
+		public Scene CurrentScene {
+			get { return _CurrentScene; }
+			set { Scene.ChangeScene (ref _CurrentScene, value); }
+		}
 		public World MainWorld { get { return _MainWorld; } }
 		// TODO: ensure thread safety here:
 		public IInputAccepter[] InputAccepterGroup {
-			get {  return (IInputAccepter[])InputAccepterGroups[InputAccepterGroupIdx]; }
+			get { 
+				if( InputAccepterGroupIdx < InputAccepterGroups.Count)
+					return (IInputAccepter[])InputAccepterGroups[InputAccepterGroupIdx];
+				else
+					return new IInputAccepter[] { };
+			}
 		}
 		public Object InputAccepterGroupsLock {
 			get { return _InputAccepterGroupsLock; }
@@ -69,19 +77,19 @@ namespace positron
 		{
 			// TODO: world objects need to be pending initialization before the world is controlled by the scene
 			FarseerPhysics.Settings.VelocityIterations = 1;
-
-			Scene.Instantiate(); // Instantiate one of each of the scenes defined in this entire assembly
-			_CurrentScene = (Scene)Scene.Scenes["SceneOne"];
-			Player1 = new Player (_CurrentScene.Stage, Texture.Get ("sprite_player"));
-			Scene.InitializeAll();
 			InputAccepterGroups = new OrderedDictionary();
-			InputAccepterGroups.Add("Player1", new IInputAccepter[]{ Player1 });
+			Scene.Instantiate(); // Instantiate one of each of the scenes defined in this entire assembly
+			CurrentScene = (Scene)Scene.Scenes["SceneFirstMenu"];
+			Scene.InitializeAll();
 		}
 		public void SetInputAccepters (string name, params IInputAccepter[] input_accepters)
 		{
 			lock (_InputAccepterGroupsLock) {
-				InputAccepterGroups.Add (name, input_accepters);
-				InputAccepterGroupIdx = InputAccepterGroups.Count - 1;
+				if(!InputAccepterGroups.Contains(name))
+				{
+					InputAccepterGroups.Add (name, input_accepters);
+					InputAccepterGroupIdx = InputAccepterGroups.Count - 1;
+				}
 			}
 		}
 		public void MixAddInputAccepters (string name, params IInputAccepter[] input_accepters)

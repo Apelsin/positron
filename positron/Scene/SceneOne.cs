@@ -18,94 +18,106 @@ namespace positron
 {
 	public class SceneOne : SceneBasicBox
 	{
-//		protected SceneOne ():
-//			base()
-//		{
-//
-//		}
-		protected override void Initialize ()
+		protected SceneOne ():
+			base()
 		{
-			base.Initialize();
+			//UIGroup = new UIElementGroup();
 
-			// Store width and height in local variables
+		}
+		protected override void InstantiateConnections ()
+		{
+			_DoorToNextScene = new Door(Rear, 512 - 68, 0);
+		}
+		protected override void InitializeScene ()
+		{
+			// Assign base class variables here, before calling the base class initializer
+			PerimeterOffsetX = -1;
+			PerimeterOffsetY = -1;
+
+			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;
 			int h_i = (int)ViewHeight;
 
-			// Setup background tiles
-			var BackgroundTiles = new TileMap(Background, 48, 24, Texture.Get("sprite_tile_bg_atlas"));
-			BackgroundTiles.PositionX = -320;
-			BackgroundTiles.PositionY = -256;
-			BackgroundTiles.PositionZ = 1.0;
-			BackgroundTiles.RandomMap();
-			BackgroundTiles.Build();
+			// X and Y positioner variables
+			double xp = TileSize * PerimeterOffsetX;
+			double yp = TileSize * PerimeterOffsetY;
 
+			// Set up doors:
+			//Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
+			//_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 			Scene next_scene = (Scene)Scene.Scenes["SceneTwo"];
-			_DoorToNextScene = new Door(Rear, 512 - 68, 32, next_scene);
+			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
+			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
 
-			// Get cross-scene variables
-			Player player_1 = Program.MainGame.Player1;
-			
-			// Set up Player 1
-			Vector3d q = new Vector3d (-48, 64, 0.0);
-			Program.MainGame.Player1.Position += q;
-			Follow(player_1, true);
-			
-			var health_meter = new HealthMeter(HUD, 64, h_i - 64, player_1);
-			health_meter.Preserve = true;
+			yp += TileSize;
 
-			double floor_y = 32.0;
-			double floor_sw_y = -4.0;
+			// Set up background tiles
+			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg_atlas"));
+			BackgroundTiles.PositionX = xp - 8 * TileSize;
+			BackgroundTiles.PositionY = yp - 4 * TileSize;
+			BackgroundTiles.PositionZ = 1.0;
+			BackgroundTiles.RandomMap ();
+			BackgroundTiles.Build ();
+
+			double floor_sw_dy = -4.0;
 
 			// Stage elements
-			new FloorTile(Rear, 0, 32 * 1);
-			new FloorTile(Rear, 32, 32 * 0.5);
+			var ft0 = new FloorTile (Rear, xp + 0, yp);
+			var ft1 = new FloorTile (Rear, xp + TileSize, yp - TileSize * 0.5);
 
-			var gw1 = new Gateway(Front, 32 * 4, floor_y, false);
-			var gw2 = new Gateway(Front, 32 * 10, floor_y, false);
+			// Control key indicators (info graphics)
+			var a_infogfx = new SpriteBase (Rear, ft1.PositionX, ft1.PositionY + TileSize, Texture.Get ("sprite_infogfx_key_a"));
+			var d_infogfx = new SpriteBase (Rear, a_infogfx.PositionX + TileSize, a_infogfx.PositionY, Texture.Get ("sprite_infogfx_key_d")).CenterShift ();
 
-			var fs00 = new FloorSwitch(Front, 32 * 3, floor_y + floor_sw_y, (sender, e) => {
+			// Gateways
+			var gw1 = new Gateway (Front, xp + TileSize * 4, yp, false);
+			var gw2 = new Gateway (Front, xp + TileSize * 10, yp, false);
+
+			var fs00 = new FloorSwitch (Front, xp + TileSize * 3, yp + floor_sw_dy, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
-				gw1.OnAction(e.Self, new ActionEventArgs(bstate, gw1));
+				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
-			} );
-			var fs01 = new FloorSwitch(Front, 32 * 5, floor_y + floor_sw_y, (sender, e) => {
+			});
+			var fs01 = new FloorSwitch (Front, xp + TileSize * 5, yp + floor_sw_dy, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
-				gw1.OnAction(e.Self, new ActionEventArgs(bstate, gw1));
+				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs00);
 
-			var fs10 = new FloorSwitch(Front, 32 * 7, floor_y + floor_sw_y, (sender, e) => {
+			var fs10 = new FloorSwitch (Front, xp + TileSize * 7, yp + floor_sw_dy, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
-				gw2.OnAction(e.Self, new ActionEventArgs(bstate, gw2));
+				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, 0.2);
-			var fs11 = new FloorSwitch(Front, 32 * 9 + 14, floor_y + floor_sw_y + 32 * 3, (sender, e) => {
+
+			var fs11 = new FloorSwitch (Front, xp + TileSize * 9 + 14, yp + floor_sw_dy + TileSize * 3, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
-				gw2.OnAction(e.Self, new ActionEventArgs(bstate, gw2));
+				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs10, 3.0);
+
+			var space_infogfx = new SpriteBase (Rear, xp + fs11.PositionX - 128, yp + fs10.PositionY, Texture.Get ("sprite_infogfx_key_spacebar"));
+
 			fs11.Theta = Math.PI * 0.5;
-			var fs12 = new FloorSwitch(Front, 32 * 12, floor_y + floor_sw_y, (sender, e) => {
+			var fs12 = new FloorSwitch (Front, xp + TileSize * 12, yp + floor_sw_dy, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
-				gw2.OnAction(e.Self, new ActionEventArgs(bstate, gw2));
+				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs11);
-            
-			new FloorTile(Rear, 32 * 4, 32 * 3 + 8);
-			new FloorTile(Rear, 32 * 4, 32 * 4 + 8);
-			new FloorTile(Rear, 32 * 4, 32 * 5 + 8);
-			new FloorTile(Rear, 32 * 4, 32 * 6 + 8);
-			new FloorTile(Rear, 32 * 4, 32 * 7 + 8);
 
-			new FloorTile(Rear, 32 * 10, 32 * 3 + 8);
-			new FloorTile(Rear, 32 * 10, 32 * 4 + 8);
-			new FloorTile(Rear, 32 * 10, 32 * 5 + 8);
-			new FloorTile(Rear, 32 * 10, 32 * 6 + 8);
-			new FloorTile(Rear, 32 * 10, 32 * 7 + 8);
-            
+			// Walls above gateways
+			for (int i = 0; i < 5; i++) {
+				new FloorTile (Rear, gw1.CornerX, gw1.CornerY + (2 + i) * TileSize + 8);
+				new FloorTile (Rear, gw2.CornerX, gw2.CornerY + (2 + i) * TileSize + 8);
+			}
+			
 			//var TestDialog = new Dialog(HUD, "Test", null);
 			//TestDialog.RenderSet = HUD;
 			//TestDialog.PauseTime = 1.0f;
+
+			// Call the base class initializer
+			base.InitializeScene ();
+
 		}
 	}
 }

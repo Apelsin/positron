@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -53,6 +54,18 @@ namespace positron
 		public override double PositionY {
 			get { return (double)Body.Position.Y *  Configuration.MeterInPixels; }
 			set { Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)(value /  Configuration.MeterInPixels)); }
+		}
+		public Vector3d Corner {
+			get { return PositionWorld * Configuration.MeterInPixels - new Vector3d(0.5 * SizeX, 0.5 * SizeY, 0.0); }
+			set { PositionWorld = (value + new Vector3d(0.5 * SizeX, 0.5 * SizeY, 0.0)) / Configuration.MeterInPixels; }
+		}
+		public double CornerX {
+			get { return (double)Body.Position.X * Configuration.MeterInPixels - 0.5 * SizeX; }
+			set { Body.Position = new Microsoft.Xna.Framework.Vector2((float)((value + 0.5 * SizeX) / Configuration.MeterInPixels), Body.Position.Y); }
+		}
+		public double CornerY {
+			get { return (double)Body.Position.Y * Configuration.MeterInPixels - 0.5 * SizeY; }
+			set { Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)((value + 0.5 * SizeY) /  Configuration.MeterInPixels)); }
 		}
 		public Vector3d VelocityWorld {
 			get {
@@ -167,11 +180,38 @@ namespace positron
 		}
 		public override void Update (double time)
 		{
+			// HACK: Unf*ckulate rotation
 			base.Update(time);
 		}
 		public virtual void ConnectBody ()
 		{
 			Body.UserData = this;
+			// Set up the blueprint from the vertices of he body here
+			_Blueprints = new List<IRenderable>();
+			for (int i = 0; i < Body.FixtureList.Count; i++) {
+				Fixture fixture = Body.FixtureList[i];
+				if(fixture.ShapeType == FarseerPhysics.Collision.Shapes.ShapeType.Polygon)
+				{
+					var poly_shape = (FarseerPhysics.Collision.Shapes.PolygonShape)fixture.Shape;
+					Vector3d[] verts = new Vector3d[poly_shape.Vertices.Count];
+					for(int j = 0; j < poly_shape.Vertices.Count; j++)
+						verts[j] = new Vector3d(
+							(poly_shape.Vertices[j].X) * Configuration.MeterInPixels,
+							(poly_shape.Vertices[j].Y) * Configuration.MeterInPixels, 0.0);
+					_Blueprints.Add (new BlueprintLineLoop(this, 0, verts));
+				}
+				else if(fixture.ShapeType == FarseerPhysics.Collision.Shapes.ShapeType.Edge)
+				{
+					var poly_shape = (FarseerPhysics.Collision.Shapes.EdgeShape)fixture.Shape;
+					var p0 = new Vector3d(
+						(poly_shape.Vertex1.X) * Configuration.MeterInPixels,
+						(poly_shape.Vertex1.Y) * Configuration.MeterInPixels, 0.0);
+					var p1 = new Vector3d(
+						(poly_shape.Vertex2.X) * Configuration.MeterInPixels,
+						(poly_shape.Vertex2.Y) * Configuration.MeterInPixels, 0.0);
+					_Blueprints.Add (new BlueprintLineLoop(this, 0, p0, p1));
+				}
+			}
 		}
 		public virtual void Derez()
 		{

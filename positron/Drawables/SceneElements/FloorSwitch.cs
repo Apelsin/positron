@@ -5,9 +5,12 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 
+using OpenTK.Graphics.OpenGL;
+using OpenTK;
+
 namespace positron
 {
-	public class FloorSwitch : SpriteObject, IInteractiveObject
+	public class FloorSwitch : SpriteObject, IActuator
 	{
 		public enum SwitchState
 		{
@@ -20,6 +23,8 @@ namespace positron
 		protected SharedState<double> _LatchExpiration;
 		protected bool _LastAffected = false;
 		protected double _LatchTime;
+		protected Vector2 HalfWH;
+
 		//protected object _LastSender;
 		protected Stopwatch _LatchTimer;
 		public double LatchTime { get { return _LatchTime; } set { _LatchTime = value; } }
@@ -73,7 +78,8 @@ namespace positron
 			w = (float)(_Scale.X * size.X / Configuration.MeterInPixels);
 			h = (float)(_Scale.Y * size.Y / Configuration.MeterInPixels);
 			h *= 0.5f; // Floor switch
-			var half_w_h = new Microsoft.Xna.Framework.Vector2 (w * 0.5f, h * 0.5f);
+			HalfWH = new Vector2 (w * 0.5f, h * 0.5f); // Please kill me
+			var half_w_h = new Microsoft.Xna.Framework.Vector2(HalfWH.X, HalfWH.Y);
 			var msv2 = new Microsoft.Xna.Framework.Vector2 (
 				(float)(_Position.X / Configuration.MeterInPixels),
 				(float)(_Position.Y / Configuration.MeterInPixels));
@@ -84,10 +90,10 @@ namespace positron
 			_SpriteBody.Friction = 0.5f;
 			_SpriteBody.OnCollision += HandleOnCollision;
 			_SpriteBody.OnSeparation += HandleOnSeparation;
-			
+
 			// HACK: Only enable bodies for which the object is in the current scene
 			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
-			
+
 			ConnectBody ();
 		}
 
@@ -96,23 +102,60 @@ namespace positron
 			object sender = fixtureB.Body.UserData;
 			if(sender == Program.MainGame.Player1)
 			{
-				// Start at 6 o'clock
-				double tolerance = 0.3;
-				double sin = -Math.Cos (Theta);
-				double cos = Math.Sin (Theta);
-				_LastAffected = Math.Abs(contact.Manifold.LocalNormal.Y - sin) < tolerance &&
-						Math.Abs(contact.Manifold.LocalNormal.X - cos) < tolerance;
-				if(_LastAffected)
-					OnAction(sender, SwitchState.Closed);
+				// Using the contact manifold normal has proven to be
+				// a huge trouble due to unexplained bugginess when
+				// enabling/disabling the body in the world
+				// TL;DR ray cast FTW
+
+				Vector2 p0, p1, c0, c1;
+				float pixel = 1.0f / (float)Configuration.MeterInPixels;
+				float pixel2 = 5.0f * pixel;
+				// Top edge
+				p0 = HalfWH;
+				p0.X -= pixel;
+				p0.Y += pixel; // Upward offset
+				p1 = p0;
+				p1.X *= -1.0f;
+				c0 = new Vector2(0.0f, HalfWH.Y - pixel2);
+				c1 = new Vector2(0.0f, HalfWH.Y + pixel2);
+
+				// Do some math (probably overkill)
+				var q = Quaternion.FromAxisAngle(Vector3.UnitZ, (float)Theta);
+				p0 = Vector2.Transform(p0, q);
+				p1 = Vector2.Transform(p1, q);
+				c0 = Vector2.Transform(c0, q);
+				c1 = Vector2.Transform(c1, q);
+
+				var p0_xna = new Microsoft.Xna.Framework.Vector2(p0.X + Body.Position.X, p0.Y + Body.Position.Y);
+				var p1_xna = new Microsoft.Xna.Framework.Vector2(p1.X + Body.Position.X, p1.Y + Body.Position.Y);
+				var c0_xna = new Microsoft.Xna.Framework.Vector2(c0.X + Body.Position.X, c0.Y + Body.Position.Y);
+				var c1_xna = new Microsoft.Xna.Framework.Vector2(c1.X + Body.Position.X, c1.Y + Body.Position.Y);
+
+				RayCastCallback callback = (fixture, point, normal, fraction) => {
+					if(!_LastAffected)
+					{
+						OnAction(sender, SwitchState.Closed);
+						_LastAffected = true;
+					}
+					return 0;
+				};
+				//Console.WriteLine ("p0_xna: {0}", p0_xna);
+				//Console.WriteLine ("p1_xna: {0}", p1_xna);
+				_RenderSet.Scene.RayCast(callback, p0_xna, p1_xna);
+				_RenderSet.Scene.RayCast(callback, p1_xna, p0_xna);
+				_RenderSet.Scene.RayCast(callback, c0_xna, c1_xna);
+		
 			}
 			return true;
 		}
+
 		protected void HandleOnSeparation (Fixture fixtureA, Fixture fixtureB)
 		{
 			if(fixtureB.Body.UserData == Program.MainGame.Player1)
 			{
 				if(_LastAffected)
 				{
+					_LastAffected = false;
 					OnAction(fixtureB.Body.UserData, SwitchState.Latched);
 				}
 			}
