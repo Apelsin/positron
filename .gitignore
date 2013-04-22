@@ -94,3 +94,9 @@ Thumbs.db
 
 # Folder config file
 Desktop.ini
+
+###########################
+## Mono / other platforms
+###########################
+.DS_Store
+*.userprefs
