@@ -56,7 +56,7 @@ namespace positron
 			_MetersInPixels = 96.0;
 			_ForceDueToGravity = -9.8;
 			_KeyPressTimeTolerance = 0.1;
-			_FrameRateCap = 59.5;
+			_FrameRateCap = 29.5;
 			_ThreadSleepTimeStep = 1;
 			_MaxWorldTimeStep = 0.04f;
 			_AdaptiveTimeStep = false;

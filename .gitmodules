@@ -4,3 +4,6 @@
 [submodule "Farseer-Physics"]
 	path = Farseer-Physics
 	url = https://github.com/d-snp/Farseer-Physics
+[submodule "psdplugin"]
+	path = psdplugin
+	url = https://git01.codeplex.com/forks/apelsin/psdplugin

@@ -60,7 +60,6 @@
     <Compile Include="Drawables\Circle.cs" />
     <Compile Include="IColorable.cs" />
     <Compile Include="Scene\SceneThree.cs" />
-    <Compile Include="Texture.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="Drawables\SpriteObject.cs" />
@@ -99,6 +98,11 @@
     <Compile Include="Drawables\HUD\IUIElement.cs" />
     <Compile Include="IActuator.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintLineLoop.cs" />
+    <Compile Include="Asset Management\Texture.cs" />
+    <Compile Include="Asset Management\PsdLoader.cs" />
+    <Compile Include="Asset Management\PsdSlicesHeader.cs" />
+    <Compile Include="Utility.cs" />
+    <Compile Include="Drawables\SceneElements\PsdSpriteTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
@@ -109,9 +113,16 @@
       <Project>{A4610E4C-DD34-428B-BABB-779CA0B5993A}</Project>
       <Name>Farseer Physics</Name>
     </ProjectReference>
+    <ProjectReference Include="..\psdplugin\PsdFile\PsdFile.csproj">
+      <Project>{8AE43567-4988-4E3E-84A4-8258167EBDEA}</Project>
+      <Name>PsdFile</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Asset Management\" />
+  </ItemGroup>
 </Project>

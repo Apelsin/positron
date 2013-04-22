@@ -73,6 +73,9 @@ namespace positron
 			var gw1 = new Gateway (Front, xp + TileSize * 4, yp, false);
 			var gw2 = new Gateway (Front, xp + TileSize * 10, yp, false);
 
+			// SPRITE TEST:
+			var test = new PsdSpriteTest(Stage, xp + TileSize * 6, yp);
+
 			var fs00 = new FloorSwitch (Front, xp + TileSize * 3, yp + floor_sw_dy, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
