@@ -53,6 +53,7 @@ namespace positron
 		protected int _Width;
 		protected int _Height;
 		public TextureRegion[] Regions;
+		protected int _DefaultRegionIndex = 0;
 		#endregion
 		#region Static Variables
 		private static Texture _DefaultTexture;
@@ -63,11 +64,16 @@ namespace positron
 		public String Label { get { return Label; } }
 		public int Width { get { return _Width; } }
 		public int Height { get { return _Height; } }
-#endregion
+		public int DefaultRegionIndex {
+			get { return _DefaultRegionIndex; }
+			set { _DefaultRegionIndex = value; }
+		}
+		public TextureRegion DefaultRegion { get { return Regions[_DefaultRegionIndex]; } }
+		#endregion
 		#region Static Accessors
 		public static Texture DefaultTexture { get { return _DefaultTexture; } }
-#endregion
-#endregion
+		#endregion
+		#endregion
 		#region Behavior
 		#region Member
 		private Texture(string label, int id, int w, int h)
@@ -97,7 +103,12 @@ namespace positron
 			var gateway = LoadTexture ("sprite_gateway",	 		"scene_element",	"sprite_gateway.png");
 			gateway.Regions = new TextureRegion[4];
 			gateway.Regions.BuildTiledRegions(4, 32, 72);
-			
+
+			var extender_platform = PsdLoader.LoadSpriteSheet("sprite_extender_platform", "scene_element", "sprite_extender_platform.psd");
+
+			// Enemies
+			var robot_1 = PsdLoader.LoadSpriteSheet("sprite_robot_1", "baddie", "sprite_robot_1.psd");
+
 			// Props
 			LoadTexture ("sprite_metal_ball",		"prop",				"sprite_metal_ball.png");
 			
@@ -114,7 +125,7 @@ namespace positron
 			
 			var bunker_wall = LoadTexture("sprite_bunker_wall",		"scene_element",   "sprite_bunker_wall.png");
 			bunker_wall.Regions = new TextureRegion[4];
-			bunker_wall.Regions.BuildTiledRegions(16, 16, 32);
+			bunker_wall.Regions.BuildTiledRegions(1, 16, 32);
 			
 			// Character
 			var character = LoadTexture ("sprite_player", "character", "sprite_protagonist.png");

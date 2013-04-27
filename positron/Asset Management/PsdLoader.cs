@@ -38,7 +38,7 @@ namespace positron
 			var layer = psdFile.Layers[0];
 			Bitmap bmp = new Bitmap(psdFile.ColumnCount, psdFile.RowCount);
 			using (Graphics gfx = Graphics.FromImage(bmp)) {
-				gfx.Clear (Color.Magenta);
+				gfx.Clear (Color.Transparent);
 				var bmp_data = bmp.LockBits(layer.Rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
 				int pixel_size = 4 * sizeof(byte);
 				int idx = 0;
@@ -58,10 +58,10 @@ namespace positron
 				bmp.UnlockBits(bmp_data);
 			}
 			var texture = Texture.LoadTexture(title, bmp);
-			texture.Regions = psdFile.SlicesToTextureRegions ();
+			psdFile.SlicesToTextureRegionInfo (ref texture);
 			return texture;
 		}
-		public static TextureRegion[] SlicesToTextureRegions (this PsdFile psd)
+		public static void SlicesToTextureRegionInfo (this PsdFile psd, ref Texture texture)
 		{
 			RawImageResource slices_resource = (RawImageResource)psd.ImageResources.Find (resource => resource.ID == ResourceID.Slices);
 
@@ -128,9 +128,11 @@ namespace positron
 						new TextureRegion(slice.Name, // Vertical axis (Y) is flipped
 					                  new Vector2d(slice.Left, psd.RowCount - slice.Bottom ),
 					                  new Vector2d(slice.Right, psd.RowCount - slice.Top)));
+					if(slice.Target.ToLower() == "default")
+						texture.DefaultRegionIndex = i;
 				}
 			}
-			return tr.ToArray();
+			texture.Regions = tr.ToArray();
 		}
 	}
 }

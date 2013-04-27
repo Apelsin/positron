@@ -45,7 +45,7 @@ namespace positron
 			// Set up doors:
 			//Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
 			//_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
-			Scene next_scene = (Scene)Scene.Scenes["SceneTwo"];
+			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneTwo"];
 			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
 			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
 
@@ -53,7 +53,7 @@ namespace positron
 
 			// Set up background tiles
 			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg_atlas"));
-			BackgroundTiles.PositionX = xp - 8 * TileSize;
+			BackgroundTiles.PositionX = xp - 10 * TileSize;
 			BackgroundTiles.PositionY = yp - 4 * TileSize;
 			BackgroundTiles.PositionZ = 1.0;
 			BackgroundTiles.RandomMap ();
@@ -66,15 +66,12 @@ namespace positron
 			var ft1 = new FloorTile (Rear, xp + TileSize, yp - TileSize * 0.5);
 
 			// Control key indicators (info graphics)
-			var a_infogfx = new SpriteBase (Rear, ft1.PositionX, ft1.PositionY + TileSize, Texture.Get ("sprite_infogfx_key_a"));
-			var d_infogfx = new SpriteBase (Rear, a_infogfx.PositionX + TileSize, a_infogfx.PositionY, Texture.Get ("sprite_infogfx_key_d")).CenterShift ();
+			var a_infogfx = new SpriteBase (Rear, ft1.CornerX, ft1.CornerY + TileSize, Texture.Get ("sprite_infogfx_key_a"));
+			var d_infogfx = new SpriteBase (Rear, a_infogfx.PositionX + TileSize, a_infogfx.PositionY, Texture.Get ("sprite_infogfx_key_d"));
 
 			// Gateways
 			var gw1 = new Gateway (Front, xp + TileSize * 4, yp, false);
 			var gw2 = new Gateway (Front, xp + TileSize * 10, yp, false);
-
-			// SPRITE TEST:
-			var test = new PsdSpriteTest(Stage, xp + TileSize * 6, yp);
 
 			var fs00 = new FloorSwitch (Front, xp + TileSize * 3, yp + floor_sw_dy, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;

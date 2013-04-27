@@ -42,6 +42,8 @@ namespace positron
 		protected Fixture FixtureUpper;
 		protected Fixture FixtureLower;
 
+		protected List<Fixture> FixtureLowerColliders = new List<Fixture>();
+
 		protected int _HealthMax = 4;
 		protected int _Health;
 		protected int MoveXIdx = 0;
@@ -130,6 +132,7 @@ namespace positron
 			AnimationEndJump.Frames[0].FrameTime = 200;
 
 			_FrameTimer.Start ();
+			JumpTimer.Start();
 		}
 		public void OnHealthChanged (object sender, int health)
 		{
@@ -137,47 +140,66 @@ namespace positron
 		}
 		protected override void InitPhysics ()
 		{
-
 			float pixel = (float)(1.0 / Configuration.MeterInPixels);
+
+			float fixture_scale_y = 0.75f;
 
 			float corner_clip_x = 7.0f * pixel;
 			float corner_clip_y = 2.0f * pixel;
+			float y_shift = 2.0f * pixel;
 
 
-			float w, h;
+			float w, h, half_h, qtr_h, scl_h;
 			if (Texture.Regions != null && Texture.Regions.Length > 0)
 			{
 				var size = Texture.Regions[0].Size;
-				w = (float)(_Scale.X * size.X / Configuration.MeterInPixels);
-				h = (float)(_Scale.Y * size.Y / Configuration.MeterInPixels);
+				w = (float)(_Scale.X * size.X) * pixel;
+				h = (float)(_Scale.Y * size.Y) * pixel;
 			}
 			else
 			{
-				w = (float)(_Scale.X * Texture.Width / Configuration.MeterInPixels);
-				h = (float)(_Scale.Y * Texture.Height / Configuration.MeterInPixels);
+				w = (float)(_Scale.X * Texture.Width) * pixel;
+				h = (float)(_Scale.Y * Texture.Height) * pixel;
 			}
-			var half_w_h = new Microsoft.Xna.Framework.Vector2(w * 0.5f, h * 0.5f);
+			scl_h = fixture_scale_y * h;
+			half_h = 0.5f * h;
+			var half_w_h = new Microsoft.Xna.Framework.Vector2(w * 0.5f, half_h);
 			var msv2 = new Microsoft.Xna.Framework.Vector2(
-				(float)(_Position.X / Configuration.MeterInPixels),
-				(float)(_Position.Y / Configuration.MeterInPixels));
-			_SpriteBody = BodyFactory.CreateBody(_RenderSet.Scene.World, msv2);
+				(float)(_Position.X) * pixel,
+				(float)(_Position.Y) * pixel);
+			_SpriteBody = BodyFactory.CreateBody(_RenderSet.Scene.World, Microsoft.Xna.Framework.Vector2.Zero, this);
+			Position = _Position;
 
 			Microsoft.Xna.Framework.Vector2 a, b, c, d, e00, e01, e10, e11;
 
-			// Attach the main part of the body
 			var verts = new Vertices(new Microsoft.Xna.Framework.Vector2[] {
-				e00 = new Microsoft.Xna.Framework.Vector2(corner_clip_x, 0.0f) - half_w_h,
-				e10 = new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, 0.0f) - half_w_h,
-				b = new Microsoft.Xna.Framework.Vector2(w, corner_clip_y) - half_w_h,
-				c = new Microsoft.Xna.Framework.Vector2(w, h - corner_clip_y) - half_w_h,
-				e11 = new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, h) - half_w_h,
-				e01 = new Microsoft.Xna.Framework.Vector2(corner_clip_x, h) - half_w_h,
-				d = new Microsoft.Xna.Framework.Vector2(0.0f, h - corner_clip_y) - half_w_h,
-				a = new Microsoft.Xna.Framework.Vector2(0.0f, corner_clip_y) - half_w_h
+				e00 = new Microsoft.Xna.Framework.Vector2(corner_clip_x, 0.0f),
+				e10 = new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, 0.0f),
+				b = new Microsoft.Xna.Framework.Vector2(w, corner_clip_y),
+				c = new Microsoft.Xna.Framework.Vector2(w, scl_h - corner_clip_y),
+				e11 = new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, scl_h),
+				e01 = new Microsoft.Xna.Framework.Vector2(corner_clip_x, scl_h),
+				d = new Microsoft.Xna.Framework.Vector2(0.0f, scl_h - corner_clip_y),
+				a = new Microsoft.Xna.Framework.Vector2(0.0f, corner_clip_y),
 			});
-			FixtureFactory.AttachPolygon(verts, 100.0f, _SpriteBody);
 
-			//FixtureFactory.AttachRectangle(w, h, 100.0f, new Microsoft.Xna.Framework.Vector2(w * 0.5f, h * 0.5f), _SpriteBody);
+			var verts_upper = new Vertices();
+			verts.ForEach(v => {
+				v.X -= half_w_h.X;
+				v.Y = y_shift + v.Y * fixture_scale_y + half_h * (0.5f - fixture_scale_y);
+				verts_upper.Add(v);
+				//Console.Write("{0}, ", v.ToString());
+			});
+			var verts_lower = new Vertices();
+			verts.ForEach(v => {
+				v.X -= half_w_h.X;
+				v.Y = y_shift + v.Y * fixture_scale_y - half_h;
+				verts_lower.Add(v);
+				//Console.Write("{0}, ", v.ToString());
+			});
+
+			FixtureUpper = FixtureFactory.AttachPolygon(verts_upper, 100.0f, _SpriteBody);
+			FixtureLower = FixtureFactory.AttachPolygon(verts_lower, 100.0f, _SpriteBody);
 
 			_SpriteBody.BodyType = BodyType.Dynamic;
 			_SpriteBody.FixedRotation = true;
@@ -189,24 +211,59 @@ namespace positron
 
 			// HACK: Only enable bodies for which the object is in the current scene
 			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
+			Body.SleepingAllowed = false; // Avoid dumb shit
 
-			ConnectBody();
+			InitBlueprints();
 
-			JumpTimer.Start();
+//			AABB lol;
+//			FixtureLower.GetAABB(out lol, 0);
+//			Console.WriteLine("AT FIRST I WAS ALL LIKE: {0}", lol.LowerBound);
+//			Position = _Position;
+//			FixtureLower.GetAABB(out lol, 0);
+//			Console.WriteLine("BUT THEN I: {0}", lol.LowerBound);
 		}
 		protected bool HandleOnCollision (Fixture fixture_a, Fixture fixture_b, Contact contact)
 		{
+			if(fixture_a == FixtureLower)
+				FixtureLowerColliders.Add(fixture_b);
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
 				// TODO: Have these values be not hard-coded
-				if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
+				lock(Program.MainUpdateLock)
 				{
-					if(_AnimationCurrent == AnimationPreJump ||
-					   _AnimationCurrent == AnimationJumping)
+					if(fixture == FixtureUpper || fixture == FixtureLower)
+						return 1.0f;
+					if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
 					{
-						PlayAnimation(AnimationEndJump);
-						_AnimationNext = AnimationStationary;
+						if(_AnimationCurrent == AnimationPreJump ||
+						   _AnimationCurrent == AnimationJumping)
+						{
+							PlayAnimation(AnimationEndJump);
+							_AnimationNext = AnimationStationary;
+
+							// TODO: See the other comment regarding disabling the
+							// lower body fixture; this is for collision rather than
+							// separation
+
+							// TODO: Hack apart Farseer Physics to make it suck less
+							//var manifold = new Manifold();
+							//manifold.LocalPoint = point;
+							//manifold.LocalNormal = normal;
+
+							AABB fixture_upper_aabb, fixture_lower_aabb;
+
+							FixtureLower.CollisionCategories = Category.All;
+
+							FixtureUpper.GetAABB(out fixture_upper_aabb, 0);
+							FixtureLower.GetAABB(out fixture_lower_aabb, 0);
+
+							if(FixtureLower.OnCollision != null)
+								FixtureLower.OnCollision(FixtureLower, fixture, null);
+							if(fixture.OnCollision != null)
+								fixture.OnCollision(fixture, FixtureLower, null);
+							
+							PositionWorldY += fixture_upper_aabb.LowerBound.Y - fixture_lower_aabb.LowerBound.Y;
+						}
 					}
-					//Console.WriteLine (VelocityY);
 				}
 				return 0;
 			};
@@ -215,6 +272,8 @@ namespace positron
 		}
 		protected void HandleOnSeparation (Fixture fixture_a, Fixture fixture_b)
 		{
+			if(fixture_a == FixtureLower)
+				FixtureLowerColliders.Remove(fixture_b);
 		}
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{
@@ -234,8 +293,9 @@ namespace positron
 					                             1000 * TileX, 0);
 					WieldingGun = true;
 					GunStowTimer.Restart();
+					return true;
                 };
-                Program.MainGame.UpdateEventQueue.Enqueue(late);
+                Program.MainGame.AddUpdateEventHandler(this, late);
 			}
 			return true;
 		}
@@ -318,20 +378,33 @@ namespace positron
 		public void BodyPlatformRayCast (RayCastCallback callback)
 		{
 			// TODO: make the foot reach distance (in pixels) a member variable
-			AABB main_aabb;
-			lock(Body)
-				Body.FixtureList[0].GetAABB(out main_aabb, 0);
-			float w = main_aabb.UpperBound.X - main_aabb.LowerBound.X;
-			float h = main_aabb.UpperBound.Y - main_aabb.LowerBound.Y;
+			AABB aabb;
+			lock (Body) {
+				if(FixtureLower.CollisionCategories == Category.None && _AnimationCurrent == AnimationJumping)
+					FixtureUpper.GetAABB (out aabb, 0);
+				else
+					FixtureLower.GetAABB (out aabb, 0); // Probably disabled lower during jump
+			}
+			float w = aabb.UpperBound.X - aabb.LowerBound.X;
+			float h = aabb.UpperBound.Y - aabb.LowerBound.Y;
+
+			//Console.WriteLine("{0}", aabb.LowerBound.Y);
+
+			float pixel = 1.0f / (float)Configuration.MeterInPixels;
+
+			float px = (float)PositionX * pixel;
+			float py = (float)PositionY * pixel;
+
 			float x_start = 0.0f;
-			float y_end = (float)(5.0 / Configuration.MeterInPixels);
-			float y_start = y_end - (float)(_Scale.Y * (0.5 * h));
-			y_end = y_start - 2 * y_end;
+			float spread = 3.0f * pixel;
+			float y_start = aabb.LowerBound.Y + spread;
+			float y_end = aabb.LowerBound.Y - spread;
+
 			for (int i = 0; i < JumpRayXDirections.Length; i++) {
 				float dx = (float)(_Scale.X * w * JumpRayXDirections [i]);
-				var start = new Microsoft.Xna.Framework.Vector2 (x_start + dx, y_start);
-				var end = new Microsoft.Xna.Framework.Vector2 (start.X, y_end);
-				_RenderSet.Scene.RayCast (callback, Body.Position + start, Body.Position + end);
+				var start = new Microsoft.Xna.Framework.Vector2 (px + x_start + dx, py + y_start);
+				var end = new Microsoft.Xna.Framework.Vector2 (start.X, py + y_end);
+				_RenderSet.Scene.RayCast (callback, start, end);
 			}
 		}
 		public void Jump()
@@ -343,17 +416,44 @@ namespace positron
 			/// </summary>
 
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
-				// TODO: Have these values be not hard-coded
-				if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
+				lock(Program.MainUpdateLock)
 				{
-                    JumpTimer.Restart();
-					float jump_imp_y = 3.0f;
-					Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, jump_imp_y);
-					GoneDown = false;
-					PlayAnimation (AnimationPreJump);
-					_AnimationNext = AnimationJumping;
+					// TODO: Have these values be not hard-coded
+					if(fixture == FixtureUpper || fixture == FixtureLower)
+						return 1.0f;
+
+					if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
+					{
+	                    JumpTimer.Restart();
+						float jump_imp_y = 3.0f;
+						Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, jump_imp_y);
+						GoneDown = false;
+						PlayAnimation (AnimationPreJump);
+						_AnimationNext = AnimationJumping;
+
+						FixtureLower.CollisionCategories = Category.None;
+					}
+
+					if(FixtureLower.CollisionCategories == Category.None)
+					{
+						// TODO: Give this functionality to more than just the player class
+						// This code is VERY important; this code tells all of the objects
+						// currently touching the lower fixture to separate as the fixture
+						// is marked as non-colliding. This ensures things like floor switches
+						// don't get stuck closed!
+						FixtureLowerColliders.Add(fixture);
+						FixtureLowerColliders.ForEach(c => {
+							if(FixtureLower.OnSeparation != null)
+								FixtureLower.OnSeparation(FixtureLower, c);
+							if(c.OnSeparation != null)
+								c.OnSeparation(c, FixtureLower);
+							//Console.WriteLine (c.Body.UserData);
+						});
+						FixtureLowerColliders.Clear();
+					}
+
+					return 1.0f;
 				}
-				return 0;
 			};
 			BodyPlatformRayCast(callback);
 		}

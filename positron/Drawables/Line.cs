@@ -83,7 +83,7 @@ namespace positron
 		{
 			this._RenderSet = e.To;
 		}
-		public virtual void ConnectBody ()
+		public virtual void InitBlueprints ()
 		{
 			Body.UserData = this;
 		}

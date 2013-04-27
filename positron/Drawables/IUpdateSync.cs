@@ -7,16 +7,18 @@ namespace positron
     {
         protected double _Time;
         public double Time { get { return _Time; } set { _Time = value; } }
-        public UpdateEventArgs(double time)
+		public int _dbg_list_idx;
+        public UpdateEventArgs(double time, int dbg_list_idx = 0)
         {
             _Time = time;
+			_dbg_list_idx = dbg_list_idx;
         }
     }
-    public delegate void UpdateEventHandler(object sender, UpdateEventArgs e);
+    public delegate bool UpdateEventHandler(object sender, UpdateEventArgs e);
     public interface IUpdateSync
     {
         //event UpdateEventHandler UpdateEvent;
-        Queue<UpdateEventHandler> UpdateEventQueue { get; }
+		List<KeyValuePair<object, UpdateEventHandler>> UpdateEventList { get; }
         void Update(double time);
     }
 }

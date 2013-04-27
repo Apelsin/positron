@@ -25,7 +25,7 @@ namespace positron
 		protected override void InstantiateConnections()
 		{
 			_DoorToPreviousScene = new Door(Rear, 512 - 68, 0);
-			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 7 * TileSize, TileSize);
+			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 8 * TileSize, 3 * TileSize);
 		}
 		protected override void InitializeScene ()
 		{
@@ -33,7 +33,7 @@ namespace positron
 			PerimeterOffsetX = -3;
 			PerimeterOffsetY = -1;
 			PerimeterX = 32;
-			PerimeterY = 16;
+			PerimeterY = 12;
 
 			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;
@@ -45,12 +45,9 @@ namespace positron
 			
 			yp += TileSize;
 
-			// Set up doors:
-			Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
+			// Set up previous door:
+			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneOne"];
 			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
-			Scene next_scene = (Scene)Scene.Scenes["SceneThree"];
-			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
-			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
 
 			// Setup background tiles
 			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg2_atlas"));
@@ -64,7 +61,7 @@ namespace positron
 			var f_infogfx = new SpriteBase (Rear, _DoorToPreviousScene.PositionX - 2 * TileSize, _DoorToPreviousScene.PositionY, Texture.Get ("sprite_infogfx_key_f"));
 
 			// Get cross-scene variables
-			Scene previous_scene = (Scene)Scene.Scenes ["SceneOne"];
+			Scene previous_scene = (Scene)Program.MainGame.Scenes["SceneOne"];
 
 			double floor_y = 32.0;
 			double floor_sw_y = -4.0;
@@ -82,7 +79,7 @@ namespace positron
 			var gw2 = new Gateway (Front, xp + TileSize * 3, yp, false);
 
 			// Walls above gateways
-			for (int i = 2; i < PerimeterY; i++) {
+			for (int i = 2; i < PerimeterY - 1; i++) {
 				new FloorTile (Rear, gw1.CornerX, gw1.CornerY + (i) * TileSize + 8);
 				new FloorTile (Rear, gw2.CornerX, gw2.CornerY + (i) * TileSize + 8);
 			}
@@ -106,13 +103,44 @@ namespace positron
 			}, fs20);
 
 			xp = fs21.CornerX + 2 * TileSize;
+
+			var ft_room_r = new FloorTile (Stage, xp, yp);
+			for (int i = 1; i < 8; i++)
+				new FloorTile (Stage, xp + i * TileSize, yp);
+
+			yp += TileSize;
+			xp += TileSize;
+
 			for (int i = 0; i < 4; i++)
-				new FloorTile (Stage, xp += TileSize, yp);
-			yp -= 0.5 * TileSize;
+				new FloorTile (Stage, xp + (i + 1) * TileSize, yp);
+			//yp += 2 * TileSize;
+			xp += 4 * TileSize;
+
+			ExtenderPlatform last_platform_0 = null;
+			ExtenderPlatform last_platform_1 = null;
 			for (int i = 0; i < 3; i++) {
-				new FloorTile (Stage, xp += TileSize, yp);
-				new FloorTile (Stage, xp, yp + TileSize);
+				last_platform_0 = new ExtenderPlatform (Stage, xp += TileSize, yp += TileSize, last_platform_0);
 			}
+			xp -= 2 * TileSize;
+			yp += TileSize;
+			for (int i = 0; i < 6; i++) {
+				last_platform_1 = new ExtenderPlatform (Stage, xp -= TileSize, yp, true);
+			}
+
+			// Set up next door:
+			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneThree"];
+			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
+			_DoorToNextScene.PositionX = last_platform_1.PositionX;
+			_DoorToNextScene.CornerY = yp += last_platform_1.SizeY;
+
+			// Update next scene's door position
+			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
+
+
+			var fs30 = new FloorSwitch (Front, ft_room_r.CornerX + TileSize, ft_room_r.CornerY + TileSize + floor_sw_y, (sender, e) => {
+				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+				last_platform_0.OnAction (e.Self, new ActionEventArgs (bstate, last_platform_0));
+			}, 5.0);
 
 			// Call the base class initializer
 			base.InitializeScene ();

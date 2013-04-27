@@ -30,7 +30,7 @@ namespace positron
 			}
 			for (int i = 0; i < PerimeterX; i++)
 			{
-				var block = new SpriteObject(Stage, x0 + TileSize * (PerimeterX - i - 1), y0 + TileSize * PerimeterY, Texture.Get("sprite_tile_floor_atlas"));
+				var block = new FloorTile(Stage, x0 + TileSize * (PerimeterX - i - 1), y0 + TileSize * PerimeterY);
 			}
 		}
 	}

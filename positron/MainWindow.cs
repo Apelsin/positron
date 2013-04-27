@@ -191,7 +191,20 @@ namespace positron
 			{
 				if (e.Key == Key.Escape)
 				{
-					this.Exit();
+					if(KeysPressed.Contains (Key.ShiftLeft) || KeysPressed.Contains (Key.ShiftRight) )
+					{
+						lock (Program.MainUpdateLock)
+						{
+							Program.MainGame = new PositronGame(); // Godspeed.
+							Program.MainGame.Setup ();
+							Program.MainGame.SetupTests ();
+							GC.Collect();
+							GC.WaitForPendingFinalizers();
+							return;
+						}
+					}
+					else
+						this.Exit();
 				}
 				else if(e.Key == Key.B)
 				{

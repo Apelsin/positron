@@ -7,6 +7,8 @@ namespace positron
 {
 	public abstract class Drawable : IRenderable, ISceneObject
 	{
+		public event RenderSetChangeEventHandler RenderSetEntry;
+		public event RenderSetChangeEventHandler RenderSetTransfer;
 		#region State
 		#region Member Variables
 		protected RenderSet _RenderSet;
@@ -88,6 +90,9 @@ namespace positron
 			_RenderSet = render_set;
             if(_RenderSet != null)
 			    _RenderSet.Add(this);
+			RenderSetTransfer += (object sender, RenderSetChangeEventArgs e) => {
+				this._RenderSet = e.To;
+			};
 		}
         /// <summary>
         /// Creates geometry information necessary for VBO
@@ -99,13 +104,19 @@ namespace positron
             // Some inexpensive drawables are built each frame
             // Therefore it is not required to implement Build()
         }
+		public virtual void OnRenderSetEntry(object sender, RenderSetChangeEventArgs e)
+		{
+			if(RenderSetEntry != null)
+				RenderSetEntry(sender, e);
+		}
+		public virtual void OnRenderSetTransfer(object sender, RenderSetChangeEventArgs e)
+		{
+			if(RenderSetTransfer != null)
+				RenderSetTransfer(sender, e);
+		}
 		public abstract void Render(double time);
 		public abstract double RenderSizeX();
 		public abstract double RenderSizeY();
-		public virtual void SetChange (object sender, RenderSetChangeEventArgs e)
-		{
-			this._RenderSet = e.To;
-		}
 		protected virtual Vector3d CalculateMovementParallax ()
 		{
 			if(this._RenderSet == this._RenderSet.Scene.HUD)

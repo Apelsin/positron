@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 
+using FarseerPhysics.Common;
+using FarseerPhysics.Collision;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
@@ -10,7 +12,7 @@ using OpenTK;
 
 namespace positron
 {
-	public class FloorSwitch : SpriteObject, IActuator
+	public class FloorSwitch : SpriteObject, IActuator, IStateShare<FloorSwitch.SwitchState>
 	{
 		public enum SwitchState
 		{
@@ -83,7 +85,7 @@ namespace positron
 			var msv2 = new Microsoft.Xna.Framework.Vector2 (
 				(float)(_Position.X / Configuration.MeterInPixels),
 				(float)(_Position.Y / Configuration.MeterInPixels));
-			_SpriteBody = BodyFactory.CreateBody (_RenderSet.Scene.World, msv2 + half_w_h);
+			_SpriteBody = BodyFactory.CreateBody (_RenderSet.Scene.World, msv2);
 			FixtureFactory.AttachRectangle (w, h, 100.0f, new Microsoft.Xna.Framework.Vector2(0.0f, -half_w_h.Y), _SpriteBody);
 			_SpriteBody.BodyType = BodyType.Static;
 			_SpriteBody.FixedRotation = true;
@@ -94,69 +96,40 @@ namespace positron
 			// HACK: Only enable bodies for which the object is in the current scene
 			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
 
-			ConnectBody ();
+			InitBlueprints ();
 		}
 
 		protected bool HandleOnCollision (Fixture fixtureA, Fixture fixtureB, Contact contact)
 		{
-			object sender = fixtureB.Body.UserData;
-			if(sender == Program.MainGame.Player1)
-			{
-				// Using the contact manifold normal has proven to be
-				// a huge trouble due to unexplained bugginess when
-				// enabling/disabling the body in the world
-				// TL;DR ray cast FTW
+			lock (Body) {
+				object sender = fixtureB.Body.UserData;
+				if (sender is Player || sender is BasicBullet) {
 
-				Vector2 p0, p1, c0, c1;
-				float pixel = 1.0f / (float)Configuration.MeterInPixels;
-				float pixel2 = 5.0f * pixel;
-				// Top edge
-				p0 = HalfWH;
-				p0.X -= pixel;
-				p0.Y += pixel; // Upward offset
-				p1 = p0;
-				p1.X *= -1.0f;
-				c0 = new Vector2(0.0f, HalfWH.Y - pixel2);
-				c1 = new Vector2(0.0f, HalfWH.Y + pixel2);
+					// TODO: implement hit-direction checking CORRECTLY
+					// Previous attempts have been awful and thus removed
 
-				// Do some math (probably overkill)
-				var q = Quaternion.FromAxisAngle(Vector3.UnitZ, (float)Theta);
-				p0 = Vector2.Transform(p0, q);
-				p1 = Vector2.Transform(p1, q);
-				c0 = Vector2.Transform(c0, q);
-				c1 = Vector2.Transform(c1, q);
-
-				var p0_xna = new Microsoft.Xna.Framework.Vector2(p0.X + Body.Position.X, p0.Y + Body.Position.Y);
-				var p1_xna = new Microsoft.Xna.Framework.Vector2(p1.X + Body.Position.X, p1.Y + Body.Position.Y);
-				var c0_xna = new Microsoft.Xna.Framework.Vector2(c0.X + Body.Position.X, c0.Y + Body.Position.Y);
-				var c1_xna = new Microsoft.Xna.Framework.Vector2(c1.X + Body.Position.X, c1.Y + Body.Position.Y);
-
-				RayCastCallback callback = (fixture, point, normal, fraction) => {
 					if(!_LastAffected)
 					{
-						OnAction(sender, SwitchState.Closed);
 						_LastAffected = true;
+						OnAction (sender, SwitchState.Closed);
 					}
-					return 0;
-				};
-				//Console.WriteLine ("p0_xna: {0}", p0_xna);
-				//Console.WriteLine ("p1_xna: {0}", p1_xna);
-				_RenderSet.Scene.RayCast(callback, p0_xna, p1_xna);
-				_RenderSet.Scene.RayCast(callback, p1_xna, p0_xna);
-				_RenderSet.Scene.RayCast(callback, c0_xna, c1_xna);
-		
+					//Console.WriteLine("Collided with switch");
+				}
 			}
 			return true;
 		}
 
 		protected void HandleOnSeparation (Fixture fixtureA, Fixture fixtureB)
 		{
-			if(fixtureB.Body.UserData == Program.MainGame.Player1)
-			{
-				if(_LastAffected)
-				{
-					_LastAffected = false;
-					OnAction(fixtureB.Body.UserData, SwitchState.Latched);
+			lock (Body) {
+				object sender = fixtureB.Body.UserData;
+				if (sender is Player || sender is BasicBullet) {
+					if (_LastAffected)
+					{
+						_LastAffected = false;
+						OnAction (fixtureB.Body.UserData, SwitchState.Latched);
+					}
+					//Console.WriteLine("Separated from switch");
 				}
 			}
 		}

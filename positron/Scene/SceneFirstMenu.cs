@@ -2,6 +2,8 @@ using System;
 
 using OpenTK;
 
+using FarseerPhysics.Collision;
+
 namespace positron
 {
 	public class SceneFirstMenu : Scene
@@ -15,9 +17,10 @@ namespace positron
 				Program.MainGame.SetInputAccepters("Main Menu",  new IInputAccepter[] { UIGroup });
 			};
 			SceneExit += (sender, e) => {
-				var player_1 = Program.MainGame.Player1 = new Player (e.To.Stage, Texture.Get ("sprite_player"));
-				if(e.To.DoorToPreviousScene != null)
-					player_1.Corner = e.To.DoorToPreviousScene.Corner;
+				Player player_1 = Program.MainGame.Player1 = new Player (e.To.Stage, e.To.DoorToPreviousScene.CornerX, e.To.DoorToPreviousScene.CornerY, Texture.Get ("sprite_player"));
+
+				e.To.Follow(player_1);
+
 				Program.MainGame.SetInputAccepters("Player1", new IInputAccepter[]{ player_1 });
 				Follow(player_1);
 				var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
@@ -30,17 +33,17 @@ namespace positron
 			var texture = Texture.Get ("sprite_main_menu_buttons");
 			double x_center = (ViewWidth) * 0.5;
 			double y_center = (ViewHeight) * 0.5;
-			((UIButton) new UIButton(this, x_center, y_center + 32,
+			new UIButton(this, x_center, y_center + 32,
 			             new SpriteBase.SpriteFrame(texture, 4),
-			             new SpriteBase.SpriteFrame(texture, 2), UIGroup).CenterShift()).Action += (sender, e) =>
+			             new SpriteBase.SpriteFrame(texture, 2), UIGroup).Action += (sender, e) =>
 			{
-				Program.MainGame.CurrentScene = (Scene)Scene.Scenes[(string)Configuration.Get("SceneBeginning")];
+				Program.MainGame.CurrentScene = (Scene)Program.MainGame.Scenes[(string)Configuration.Get("SceneBeginning")];
 			};
-			((UIButton) new UIButton(this, x_center, y_center - 32,
+			new UIButton(this, x_center, y_center - 32,
 			             new SpriteBase.SpriteFrame(texture, 5),
-			                         new SpriteBase.SpriteFrame(texture, 3), UIGroup).CenterShift()).Action += (sender, e) =>
+			                         new SpriteBase.SpriteFrame(texture, 3), UIGroup).Action += (sender, e) =>
 			{
-				Program.MainGame.CurrentScene = (Scene)Scene.Scenes[(string)Configuration.Get("SceneBeginning")];
+				Program.MainGame.CurrentScene = (Scene)Program.MainGame.Scenes[(string)Configuration.Get("SceneBeginning")];
 			};
 		}
 	}

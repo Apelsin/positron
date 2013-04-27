@@ -82,7 +82,6 @@
     <Compile Include="Scene\Scene.cs" />
     <Compile Include="Scene\SceneTwo.cs" />
     <Compile Include="Scene\SceneBasicBox.cs" />
-    <Compile Include="Drawables\BasicBullet.cs" />
     <Compile Include="Drawables\SceneElements\FloorTile.cs" />
     <Compile Include="Drawables\SceneElements\Door.cs" />
     <Compile Include="Drawables\SceneElements\Player.cs" />
@@ -103,6 +102,11 @@
     <Compile Include="Asset Management\PsdSlicesHeader.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Drawables\SceneElements\PsdSpriteTest.cs" />
+    <Compile Include="IStateShare.cs" />
+    <Compile Include="Drawables\SceneElements\BasicBullet.cs" />
+    <Compile Include="Drawables\SceneElements\ExtenderPlatform.cs" />
+    <Compile Include="Drawables\SceneElements\BaddieRobotCrawlerShooter.cs" />
+    <Compile Include="IShooter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

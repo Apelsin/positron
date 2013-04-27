@@ -42,14 +42,18 @@ namespace positron
 						_Frames[i] = new SpriteFrame(texture, region_incices[i], Color.White, frame_time);
 				}
 			}
+			public SpriteAnimation(Texture texture, int frame_time, bool looping, bool ping_pong, params string[] region_labels) :
+				this(texture, frame_time, looping, ping_pong, texture.Regions.Labeled(region_labels))
+			{
+			}
+			public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params int[] region_incices) :
+				this(texture, _FrameTimeDefault, looping, ping_pong, region_incices)
+			{
+			}
 			public SpriteAnimation(Texture texture, bool looping, params int[] region_incices):
 				this(texture, looping, false, region_incices)
 			{
 			}
-            public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params int[] region_incices) :
-                this(texture, _FrameTimeDefault, looping, ping_pong, region_incices)
-            {
-            }
 			/// <summary>
 			/// Initializes a new instance of the <see cref="positron.SpriteBase+SpriteAnimation"/> class.
 			/// If region_indices is empty, frame_time instead defines first frame and default frame time is used,
@@ -289,8 +293,8 @@ namespace positron
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
 			_FrameStatic = _AnimationDefault.Frames[0];
-			_Position.X = x + SizeX * 0.5;
-			_Position.Y = y + SizeY * 0.5;
+			_Position.X = x;// + SizeX * 0.5;
+			_Position.Y = y;// + SizeY * 0.5;
 		}
 		public SpriteBase CenterShift ()
 		{
