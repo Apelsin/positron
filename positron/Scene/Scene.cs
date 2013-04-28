@@ -2,19 +2,52 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using FarseerPhysics.Dynamics;
 using System.Reflection; // Please kill me.
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
+using FarseerPhysics.Common;
+using FarseerPhysics.Collision;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Dynamics.Contacts;
+using FarseerPhysics.Factories;
+
 namespace positron
 {
+	#region EventArgs
+	public class RenderSetChangeEventArgs : EventArgs
+	{
+		public RenderSet From { get; set; }
+		public RenderSet To { get; set; }
+		public RenderSetChangeEventArgs(RenderSet from, RenderSet to)
+		{
+			From = from;
+			To = to;
+		}
+	}
+	public class SceneChangeEventArgs : EventArgs
+	{
+		public Scene From { get; set; }
+		public Scene To { get; set; }
+		public SceneChangeEventArgs(Scene from, Scene to)
+		{
+			From = from;
+			To = to;
+		}
+	}
+	#endregion
+	public delegate void SceneEntryEventHandler(object sender, SceneChangeEventArgs e);
+	public delegate void SceneExitEventHandler(object sender, SceneChangeEventArgs e);
 	public class Scene
 	{
+		#region Events
+		public event SceneEntryEventHandler SceneEntry;
+		public event SceneExitEventHandler SceneExit;
+		#endregion
 		#region State
 		#region Member Variables
-		protected string Name;
+		protected string _Name;
 		protected Vector2d _ViewSize;
 		protected Vector3d _ViewOffset;
 		protected Vector3d _ViewPosition;
@@ -75,19 +108,16 @@ namespace positron
 		/// </summary>
 		protected int ATSIndex = 0;
 		#endregion
-		#region Static Variables
-		protected static Hashtable _Scenes = new Hashtable();
-		protected static World _WorldMain = new World(new Microsoft.Xna.Framework.Vector2(0.0f, (float)Configuration.ForceDueToGravity));
-		#endregion
 		#region Member Accessors
+		public string Name { get { return _Name; } }
 		public Vector2d ViewSize { get { return _ViewSize; } }
 		public double ViewWidth {
 			get { return _ViewSize.X; }
-			private set { _ViewSize.X = value; }
+			protected set { _ViewSize.X = value; }
 		}
 		public double ViewHeight {
 			get { return _ViewSize.Y; }
-			private set { _ViewSize.Y = value; }
+			protected set { _ViewSize.Y = value; }
 		}
 		public Vector3d ViewOffset {
 			get { return _ViewOffset; }
@@ -103,16 +133,12 @@ namespace positron
 		public Door DoorToNextScene { get { return _DoorToNextScene; } }
 		public Door DoorToPreviousScene { get { return _DoorToPreviousScene; } }
 		#endregion
-		#region Static Accessors
-		public static Hashtable Scenes { get { return _Scenes; } }
-		public static World WorldMain { get { return _WorldMain; } }
-		#endregion
 		#endregion
 		#region Behavior
 		#region Member
 		protected Scene (string name, World world)
 		{
-			Name = name;
+			_Name = name;
 
 			_World = world;
 
@@ -134,30 +160,57 @@ namespace positron
 			// This should contain everything AllRednerSetsInOrder would contain
 			// This is an optimization over using an enumerable
 			All = new RenderSet(this, Background, Rear, Stage, Tests, Front, HUD, HUDBlueprint);
+
+			SceneEntry += (sender, e) => 
+			{
+				foreach(RenderSet render_set in AllRenderSetsInOrder())
+				{
+					render_set.ForEach (element => {
+						if(element is IWorldObject)
+						{
+							IWorldObject w_o = (IWorldObject)element;
+							//Console.WriteLine("Rotation for {0} sprite with rotation {1}", w_o, w_o.Theta);
+						}
+					});
+				}
+			};
 		}
 		protected Scene ():
-			this("Scene", _WorldMain)
+			this("Scene", Program.MainGame.WorldMain)
 		{
-			Name = GetType ().Name;
+			_Name = GetType ().Name;
 		}
-		protected virtual void Initialize ()
+		protected virtual void InstantiateConnections ()
+		{
+		}
+		protected virtual void InitializeScene ()
 		{
 			SetupHUD();
 		}
-        private void SetupHUD()
+		public void OnSceneEntry (object sender, SceneChangeEventArgs e)
+		{
+			if(SceneEntry != null)
+				SceneEntry(sender, e);
+		}
+		public void OnSceneExit (object sender, SceneChangeEventArgs e)
+		{
+			if(SceneExit != null)
+				SceneExit(sender, e);
+		}
+        protected void SetupHUD()
         {
             var p = new Vector3d(5.0, 5.0, 0.0);
             var s = new Vector3d(5.0, 12, 0.0);
-            FrameTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+			FrameTimeMeter = new HUDQuad(HUDBlueprint, p, s);
             FrameTimeMeter.Color = Color.DarkSlateBlue;
-            UpdateTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+			UpdateTimeMeter = new HUDQuad(HUDBlueprint, p, s);
             UpdateTimeMeter.Color = Color.DarkCyan;
-            RenderTimeMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+			RenderTimeMeter = new HUDQuad(HUDBlueprint, p, s);
             RenderTimeMeter.Color = Color.DarkRed;
-            RenderDrawingMeter = new HUDQuad(p, s, HUDBlueprint, 0);
+			RenderDrawingMeter = new HUDQuad(HUDBlueprint, p, s);
             RenderDrawingMeter.Color = Color.Red;
         }
-        private void UpdateHUDStats()
+        protected void UpdateHUDStats()
         {
             double w_x, w = 4000.0;
             w_x = w * Program.MainWindow.LastFrameTime;
@@ -204,10 +257,8 @@ namespace positron
 				{
                     if (_FollowTarget != null)
                     {
-						Vector3d pan = CalculatePan();
-						//float a = Math.Min (1.0f, 2.0f * (float)time + 1.0f / Math.Max(1.0f, (float)(pan - _ViewPosition).LengthFast));
-						float a = Math.Min (1.0f, (5000f * (float)time) / (float)Math.Max(50f, (pan - _ViewPosition).Length));
-						_ViewPosition = Vector3d.Lerp(_ViewPosition, pan, a);
+						CalculatePan((float)time);
+
                         GL.Translate(Math.Round(_ViewPosition.X), Math.Round(_ViewPosition.Y), Math.Round(_ViewPosition.Z));
                         //GL.Translate(ScenePan);
                     }
@@ -223,29 +274,24 @@ namespace positron
 				HUDBlueprint.Render (time);
 			}
 		}
-		protected Vector3d CalculatePan()
+		protected void CalculatePan (float time)
 		{
-			double view_size_by_two_x = _ViewSize.X * 0.5;
-			double view_size_by_two_y = _ViewSize.Y * 0.5;
-			double view_size_by_5_x = _ViewSize.X * 0.2;
-			double view_size_by_5_y = _ViewSize.Y * 0.2;
-
-			Vector3d pan = new Vector3d(0.5 * ViewWidth, 0.4 * ViewHeight, 0.0 ) - _FollowTarget.Position;
-			double a = Math.Abs (_ViewPosition.X - pan.X);
-			double b = Math.Abs (_ViewPosition.Y - pan.Y);
-			//Console.WriteLine("a  == {0}, b  == {1}", a, b);
-			a = Helper.SmootherStep(view_size_by_5_x - 64, view_size_by_5_x, a);
-			b = Helper.SmootherStep(view_size_by_5_y - 64, view_size_by_5_y, b);
-			//Console.WriteLine("a' == {0}, b' == {1}", a, b);
-
-			pan.X = _ViewPosition.X + (pan.X - _ViewPosition.X) * a;
-			pan.Y = _ViewPosition.Y + (pan.Y - _ViewPosition.Y) * b;
-
-			pan += _ViewOffset;
-
-			//if(typeof(Player) == typeof(Player))
-			//	pan -= ((Player)_FollowTarget).DampVeloNormal * 50;
-			return pan;
+			double view_size_scaled_x = _ViewSize.X * 0.2;
+			double view_size_scaled_y = _ViewSize.Y * 0.2;
+			Vector3d pan = new Vector3d (0.5 * ViewWidth, 0.4 * ViewHeight, 0.0) - _FollowTarget.Position;
+			if (time > 0.0f) {
+				double a = Math.Abs (_ViewPosition.X - pan.X);
+				double b = Math.Abs (_ViewPosition.Y - pan.Y);
+				a = Helper.SmootherStep (view_size_scaled_x - 64, view_size_scaled_x, a);
+				b = Helper.SmootherStep (view_size_scaled_y - 64, view_size_scaled_y, b);
+				pan.X = _ViewPosition.X + (pan.X - _ViewPosition.X) * a;
+				pan.Y = _ViewPosition.Y + (pan.Y - _ViewPosition.Y) * b;
+				float alpha = Math.Min (1.0f, (2000f * (float)time) / (float)Math.Max (50f, (pan - _ViewPosition).Length));
+				pan = Vector3d.Lerp (_ViewPosition, pan, alpha);
+				//if(typeof(Player) == typeof(Player))
+				//	pan -= ((Player)_FollowTarget).DampVeloNormal * 50;
+			}
+			_ViewPosition = pan;
 		}
 		public IEnumerable<RenderSet> AllRenderSetsInOrder()
 		{
@@ -275,7 +321,7 @@ namespace positron
 		{
 			_FollowTarget = follow_target;
 			if (cut)
-				_ViewPosition = CalculatePan ();
+				CalculatePan (1.0f);
 		}
 		public void RayCast (RayCastCallback callback, Microsoft.Xna.Framework.Vector2 point1, Microsoft.Xna.Framework.Vector2 point2)
 		{
@@ -283,86 +329,23 @@ namespace positron
 			if (Configuration.DrawBlueprints) {
 				lock(RenderLock)
 				{
-					WorldBlueprint.Add (
-						new BlueprintLine (
-						new Vector3d (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0),
-						new Vector3d (point2.X * Configuration.MeterInPixels, point2.Y * Configuration.MeterInPixels, 0.0),
-							WorldBlueprint));
+					new BlueprintLine (
+					new Vector3d (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0),
+					new Vector3d (point2.X * Configuration.MeterInPixels, point2.Y * Configuration.MeterInPixels, 0.0),
+						WorldBlueprint);
 				}
 			}
 		}
 		#endregion
 		#region Static
-		public static Scene Create (string name, World world)
-		{
-			Scene scene = new Scene(name, world);
-			_Scenes.Add(name, scene);
-			return scene;
-		}
-		public static Scene Create(string name)
-		{
-			return Create (name, WorldMain);
-		}
-		public static void ChangeScene (ref Scene current_scene, Scene next_scene)
-		{
-			if (current_scene == next_scene)
-				return;
-			// TODO: Make this better
-			// Get the enumerable for the render sets; these need to be in the same order!
-			IEnumerable<RenderSet> current_sets = current_scene.AllRenderSetsInOrder ();
-			IEnumerable<RenderSet> next_sets = next_scene.AllRenderSetsInOrder ();
-			IEnumerator<RenderSet> next_set_enum = next_sets.GetEnumerator ();
-			lock (Program.MainUpdateLock) {										// Don't even think about not locking this threaded monstrosity
-				foreach (RenderSet render_set in current_sets) {					// For each render set
-					if (!next_set_enum.MoveNext ())									// Advance enumerator; if passed end...
-						break;														// ...get the hell out of Dodge
-					
-					// Process this scene
-					for (int i = 0; i < render_set.Count;) {						// For each renderable in render set
-						var renderable = render_set [i];
-						if (renderable is ISceneObject) {							// If object also implements scene object
-							ISceneObject scene_object = (ISceneObject)renderable;	// Cast to scene object
-							if (scene_object is IWorldObject) {
-								IWorldObject world_object = (IWorldObject)scene_object;
-								// Have the object be enabled if it is preserved
-								world_object.Body.Enabled = world_object.Preserve;
-							}
-							if (scene_object.Preserve) { 							// If scene object is preserved
-								next_set_enum.Current.Add (renderable);				// Add in this object
-								render_set.RemoveAt (i);							// Remove from previous 
-								SetChangeEventArgs scea = new SetChangeEventArgs ();
-								scea.From = render_set;
-								scea.To = next_set_enum.Current;
-								scene_object.SetChange (null, scea);
-								continue;
-							}
-						}
-						i++;
-					}
-					
-					// Process next scene
-					foreach (IRenderable renderable in next_set_enum.Current) {
-						if (renderable is IWorldObject) {
-							IWorldObject world_object = (IWorldObject)renderable;
-							world_object.Body.Enabled = true;
-						}
-					}
-				}
-			}
-			
-			next_scene._World = current_scene._World;				// World is -always- preserved
-			if (current_scene.FollowTarget.Preserve) {
-				next_scene.Follow (current_scene.FollowTarget, true);
-				//next_scene._ViewPosition = current_scene._ViewPosition;
-			}
-			current_scene = next_scene;								// Update the scene reference
-		}
 		/// <summary>
 		/// Instantiates and initializes one instnace
 		/// of every subclass of Scene in this assembly
 		/// </summary>
-		public static void Instantiate ()
+		static public void InstantiateScenes (PositronGame game)
 		{
+			// Brave new world:
+			game.WorldMain = new World(new Microsoft.Xna.Framework.Vector2(0.0f, (float)Configuration.ForceDueToGravity));
 			// This is EVIL:
 			IEnumerable<Type> model_enum = typeof(Scene).FindAllEndClasses ();
 			foreach (Type m in model_enum) {
@@ -373,21 +356,18 @@ namespace positron
 				ConstructorInfo ctor = m.GetConstructor(flags, null, new Type[] { }, null);
 				object instanace = ctor.Invoke(null);
 				Scene scene = (Scene)instanace;
-				_Scenes.Add(scene.Name, scene);
+				game.Scenes.Add(scene.Name, scene);
 			}
 		}
-		public static void InitializeAll()
+		static public void InitializeScenes(PositronGame game)
 		{
-			foreach(Scene scene in Scenes.Values)
-				scene.Initialize();
+			foreach(Scene scene in game.Scenes.Values)
+				scene.InstantiateConnections();
+			foreach(Scene scene in game.Scenes.Values)
+				scene.InitializeScene();
 		}
 		#endregion
 		#endregion
-	}
-	public class SetChangeEventArgs : EventArgs
-	{
-		public RenderSet From { get; set; }
-		public RenderSet To { get; set; }
 	}
 }
 

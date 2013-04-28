@@ -15,7 +15,7 @@ namespace positron
 		}
 	}
 	public delegate void ActionEventHandler(object sender, ActionEventArgs e);
-	public interface IInteractiveObject : IWorldObject
+	public interface IActuator
 	{
 		event ActionEventHandler Action;
 		void OnAction(object sender, ActionEventArgs e);

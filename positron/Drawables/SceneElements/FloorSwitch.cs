@@ -1,13 +1,18 @@
 using System;
 using System.Diagnostics;
 
+using FarseerPhysics.Common;
+using FarseerPhysics.Collision;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 
+using OpenTK.Graphics.OpenGL;
+using OpenTK;
+
 namespace positron
 {
-	public class FloorSwitch : SpriteObject, IInteractiveObject
+	public class FloorSwitch : SpriteObject, IActuator, IStateShare<FloorSwitch.SwitchState>
 	{
 		public enum SwitchState
 		{
@@ -20,6 +25,8 @@ namespace positron
 		protected SharedState<double> _LatchExpiration;
 		protected bool _LastAffected = false;
 		protected double _LatchTime;
+		protected Vector2 HalfWH;
+
 		//protected object _LastSender;
 		protected Stopwatch _LatchTimer;
 		public double LatchTime { get { return _LatchTime; } set { _LatchTime = value; } }
@@ -73,47 +80,56 @@ namespace positron
 			w = (float)(_Scale.X * size.X / Configuration.MeterInPixels);
 			h = (float)(_Scale.Y * size.Y / Configuration.MeterInPixels);
 			h *= 0.5f; // Floor switch
-			var half_w_h = new Microsoft.Xna.Framework.Vector2 (w * 0.5f, h * 0.5f);
+			HalfWH = new Vector2 (w * 0.5f, h * 0.5f); // Please kill me
+			var half_w_h = new Microsoft.Xna.Framework.Vector2(HalfWH.X, HalfWH.Y);
 			var msv2 = new Microsoft.Xna.Framework.Vector2 (
 				(float)(_Position.X / Configuration.MeterInPixels),
 				(float)(_Position.Y / Configuration.MeterInPixels));
-			_SpriteBody = BodyFactory.CreateBody (_RenderSet.Scene.World, msv2 + half_w_h);
+			_SpriteBody = BodyFactory.CreateBody (_RenderSet.Scene.World, msv2);
 			FixtureFactory.AttachRectangle (w, h, 100.0f, new Microsoft.Xna.Framework.Vector2(0.0f, -half_w_h.Y), _SpriteBody);
 			_SpriteBody.BodyType = BodyType.Static;
 			_SpriteBody.FixedRotation = true;
 			_SpriteBody.Friction = 0.5f;
 			_SpriteBody.OnCollision += HandleOnCollision;
 			_SpriteBody.OnSeparation += HandleOnSeparation;
-			
+
 			// HACK: Only enable bodies for which the object is in the current scene
 			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
-			
-			ConnectBody ();
+
+			InitBlueprints ();
 		}
 
 		protected bool HandleOnCollision (Fixture fixtureA, Fixture fixtureB, Contact contact)
 		{
-			object sender = fixtureB.Body.UserData;
-			if(sender == Program.MainGame.Player1)
-			{
-				// Start at 6 o'clock
-				double tolerance = 0.3;
-				double sin = -Math.Cos (Theta);
-				double cos = Math.Sin (Theta);
-				_LastAffected = Math.Abs(contact.Manifold.LocalNormal.Y - sin) < tolerance &&
-						Math.Abs(contact.Manifold.LocalNormal.X - cos) < tolerance;
-				if(_LastAffected)
-					OnAction(sender, SwitchState.Closed);
+			lock (Body) {
+				object sender = fixtureB.Body.UserData;
+				if (sender is Player || sender is BasicBullet) {
+
+					// TODO: implement hit-direction checking CORRECTLY
+					// Previous attempts have been awful and thus removed
+
+					if(!_LastAffected)
+					{
+						_LastAffected = true;
+						OnAction (sender, SwitchState.Closed);
+					}
+					//Console.WriteLine("Collided with switch");
+				}
 			}
 			return true;
 		}
+
 		protected void HandleOnSeparation (Fixture fixtureA, Fixture fixtureB)
 		{
-			if(fixtureB.Body.UserData == Program.MainGame.Player1)
-			{
-				if(_LastAffected)
-				{
-					OnAction(fixtureB.Body.UserData, SwitchState.Latched);
+			lock (Body) {
+				object sender = fixtureB.Body.UserData;
+				if (sender is Player || sender is BasicBullet) {
+					if (_LastAffected)
+					{
+						_LastAffected = false;
+						OnAction (fixtureB.Body.UserData, SwitchState.Latched);
+					}
+					//Console.WriteLine("Separated from switch");
 				}
 			}
 		}

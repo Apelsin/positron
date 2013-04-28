@@ -1,55 +1,60 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Collections.Generic;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
-	public class BlueprintQuad : IRenderable
+	public class BlueprintLineLoop : IRenderable
 	{
 		protected int Lifespan;
 		protected Stopwatch Timer;
-		protected RenderSet _RenderSet;
-		public Vector3d A, B, C, D;
-		public BlueprintQuad (Vector3d a, Vector3d b, Vector3d c, Vector3d d, RenderSet render_set):
-			this(a, b, c, d, render_set, 0)
+		protected ISceneElement _Instance;
+		public Vector3d[] Vertices;
+		public BlueprintLineLoop (ISceneElement instance, params Vector3d[] vertices):
+			this(instance, 0, vertices)
 		{
 		}
-		public BlueprintQuad (Vector3d a, Vector3d b, Vector3d c, Vector3d d, RenderSet render_set, int millis)
+		public BlueprintLineLoop (ISceneElement instance, int millis, params Vector3d[] vertices)
 		{
-			_RenderSet = render_set;
-            _RenderSet.Add(this); // if render_set is null, that's your problem
+			_Instance = instance;
+			Vertices = vertices;
 			Lifespan = millis;
-			A = a;
-			B = b;
-			C = c;
-			D = d;
             if (Lifespan > 0)
             {
                 Timer = new Stopwatch();
                 Timer.Start();
             }
 		}
+		protected IEnumerable<Color> ColorSequence ()
+		{
+			for(;;) {
+				yield return Color.Crimson;
+				yield return Color.Gold;
+
+			}
+		}
 		public virtual void Render (double time)
 		{
             if (Lifespan > 0 && Timer.ElapsedMilliseconds > Lifespan)
-                _RenderSet.Remove(this);
+				_Instance.Blueprints.Remove(this);
             else
             {
+				IEnumerator<Color> color_enumerator = ColorSequence().GetEnumerator();
                 // Unbind any texture that was previously bound
                 GL.BindTexture(TextureTarget.Texture2D, 0);
                 GL.LineWidth(1);
                 GL.Begin(BeginMode.LineLoop);
-                GL.Color4(Color.Crimson);
-                GL.Vertex3(A);
-                GL.Color4(Color.Gold);
-                GL.Vertex3(B);
-                GL.Color4(Color.Crimson);
-                GL.Vertex3(C);
-                GL.Color4(Color.Gold);
-                GL.Vertex3(D);
+				for(int i = 0; i < Vertices.Length; i++)
+				{
+					color_enumerator.MoveNext();
+					Color color = color_enumerator.Current;
+					GL.Color4(color);
+					GL.Vertex3(Vertices[i]);
+				}
                 GL.End();
             }
 		}

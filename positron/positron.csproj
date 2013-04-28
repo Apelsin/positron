@@ -60,7 +60,6 @@
     <Compile Include="Drawables\Circle.cs" />
     <Compile Include="IColorable.cs" />
     <Compile Include="Scene\SceneThree.cs" />
-    <Compile Include="Texture.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="Drawables\SpriteObject.cs" />
@@ -72,10 +71,7 @@
     <Compile Include="Drawables\BooleanIndicator.cs" />
     <Compile Include="Drawables\SpriteBase.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintLine.cs" />
-    <Compile Include="Drawables\Blueprint\BlueprintQuad.cs" />
     <Compile Include="VertexBuffer.cs" />
-    <Compile Include="Drawables\ISceneObject.cs" />
-    <Compile Include="IInteractiveObject.cs" />
     <Compile Include="Drawables\HUD\HealthMeter.cs" />
     <Compile Include="PositronGame.cs" />
     <Compile Include="Drawables\SceneElements\BunkerFloor.cs" />
@@ -85,7 +81,6 @@
     <Compile Include="Scene\Scene.cs" />
     <Compile Include="Scene\SceneTwo.cs" />
     <Compile Include="Scene\SceneBasicBox.cs" />
-    <Compile Include="Drawables\BasicBullet.cs" />
     <Compile Include="Drawables\SceneElements\FloorTile.cs" />
     <Compile Include="Drawables\SceneElements\Door.cs" />
     <Compile Include="Drawables\SceneElements\Player.cs" />
@@ -95,6 +90,23 @@
     <Compile Include="Drawables\SceneElements\Spidey.cs" />
     <Compile Include="Drawables\TileMap.cs" />
     <Compile Include="Drawables\Dialog.cs" />
+    <Compile Include="Scene\SceneFirstMenu.cs" />
+    <Compile Include="Drawables\HUD\UIButton.cs" />
+    <Compile Include="Drawables\HUD\UIElementGroup.cs" />
+    <Compile Include="Drawables\HUD\IUIElement.cs" />
+    <Compile Include="IActuator.cs" />
+    <Compile Include="Drawables\Blueprint\BlueprintLineLoop.cs" />
+    <Compile Include="Asset Management\Texture.cs" />
+    <Compile Include="Asset Management\PsdLoader.cs" />
+    <Compile Include="Asset Management\PsdSlicesHeader.cs" />
+    <Compile Include="Utility.cs" />
+    <Compile Include="Drawables\SceneElements\PsdSpriteTest.cs" />
+    <Compile Include="IStateShare.cs" />
+    <Compile Include="Drawables\SceneElements\BasicBullet.cs" />
+    <Compile Include="Drawables\SceneElements\ExtenderPlatform.cs" />
+    <Compile Include="Drawables\SceneElements\BaddieRobotCrawlerShooter.cs" />
+    <Compile Include="IShooter.cs" />
+    <Compile Include="Drawables\ISceneElement.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
@@ -105,9 +117,16 @@
       <Project>{A4610E4C-DD34-428B-BABB-779CA0B5993A}</Project>
       <Name>Farseer Physics</Name>
     </ProjectReference>
+    <ProjectReference Include="..\psdplugin\PsdFile\PsdFile.csproj">
+      <Project>{8AE43567-4988-4E3E-84A4-8258167EBDEA}</Project>
+      <Name>PsdFile</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Asset Management\" />
+  </ItemGroup>
 </Project>

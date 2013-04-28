@@ -18,19 +18,39 @@ namespace positron
 {
     public class SceneThree : SceneBasicBox
     {
-        //		protected SceneThree ():
-        //			base()
-        //		{
-        //		}
-        protected override void Initialize()
+		protected SceneThree ():
+			base()
+		{
+		}
+		protected override void InstantiateConnections()
+		{
+			_DoorToPreviousScene = new Door(Rear, 0, 0);
+		}
+        protected override void InitializeScene()
         {
-            base.Initialize();
+			// Define these before calling the base class initializer
+			PerimeterOffsetX = 12;
+			PerimeterOffsetY = 5;
 
-            // Store width and height in local variables
-            int w_i = (int)ViewWidth;
-            int h_i = (int)ViewHeight;
+			// Store width and height in local variables for easy access
+			int w_i = (int)ViewWidth;
+			int h_i = (int)ViewHeight;
+			
+			// X and Y positioner variables
+			double xp = TileSize * PerimeterOffsetX;
+			double yp = TileSize * PerimeterOffsetY;
+			
+			yp += TileSize;
+			
+			// Set up doors:
+			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneTwo"];
+			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
+//			Scene next_scene = (Scene)Scene.Scenes["SceneThree"];
+//			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
+//			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
 
             // Setup background tiles
+<<<<<<< HEAD
             var BackgroundTiles = new TileMap(Background, 48, 24, Texture.Get("sprite_tile_bg2_atlas"));
             BackgroundTiles.PositionX = -320;
             BackgroundTiles.PositionY = -256;
@@ -40,18 +60,34 @@ namespace positron
 
             Scene prev_scene = (Scene)Scene.Scenes["SceneTwo"];
             _DoorToPreviousScene = new Door(Rear, 0, 32, prev_scene);
+=======
+            var BackgroundTiles = new TileMap(Background, 48, 24, Texture.Get("sprite_tile_bg3_atlas"));
+			BackgroundTiles.PositionX = xp - 10 * TileSize;
+			BackgroundTiles.PositionY = yp - 4 * TileSize;
+			BackgroundTiles.PositionZ = 1.0;
+			BackgroundTiles.RandomMap ();
+			BackgroundTiles.Build ();
+>>>>>>> ccc9f8039ab57e2abbece1128a8df2d49db424c3
 
             // Get cross-scene variables
-            Scene previous_scene = (Scene)Scene.Scenes["SceneTwo"];
+			Scene previous_scene = (Scene)Program.MainGame.Scenes["SceneTwo"];
             Player player_1 = Program.MainGame.Player1;
 
             for (int i = 0; i < 3; i++)
             {
-                var spidey = new Spidey(Stage, 10 * i - 100, 20);
+                var spidey = new Spidey(Stage, 10 * i - TileSize * 32, 20);
                 spidey.Position += DoorToPreviousScene.Position;
                 spidey.Body.BodyType = BodyType.Dynamic;
+				xp = spidey.CornerX;
+				yp = spidey.CornerY;
             }
 
+			xp -= TileSize;
+
+			new BaddieRobotCrawlerShooter(this, DoorToPreviousScene.CornerX, DoorToPreviousScene.CornerY);
+
+			// Call the base class initializer
+			base.InitializeScene();
         }
     }
 }

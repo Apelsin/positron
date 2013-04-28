@@ -4,7 +4,7 @@ using FarseerPhysics.Dynamics;
 
 namespace positron
 {
-	public interface IWorldObject : ISceneObject
+	public interface IWorldObject : ISceneElement
 	{
 		void Update(double time);
 
@@ -12,7 +12,7 @@ namespace positron
 		/// Connects the Body object with this IWorldObject by
 		/// setting the body's user data variable to this object
 		/// </summary>
-		void ConnectBody();
+		void InitBlueprints();
 		void Derez();
 
 		Body Body { get; set; }

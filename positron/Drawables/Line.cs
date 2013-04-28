@@ -79,11 +79,11 @@ namespace positron
 		{
 			// Do something!
 		}
-		public virtual void SetChange (object sender, SetChangeEventArgs e)
+		public virtual void SetChange (object sender, RenderSetChangeEventArgs e)
 		{
 			this._RenderSet = e.To;
 		}
-		public virtual void ConnectBody ()
+		public virtual void InitBlueprints ()
 		{
 			Body.UserData = this;
 		}

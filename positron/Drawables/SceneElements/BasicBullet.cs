@@ -32,9 +32,10 @@ namespace positron
 			Body.IsBullet = true;
 			Body.OnCollision += (Fixture fixtureA, Fixture fixtureB, Contact contact) =>
 			{
-                Program.MainGame.UpdateEventQueue.Enqueue((sender, e) =>
+                Program.MainGame.AddUpdateEventHandler(this, (sender, e) =>
                 {
                     Derez();
+					return true;
                 });
 				return true;
 			};

@@ -2,7 +2,7 @@ using System;
 
 namespace positron
 {
-	public class Door : SpriteObject, IInteractiveObject
+	public class Door : SpriteObject, IActuator
 	{
 		public event ActionEventHandler Action;
 		protected Scene _NextScene;
@@ -25,10 +25,14 @@ namespace positron
 		{
 		}
 		public Door (RenderSet render_set, double x, double y, Scene next_scene):
+			this(render_set, x, y)
+		{
+			_NextScene = next_scene;
+		}
+		public Door (RenderSet render_set, double x, double y):
 			base(render_set, x, y, Texture.Get("sprite_doorway"))
 		{
 			_SpriteBody.CollisionCategories = FarseerPhysics.Dynamics.Category.None;
-			_NextScene = next_scene;
 		}
 		public void OnAction (object sender, ActionEventArgs e)
 		{
@@ -37,7 +41,8 @@ namespace positron
 				Player player = (Player)sender;
 				if(_Destination != null)
 				{
-					player.Position = _Destination._Position;
+					// TODO: make this work
+					//player.Position = _Destination._Position + player.Position - Position;
 				}
 				Program.MainGame.ChangeScene(_Destination == null ? _NextScene == null ?  null : _NextScene : _Destination.RenderSet.Scene);
 			}

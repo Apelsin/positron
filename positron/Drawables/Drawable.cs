@@ -1,14 +1,18 @@
 using System;
+using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
-	public abstract class Drawable : IRenderable, ISceneObject
+	public abstract class Drawable : IRenderable, ISceneElement
 	{
+		public event RenderSetChangeEventHandler RenderSetEntry;
+		public event RenderSetChangeEventHandler RenderSetTransfer;
 		#region State
 		#region Member Variables
 		protected RenderSet _RenderSet;
+		protected List<IRenderable> _Blueprints;
         #region OpenGL
         #endregion
         protected Vector3d _Position = new Vector3d();
@@ -62,6 +66,9 @@ namespace positron
 			get { return _Theta; }
 			set { _Theta = value; }
 		}
+		public virtual List<IRenderable> Blueprints {
+			get { return _Blueprints; }
+		}
 		/// <summary>
 		/// Gets the render set associated with this drawable.
 		/// Specifying a null render set in the constructor
@@ -83,6 +90,9 @@ namespace positron
 			_RenderSet = render_set;
             if(_RenderSet != null)
 			    _RenderSet.Add(this);
+			RenderSetTransfer += (object sender, RenderSetChangeEventArgs e) => {
+				this._RenderSet = e.To;
+			};
 		}
         /// <summary>
         /// Creates geometry information necessary for VBO
@@ -94,13 +104,19 @@ namespace positron
             // Some inexpensive drawables are built each frame
             // Therefore it is not required to implement Build()
         }
+		public virtual void OnRenderSetEntry(object sender, RenderSetChangeEventArgs e)
+		{
+			if(RenderSetEntry != null)
+				RenderSetEntry(sender, e);
+		}
+		public virtual void OnRenderSetTransfer(object sender, RenderSetChangeEventArgs e)
+		{
+			if(RenderSetTransfer != null)
+				RenderSetTransfer(sender, e);
+		}
 		public abstract void Render(double time);
 		public abstract double RenderSizeX();
 		public abstract double RenderSizeY();
-		public virtual void SetChange (object sender, SetChangeEventArgs e)
-		{
-			this._RenderSet = e.To;
-		}
 		protected virtual Vector3d CalculateMovementParallax ()
 		{
 			if(this._RenderSet == this._RenderSet.Scene.HUD)

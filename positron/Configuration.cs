@@ -15,7 +15,7 @@ namespace positron
 		private static double _KeyPressTimeTolerance;
 		private static double _FrameRateCap;
 		private static int _ThreadSleepTimeStep;
-		private static int _ThreadSleepToleranceStep;
+		//private static int _ThreadSleepToleranceStep;
 		private static float _MaxWorldTimeStep;
 		private static bool _AdaptiveTimeStep;
 		private static int _CanvasWidth;
@@ -52,15 +52,16 @@ namespace positron
 			*/
 			Console.WriteLine ("Using artwork path {0}", artwork_path);
 			Set("ArtworkPath", artwork_path);
+			Set ("SceneBeginning", "SceneThree");
 			_MetersInPixels = 96.0;
 			_ForceDueToGravity = -9.8;
 			_KeyPressTimeTolerance = 0.1;
-			_FrameRateCap = 30;
+			_FrameRateCap = 59.5;
 			_ThreadSleepTimeStep = 1;
 			_MaxWorldTimeStep = 0.04f;
 			_AdaptiveTimeStep = false;
-			_CanvasWidth = 600;
-			_CanvasHeight = 400;
+			_CanvasWidth = 1400 / 2;
+			_CanvasHeight = 800 / 2;
 			_DrawBlueprints = false;
 		}
 		#region Alias Accessors

@@ -4,6 +4,7 @@ namespace positron
 {
 	public class BunkerWall : SpriteObject, IVariant
 	{
+		protected static Random Variance = new Random(2944);
 		protected int _Variant = 0;
 		protected int _Direction = 0;
 		public int Variant {
@@ -17,6 +18,12 @@ namespace positron
 		public BunkerWall (Scene scene, double x, double y):
 			base(scene.Stage, x, y, Texture.Get("sprite_bunker_wall"))
 		{
+			_Variant = Variance.Next(Texture.Regions.Length);
+			PlayAnimation(new SpriteAnimation(Texture, _Variant));
+		}
+		public override void Update (double time)
+		{
+			base.Update(time);
 		}
 		protected override void Draw ()
 		{

@@ -44,6 +44,7 @@ namespace positron
 				PositronGame.InitialSetup ();
 				// Instantiate a main game
 				MainGame = new PositronGame ();
+				// Game setup
 				MainGame.Setup ();
 				MainGame.SetupTests ();
 				// TEST: Dump all the settings:

@@ -39,25 +39,48 @@ namespace positron
 		public event HealthChangedEventHandler HealthChanged;
 		#endregion
 
+		protected Fixture FixtureUpper;
+		protected Fixture FixtureLower;
+
+		protected List<Fixture> FixtureLowerColliders = new List<Fixture>();
+
 		protected int _HealthMax = 4;
 		protected int _Health;
 		protected int MoveXIdx = 0;
 		protected int MoveYIdx = 0;
 		protected float _MovementDamping = 3.0f;
+
+		protected bool _WieldingGun = false;
+		protected bool _WouldCrouch = false;
+
 		protected Vector3d _DampVeloNormal = new Vector3d();
 		protected Stopwatch JumpTimer = new Stopwatch();
 		protected Stopwatch WalkAnimationTimer = new Stopwatch();
+		protected Stopwatch GunStowTimer = new Stopwatch();
 
-		protected SpriteAnimation AnimationStationary;
-		protected SpriteAnimation AnimationWalk;
-		protected SpriteAnimation AnimationStationaryFw;
-		protected SpriteAnimation AnimationWalkFw;
-		protected SpriteAnimation AnimationStationaryBk;
-		protected SpriteAnimation AnimationWalkBk;
+		protected SpriteAnimation
+			AnimationStand,
+			AnimationWalk,
+			AnimationStationaryFw,
+			AnimationWalkFw,
+			AnimationStationaryBk,
+			AnimationWalkBk,
 
-		protected SpriteAnimation AnimationPreJump;
-		protected SpriteAnimation AnimationJumping;
-		protected SpriteAnimation AnimationEndJump;
+			AnimationCrouch,
+			AnimationCrawl,
+
+			AnimationPreJump,
+			AnimationJumping,
+			AnimationEndJump,
+
+			AnimationAimGunFwd,
+			AnimationAimGunFwdUp,
+			AnimationAimGunFwdDown,
+			AnimationAimGunFwdCrouch,
+			AnimationAimGunFwdJump;
+
+		SpriteAnimation AnimationStationary { get { return _WouldCrouch ? AnimationCrouch : AnimationStand; } }
+		SpriteAnimation AnimationMove { get { return _WouldCrouch ? AnimationCrawl : AnimationWalk; } }
 
 		protected ManualResetEvent JumpRayMRE = new ManualResetEvent(false);
 		protected float[] JumpRayXDirections = new float[] { 0.0f, 0.2f, -0.2f, 0.45f, -0.45f };
@@ -72,6 +95,10 @@ namespace positron
 		}
 		public int Health {
 			get { return _Health; }
+		}
+		public bool WieldingGun {
+			get { return _WieldingGun; }
+			set { _WieldingGun = value; }
 		}
 		#region Behavior
 		public Player(RenderSet render_set, Texture texture):
@@ -89,16 +116,25 @@ namespace positron
 			HealthChanged += (object sender, HealthChangedEventArgs e) => { _Health = Math.Max (0, e.HealthNow); };
 			OnHealthChanged(this, _HealthMax);
 
-			AnimationStationary = 	new SpriteAnimation(texture, 0);
-			AnimationWalk  = 		new SpriteAnimation(texture, true, 1, 2, 3, 4);
-			AnimationStationaryFw = new SpriteAnimation(texture, 5);
-			AnimationWalkFw = 		new SpriteAnimation(texture, true, 6, 7, 8, 9);
-			AnimationStationaryBk = new SpriteAnimation(texture, 10);
-			AnimationWalkBk = 		new SpriteAnimation(texture, true, 11, 12, 13, 14);
-			
-			AnimationPreJump = 		new SpriteAnimation(texture, 15);
-			AnimationJumping = 		new SpriteAnimation(texture, 17);
-			AnimationEndJump = 		new SpriteAnimation(texture, 19);
+			AnimationStand = 	new SpriteAnimation(texture, "protag standing");
+			AnimationWalk  = 		new SpriteAnimation(texture, true, "protag walking 1", "protag walking 2", "protag walking 3", "protag walking 4");
+			AnimationStationaryFw = new SpriteAnimation(texture, "protag standing facing front");
+			AnimationWalkFw = 		new SpriteAnimation(texture, true, "protag walking front 1", "protag walking front 2", "protag walking front 3", "protag walking front 4");
+			AnimationStationaryBk = new SpriteAnimation(texture, "protag standing back" );
+			AnimationWalkBk = 		new SpriteAnimation(texture, true, "protag walking back 1", "protag walking back 2", "protag walking back 3", "protag walking back 4");
+
+			AnimationCrouch =		new SpriteAnimation(texture, true, "protag crouch");
+			AnimationCrawl =		new SpriteAnimation(texture, true, "protag crouch"); // TODO
+
+			AnimationPreJump = 		new SpriteAnimation(texture, "protag jumping 1");
+			AnimationJumping = 		new SpriteAnimation(texture, "protag jumping 2");
+			AnimationEndJump = 		new SpriteAnimation(texture, "protag jumping 4");
+
+			AnimationAimGunFwd = 		new SpriteAnimation(texture, true, "protag aiming gun");
+			AnimationAimGunFwdUp = 		new SpriteAnimation(texture, true, "protag aiming gun up");
+			AnimationAimGunFwdDown = 	new SpriteAnimation(texture, true, "protag aiming gun down");
+			AnimationAimGunFwdCrouch = 	new SpriteAnimation(texture, true, "protag aiming gun crouch");
+			AnimationAimGunFwdJump = 	new SpriteAnimation(texture, true, "protag aiming gun jump");
 
 			AnimationPreJump.Frames[0].FrameTime = 100;
 			//AnimationPreJump.Frames[1].FrameTime = 50;
@@ -106,6 +142,7 @@ namespace positron
 			AnimationEndJump.Frames[0].FrameTime = 200;
 
 			_FrameTimer.Start ();
+			JumpTimer.Start();
 		}
 		public void OnHealthChanged (object sender, int health)
 		{
@@ -113,48 +150,65 @@ namespace positron
 		}
 		protected override void InitPhysics ()
 		{
-
 			float pixel = (float)(1.0 / Configuration.MeterInPixels);
+
+			float fixture_scale_y = 0.75f;
 
 			float corner_clip_x = 7.0f * pixel;
 			float corner_clip_y = 2.0f * pixel;
+			float y_shift = 2.0f * pixel;
 
 
-			float w, h;
+			float w, h, half_h, qtr_h, scl_h;
 			if (Texture.Regions != null && Texture.Regions.Length > 0)
 			{
-				var size = Texture.Regions[0].Size;
-				w = (float)(_Scale.X * size.X / Configuration.MeterInPixels);
-				h = (float)(_Scale.Y * size.Y / Configuration.MeterInPixels);
+				var size = Texture.DefaultRegion.Size;
+				w = (float)(_Scale.X * size.X) * pixel;
+				h = (float)(_Scale.Y * size.Y) * pixel;
 			}
 			else
 			{
-				w = (float)(_Scale.X * Texture.Width / Configuration.MeterInPixels);
-				h = (float)(_Scale.Y * Texture.Height / Configuration.MeterInPixels);
+				w = (float)(_Scale.X * Texture.Width) * pixel;
+				h = (float)(_Scale.Y * Texture.Height) * pixel;
 			}
-			var half_w_h = new Microsoft.Xna.Framework.Vector2(w * 0.5f, h * 0.5f);
+			scl_h = fixture_scale_y * h;
+			half_h = 0.5f * h;
+			var half_w_h = new Microsoft.Xna.Framework.Vector2(w * 0.5f, half_h);
 			var msv2 = new Microsoft.Xna.Framework.Vector2(
-				(float)(_Position.X / Configuration.MeterInPixels),
-				(float)(_Position.Y / Configuration.MeterInPixels));
-			_SpriteBody = BodyFactory.CreateBody(_RenderSet.Scene.World, msv2);
+				(float)(_Position.X) * pixel,
+				(float)(_Position.Y) * pixel);
+			_SpriteBody = BodyFactory.CreateBody(_RenderSet.Scene.World, Microsoft.Xna.Framework.Vector2.Zero, this);
 
-			Microsoft.Xna.Framework.Vector2 a, b, c, d;
+			Microsoft.Xna.Framework.Vector2 a, b, c, d, e00, e01, e10, e11;
 
-			// Attach the main part of the body
 			var verts = new Vertices(new Microsoft.Xna.Framework.Vector2[] {
-				new Microsoft.Xna.Framework.Vector2(corner_clip_x, 0.0f) - half_w_h,
-				new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, 0.0f) - half_w_h,
-				b = new Microsoft.Xna.Framework.Vector2(w, corner_clip_y) - half_w_h,
-				c = new Microsoft.Xna.Framework.Vector2(w, h - corner_clip_y) - half_w_h,
-				new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, h) - half_w_h,
-				new Microsoft.Xna.Framework.Vector2(corner_clip_x, h) - half_w_h,
-				d = new Microsoft.Xna.Framework.Vector2(0.0f, h - corner_clip_y) - half_w_h,
-				a = new Microsoft.Xna.Framework.Vector2(0.0f, corner_clip_y) - half_w_h
+				e00 = new Microsoft.Xna.Framework.Vector2(corner_clip_x, 0.0f),
+				e10 = new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, 0.0f),
+				b = new Microsoft.Xna.Framework.Vector2(w, corner_clip_y),
+				c = new Microsoft.Xna.Framework.Vector2(w, scl_h - corner_clip_y),
+				e11 = new Microsoft.Xna.Framework.Vector2(w - corner_clip_x, scl_h),
+				e01 = new Microsoft.Xna.Framework.Vector2(corner_clip_x, scl_h),
+				d = new Microsoft.Xna.Framework.Vector2(0.0f, scl_h - corner_clip_y),
+				a = new Microsoft.Xna.Framework.Vector2(0.0f, corner_clip_y),
 			});
 
-			FixtureFactory.AttachPolygon(verts, 100.0f, _SpriteBody);
+			var verts_upper = new Vertices();
+			verts.ForEach(v => {
+				v.X -= half_w_h.X;
+				v.Y = y_shift + v.Y * fixture_scale_y + half_h * (0.5f - fixture_scale_y);
+				verts_upper.Add(v);
+				//Console.Write("{0}, ", v.ToString());
+			});
+			var verts_lower = new Vertices();
+			verts.ForEach(v => {
+				v.X -= half_w_h.X;
+				v.Y = y_shift + v.Y * fixture_scale_y - half_h;
+				verts_lower.Add(v);
+				//Console.Write("{0}, ", v.ToString());
+			});
 
-			//FixtureFactory.AttachRectangle(w, h, 100.0f, new Microsoft.Xna.Framework.Vector2(w * 0.5f, h * 0.5f), _SpriteBody);
+			FixtureUpper = FixtureFactory.AttachPolygon(verts_upper, 100.0f, _SpriteBody);
+			FixtureLower = FixtureFactory.AttachPolygon(verts_lower, 100.0f, _SpriteBody);
 
 			_SpriteBody.BodyType = BodyType.Dynamic;
 			_SpriteBody.FixedRotation = true;
@@ -164,26 +218,63 @@ namespace positron
 			Body.OnSeparation += HandleOnSeparation;
 			Preserve = true;
 
+			Body.SleepingAllowed = false; // Avoid dumb shit
+
 			// HACK: Only enable bodies for which the object is in the current scene
 			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
 
-			ConnectBody();
+			InitBlueprints();
 
-			JumpTimer.Start();
+//			AABB lol;
+//			FixtureLower.GetAABB(out lol, 0);
+//			Console.WriteLine("AT FIRST I WAS ALL LIKE: {0}", lol.LowerBound);
+//			Position = _Position;
+//			FixtureLower.GetAABB(out lol, 0);
+//			Console.WriteLine("BUT THEN I: {0}", lol.LowerBound);
 		}
 		protected bool HandleOnCollision (Fixture fixture_a, Fixture fixture_b, Contact contact)
 		{
+			if(fixture_a == FixtureLower)
+				FixtureLowerColliders.Add(fixture_b);
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
 				// TODO: Have these values be not hard-coded
-				if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
+				lock(Program.MainUpdateLock)
 				{
-					if(_AnimationCurrent == AnimationPreJump ||
-					   _AnimationCurrent == AnimationJumping)
+					if(fixture == FixtureUpper || fixture == FixtureLower)
+						return 1.0f;
+					if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
 					{
-						PlayAnimation(AnimationEndJump);
-						_AnimationNext = AnimationStationary;
+						if(_AnimationCurrent == AnimationPreJump ||
+						   _AnimationCurrent == AnimationJumping)
+						{
+							PlayAnimation(AnimationEndJump);
+							_AnimationNext = new Lazy<SpriteAnimation>( // BECAUSE YOLO
+								() => { return _WouldCrouch ? AnimationCrouch : AnimationStand; });
+
+							// TODO: See the other comment regarding disabling the
+							// lower body fixture; this is for collision rather than
+							// separation
+
+							// TODO: Hack apart Farseer Physics to make it suck less
+							//var manifold = new Manifold();
+							//manifold.LocalPoint = point;
+							//manifold.LocalNormal = normal;
+
+							AABB fixture_upper_aabb, fixture_lower_aabb;
+
+							FixtureLower.CollisionCategories = Category.All;
+
+							FixtureUpper.GetAABB(out fixture_upper_aabb, 0);
+							FixtureLower.GetAABB(out fixture_lower_aabb, 0);
+
+							if(FixtureLower.OnCollision != null)
+								FixtureLower.OnCollision(FixtureLower, fixture, null);
+							if(fixture.OnCollision != null)
+								fixture.OnCollision(fixture, FixtureLower, null);
+							
+							PositionWorldY += fixture_upper_aabb.LowerBound.Y - fixture_lower_aabb.LowerBound.Y;
+						}
 					}
-					//Console.WriteLine (VelocityY);
 				}
 				return 0;
 			};
@@ -192,22 +283,8 @@ namespace positron
 		}
 		protected void HandleOnSeparation (Fixture fixture_a, Fixture fixture_b)
 		{
-		}
-		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
-		{
-			if (e.Key == Key.Space) {
-				Jump ();
-			} else if (e.Key == Key.E) {
-				DoActionHere ();
-			} else if (e.Key == Key.F) {
-                UpdateEventHandler late;
-                late = (u_sender, u_e) =>
-                {
-					var bullet = new BasicBullet(this._RenderSet.Scene, this.PositionX + (SizeX + 3) * TileX, this.PositionY, 500 * TileX, 0);
-                };
-                Program.MainGame.UpdateEventQueue.Enqueue(late);
-			}
-			return true;
+			if(fixture_a == FixtureLower)
+				FixtureLowerColliders.Remove(fixture_b);
 		}
 		protected void DoActionHere ()
 		{
@@ -218,9 +295,9 @@ namespace positron
 					var world_object = fixture.Body.GetWorldObject ();
 					if(world_object != null)
 					{
-						if(world_object is IInteractiveObject)
+						if(world_object is IActuator)
 						{
-							var interactive_object = (IInteractiveObject)world_object;
+							var interactive_object = (IActuator)world_object;
 							interactive_object.OnAction(this, new ActionEventArgs());
 							break;
 						}
@@ -228,13 +305,50 @@ namespace positron
 				}
 			}
 		}
-		public bool KeyUp(object sender, KeyboardKeyEventArgs e)
+		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{
+			if (e.Key == Key.Space) {
+				Jump ();
+			} else if (e.Key == Key.W && !_WieldingGun) {
+				DoActionHere ();
+			} else if (e.Key == Key.LShift) {
+				_WieldingGun = true;
+			} else if (e.Key == Key.S) {
+				_WouldCrouch = true;
+			}
+			return true;
+		}
+
+		public bool KeyUp (object sender, KeyboardKeyEventArgs e)
+		{
+			if (e.Key == Key.LShift) {
+				UpdateEventHandler late;
+				late = (u_sender, u_e) =>
+				{
+					// TODO: Un-hard-code this:
+					Vector2d shot_offset = new Vector2d ((SizeX + 3) * TileX, SizeY * 0.23);
+					var bullet = new BasicBullet (this._RenderSet.Scene,
+					                             this.PositionX + shot_offset.X,
+					                             this.PositionY + shot_offset.Y,
+					                             1000 * TileX, 0);
+					GunStowTimer.Restart ();
+					return true;
+				};
+				Program.MainGame.AddUpdateEventHandler (this, late);
+			} else if (e.Key == Key.S) {
+				_WouldCrouch = false;
+			}
 			return true;
 		}
 		public KeysUpdateEventArgs KeysUpdate (object sender, KeysUpdateEventArgs e)
 		{
 			float fx = (e.KeysPressedWhen.Contains (Key.A) ? -1.0f : 0.0f) + (e.KeysPressedWhen.Contains (Key.D) ? 1.0f : 0.0f);
+			if (_WieldingGun) {
+				if (fx != 0.0f) {
+					_TileX = fx;
+					fx = 0.0f;
+				}
+			}
 			//float fy = (e.KeysPressed.Contains(Key.S) ? -1.0f : 0.0f) + (e.KeysPressed.Contains(Key.W) ? 1.0f : 0.0f);
 			fx *= 5f;
 			//vy *= 10f;
@@ -247,17 +361,26 @@ namespace positron
 			}
 
 			float v__x_mag = Math.Abs (v.X);
-
 			if (_AnimationCurrent != AnimationJumping &&
 				_AnimationCurrent != AnimationPreJump &&
 				_AnimationCurrent != AnimationEndJump) {
 				if (v__x_mag > 0.1) {
 					_TileX = v.X > 0.0 ? 1.0 : -1.0;
-					PlayAnimation (AnimationWalk);
-				} else if (v__x_mag < 0.01)
-				{
+					PlayAnimation (AnimationMove);
+				} else if (v__x_mag < 0.01) {
+					if (_WieldingGun) {
+						if (e.KeysPressedWhen.Contains (Key.W))
+							PlayAnimation (AnimationAimGunFwdUp);
+						else if (e.KeysPressedWhen.Contains (Key.S))
+							PlayAnimation (AnimationAimGunFwdDown);
+						else
+							PlayAnimation (AnimationAimGunFwd);
+					}
 					PlayAnimation (AnimationStationary);
 				}
+				else
+					PlayAnimation (AnimationStationary);
+				_AnimationNext = null;
 			}
 
 			//Console.WriteLine("On Platform == {0}", OnPlatform);
@@ -285,20 +408,31 @@ namespace positron
 		public void BodyPlatformRayCast (RayCastCallback callback)
 		{
 			// TODO: make the foot reach distance (in pixels) a member variable
-			AABB main_aabb;
-			lock(Body)
-				Body.FixtureList[0].GetAABB(out main_aabb, 0);
-			float w = main_aabb.UpperBound.X - main_aabb.LowerBound.X;
-			float h = main_aabb.UpperBound.Y - main_aabb.LowerBound.Y;
+			AABB aabb;
+			lock (Body) {
+				if(FixtureLower.CollisionCategories == Category.None && _AnimationCurrent == AnimationJumping)
+					FixtureUpper.GetAABB (out aabb, 0);
+				else
+					FixtureLower.GetAABB (out aabb, 0); // Probably disabled lower fixture during jump
+			}
+			float w = aabb.UpperBound.X - aabb.LowerBound.X;
+			float h = aabb.UpperBound.Y - aabb.LowerBound.Y;
+
+			float pixel = 1.0f / (float)Configuration.MeterInPixels;
+
+			float px = (float)PositionX * pixel;
+			float py = (float)PositionY * pixel;
+
 			float x_start = 0.0f;
-			float y_end = (float)(5.0 / Configuration.MeterInPixels);
-			float y_start = y_end - (float)(_Scale.Y * (0.5 * h));
-			y_end = y_start - 2 * y_end;
+			float spread = 3.0f * pixel;
+			float y_start = aabb.LowerBound.Y + spread;
+			float y_end = aabb.LowerBound.Y - spread;
+
 			for (int i = 0; i < JumpRayXDirections.Length; i++) {
 				float dx = (float)(_Scale.X * w * JumpRayXDirections [i]);
-				var start = new Microsoft.Xna.Framework.Vector2 (x_start + dx, y_start);
-				var end = new Microsoft.Xna.Framework.Vector2 (start.X, y_end);
-				_RenderSet.Scene.RayCast (callback, Body.Position + start, Body.Position + end);
+				var start = new Microsoft.Xna.Framework.Vector2 (px + x_start + dx, py + y_start);
+				var end = new Microsoft.Xna.Framework.Vector2 (start.X, py + y_end);
+				_RenderSet.Scene.RayCast (callback, start, end);
 			}
 		}
 		public void Jump()
@@ -310,22 +444,53 @@ namespace positron
 			/// </summary>
 
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
-				// TODO: Have these values be not hard-coded
-				if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
+				lock(Program.MainUpdateLock)
 				{
-                    JumpTimer.Restart();
-					float jump_imp_y = 3.0f;
-					Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, jump_imp_y);
-					GoneDown = false;
-					PlayAnimation (AnimationPreJump);
-					_AnimationNext = AnimationJumping;
+					// TODO: Have these values be not hard-coded
+					if(fixture == FixtureUpper || fixture == FixtureLower)
+						return 1.0f;
+
+					if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
+					{
+	                    JumpTimer.Restart();
+						float jump_imp_y = 3.0f;
+						Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, jump_imp_y);
+						GoneDown = false;
+						PlayAnimation (AnimationPreJump);
+						_AnimationNext = new Lazy<SpriteAnimation>(() => { return AnimationJumping; });
+
+						FixtureLower.CollisionCategories = Category.None;
+					}
+
+					if(FixtureLower.CollisionCategories == Category.None)
+					{
+						// TODO: Give this functionality to more than just the player class
+						// This code is VERY important; this code tells all of the objects
+						// currently touching the lower fixture to separate as the fixture
+						// is marked as non-colliding. This ensures things like floor switches
+						// don't get stuck closed!
+						FixtureLowerColliders.Add(fixture);
+						FixtureLowerColliders.ForEach(c => {
+							if(FixtureLower.OnSeparation != null)
+								FixtureLower.OnSeparation(FixtureLower, c);
+							if(c.OnSeparation != null)
+								c.OnSeparation(c, FixtureLower);
+							//Console.WriteLine (c.Body.UserData);
+						});
+						FixtureLowerColliders.Clear();
+					}
+
+					return 1.0f;
 				}
-				return 0;
 			};
 			BodyPlatformRayCast(callback);
 		}
-		public override void Update(double time)
+		public override void Update (double time)
 		{
+			if (GunStowTimer.Elapsed.TotalSeconds > 0.2) {
+				GunStowTimer.Reset();
+				WieldingGun = false;
+			}
 			base.Update(time);
 			GoneDown = GoneDown || Body.LinearVelocity.Y < 0.0f;
 			//((BooleanIndicator)Program.MainGame.TestIndicators[0]).State = GoneDown;

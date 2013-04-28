@@ -42,14 +42,39 @@ namespace positron
 						_Frames[i] = new SpriteFrame(texture, region_incices[i], Color.White, frame_time);
 				}
 			}
+			public SpriteAnimation(Texture texture, int frame_time, bool looping, bool ping_pong, params string[] region_labels) :
+				this(texture, frame_time, looping, ping_pong, texture.Regions.Labeled(region_labels))
+			{
+			}
+			public SpriteAnimation(Texture texture, int frame_time, bool looping, params string[] region_labels) :
+				this(texture, frame_time, looping, false, region_labels)
+			{
+			}
+//			public SpriteAnimation(Texture texture, int frame_time, params string[] region_labels) :
+//				this(texture, frame_time, false, region_labels)
+//			{
+//			}
+			public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params string[] region_labels) :
+				this(texture, _FrameTimeDefault, looping, ping_pong, region_labels)
+			{
+			}
+			public SpriteAnimation(Texture texture, bool looping, params string[] region_labels) :
+				this(texture, looping, false, region_labels)
+			{
+			}
+			public SpriteAnimation(Texture texture, params string[] region_labels) :
+				this(texture, false, region_labels)
+			{
+			}
+
+			public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params int[] region_incices) :
+				this(texture, _FrameTimeDefault, looping, ping_pong, region_incices)
+			{
+			}
 			public SpriteAnimation(Texture texture, bool looping, params int[] region_incices):
 				this(texture, looping, false, region_incices)
 			{
 			}
-            public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params int[] region_incices) :
-                this(texture, _FrameTimeDefault, looping, ping_pong, region_incices)
-            {
-            }
 			/// <summary>
 			/// Initializes a new instance of the <see cref="positron.SpriteBase+SpriteAnimation"/> class.
 			/// If region_indices is empty, frame_time instead defines first frame and default frame time is used,
@@ -83,7 +108,7 @@ namespace positron
 			protected int _FrameTime;
 			protected int _TextureRegionIndex;
 			protected VertexBuffer _VBO;
-			protected VertexBuffer _BPVBO;
+			//protected VertexBuffer _BPVBO;
 			protected double _TileX;
 			protected double _TileY;
 			public Color Color {
@@ -116,7 +141,7 @@ namespace positron
 				get { return _Texture.Regions == null ? _Texture.Height : _Texture.Regions [_TextureRegionIndex].SizeY; }
 			}
 			public VertexBuffer VBO { get { return _VBO; } }
-			public VertexBuffer BPVBO { get { return _BPVBO; } }
+			//public VertexBuffer BPVBO { get { return _BPVBO; } }
 			public SpriteFrame (Texture texture, int idx):
 				this(texture, idx, Color.White)
 			{
@@ -137,25 +162,28 @@ namespace positron
 			}
 			public void Build()
 			{
-				double w, h, w_half, h_half, x0, y0, x1, y1, xs, ys;
+				double w, h, w_half, h_half, x0, y0, x1, y1, xx, yy, corner_x, corner_y;
 				if (_Texture.Regions != null && _Texture.Regions.Length > 0)
 				{
-					x0 = _Texture.Regions[_TextureRegionIndex].Low.X;
-					y0 = _Texture.Regions[_TextureRegionIndex].Low.Y;
-					x1 = _Texture.Regions[_TextureRegionIndex].High.X;
-					y1 = _Texture.Regions[_TextureRegionIndex].High.Y;
+					TextureRegion region = _Texture.Regions[_TextureRegionIndex];
+					x0 = region.Low.X;
+					y0 = region.Low.Y;
+					x1 = region.High.X;
+					y1 = region.High.Y;
 					w = x1 - x0;
 					h = y1 - y0;
-					xs = x0 + x1;
-					ys = y0 + y1;
-					x0 = (xs - w * _TileX) * 0.5;
-					y0 = (ys - h * _TileY) * 0.5;
-					x1 = (xs + w * _TileX) * 0.5;
-					y1 = (ys + h * _TileY) * 0.5;
+					xx = x0 + x1;
+					yy = y0 + y1;
+					x0 = (xx - w * _TileX) * 0.5;
+					y0 = (yy - h * _TileY) * 0.5;
+					x1 = (xx + w * _TileX) * 0.5;
+					y1 = (yy + h * _TileY) * 0.5;
 					x0 /= _Texture.Width;
 					x1 /= _Texture.Width;
 					y0 /= _Texture.Height;
 					y1 /= _Texture.Height;
+					corner_x = region.OriginOffsetX;
+					corner_y = region.OriginOffsetY;
 				}
 				else
 				{
@@ -165,13 +193,15 @@ namespace positron
 					y0 = 0.0;
 					x1 = _TileX;
 					y1 = _TileY;
+					corner_x = 0;
+					corner_y = 0;
 				}
 				w_half = w * 0.5;
 				h_half = h * 0.5;
-				var A = new Vertex(-w_half, -h_half, 0.0, 0.0, 0.0, 1.0, x0, -y0);
-				var B = new Vertex(w_half, -h_half, 0.0, 0.0, 0.0, 1.0, x1, -y0);
-				var C = new Vertex(w_half, h_half, 0.0, 0.0, 0.0, 1.0, x1, -y1);
-				var D = new Vertex(-w_half, h_half, 0.0, 0.0, 0.0, 1.0, x0, -y1);
+				var A = new Vertex(corner_x - w_half, corner_y - h_half, 0.0, 0.0, 0.0, 1.0, x0, -y0);
+				var B = new Vertex(corner_x + w_half, corner_y - h_half, 0.0, 0.0, 0.0, 1.0, x1, -y0);
+				var C = new Vertex(corner_x + w_half, corner_y + h_half, 0.0, 0.0, 0.0, 1.0, x1, -y1);
+				var D = new Vertex(corner_x - w_half, corner_y + h_half, 0.0, 0.0, 0.0, 1.0, x0, -y1);
 				_VBO = new VertexBuffer(A, B, C, D);
 				//BPVBO = new VertexBuffer(A, B, C, D);
 			}
@@ -189,7 +219,9 @@ namespace positron
 
 		protected SpriteAnimation _AnimationDefault;
 		protected SpriteAnimation _AnimationCurrent;
-		protected SpriteAnimation _AnimationNext;
+		protected Lazy<SpriteAnimation> _AnimationNext;
+
+		protected SpriteFrame _FrameStatic;
         /// <summary>
         /// The blueprint vertex buffer object
         /// </summary>
@@ -202,11 +234,11 @@ namespace positron
 		public SpriteAnimation AnimationCurrent {
 			get { return _AnimationCurrent; }
 		}
-		public SpriteAnimation AnimationNext {
+		public Lazy<SpriteAnimation> AnimationNext {
 			get { return _AnimationNext; }
 		}
 		public SpriteFrame FrameCurrent {
-			get { return _AnimationCurrent.Frames[_AnimationFrameIndex]; }
+			get { return _AnimationCurrent == null ? _FrameStatic : _AnimationCurrent.Frames[_AnimationFrameIndex]; }
 		}
 //		public bool Animate {
 //			get { return _FrameTimer != null && _FrameTimer.IsRunning; }
@@ -252,7 +284,7 @@ namespace positron
 		}
 
 		public VertexBuffer VBO { get { return FrameCurrent.VBO; } }
-		public VertexBuffer BPVBO { get { return FrameCurrent.BPVBO; } }
+		//public VertexBuffer BPVBO { get { return FrameCurrent.BPVBO; } }
 
 		#endregion
 		#endregion
@@ -286,13 +318,14 @@ namespace positron
 			_AnimationFrameIndex = 0;
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
-			_Position.X = x + FrameCurrent.SizeX * 0.5;
-			_Position.Y = y + FrameCurrent.SizeY * 0.5;
+			_FrameStatic = _AnimationDefault.Frames[0];
+			_Position.X = x;// + SizeX * 0.5;
+			_Position.Y = y;// + SizeY * 0.5;
 		}
 		public SpriteBase CenterShift ()
 		{
-			_Position.X -= FrameCurrent.SizeX * 0.5;
-			_Position.Y -= FrameCurrent.SizeY * 0.5;
+			PositionX -= FrameCurrent.SizeX * 0.5;
+			PositionY -= FrameCurrent.SizeY * 0.5;
 			return this;
 		}
 		// TODO: rotation stuff here
@@ -321,15 +354,18 @@ namespace positron
             GL.Color4(_Color);
             Texture.Bind(); // Bind to (current) sprite texture
             VBO.Render(); // Render the vertex buffer object
-            if (Configuration.DrawBlueprints && BPVBO != null)
+            if (Configuration.DrawBlueprints /*&& BPVBO != null*/)
             {
                 GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
-				BPVBO.Render(); // Render blueprint objects
+				//BPVBO.Render(); // Render blueprint objects
+				if(_Blueprints != null)
+					foreach(IRenderable r in _Blueprints)
+						r.Render(0.0);
             }
         }
         public override void Build()
         {
-			// SpriteFrame handles Build();
+			// SpriteFrame handles Build() for frames
 		}
 		public virtual void Update (double time)
 		{
@@ -347,7 +383,8 @@ namespace positron
 							{
 								_FrameTimer.Stop ();
 								_AnimationFrameIndex = _AnimationCurrent.FrameCount - 1;
-								PlayAnimation(_AnimationNext);
+								if(_AnimationNext != null)
+									PlayAnimation(_AnimationNext.Value);
 							}
 						}
 					}
@@ -362,10 +399,12 @@ namespace positron
 			if(animation != _AnimationCurrent)
 				StartAnimation(animation);
 		}
-		protected void StartAnimation(SpriteAnimation animation)
+		protected void StartAnimation (SpriteAnimation animation)
 		{
-			if(animation == null)
-				animation = _AnimationNext;
+			if (animation == null) {
+				if (_AnimationNext != null)
+					animation = _AnimationNext.Value;
+			}
 			if (animation != null) {
 				_AnimationFrameIndex = 0;
 				_AnimationCurrent = animation;

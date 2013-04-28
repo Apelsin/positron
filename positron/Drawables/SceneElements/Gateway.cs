@@ -2,11 +2,11 @@ using System;
 
 namespace positron
 {
-	public class Gateway : SpriteObject, IInteractiveObject
+	public class Gateway : SpriteObject, IActuator, IStateShare<bool>
 	{
 		public event ActionEventHandler Action;
 		protected SharedState<bool> _State;
-
+		public SharedState<bool> State { get { return _State; } }
 		protected SpriteAnimation Open;
 		protected SpriteAnimation Close;
 
@@ -29,6 +29,10 @@ namespace positron
 				PlayAnimation (e.CurrentState ? Open : Close);
 				Body.Enabled = (RenderSet.Scene == Program.MainGame.CurrentScene) && !e.CurrentState;
 			};
+		}
+		protected override void EnteredRenderSet (object sender, RenderSetChangeEventArgs e)
+		{
+			Body.Enabled = (RenderSet.Scene == e.To.Scene) && !_State;
 		}
 		public void OnAction (object sender, ActionEventArgs e)
 		{

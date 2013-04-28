@@ -4,8 +4,12 @@ using System.Drawing;
 
 using OpenTK;
 
-using FarseerPhysics.Dynamics;
+using FarseerPhysics.Collision;
 using FarseerPhysics.Common;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Dynamics.Contacts;
+using FarseerPhysics.Factories;
+
 
 namespace positron
 {
@@ -32,6 +36,33 @@ namespace positron
                 regions[i] = new TextureRegion(low, high);
             }
         }
+		/// <summary>
+		///	Returns the index of the texture region matching a given label
+		/// </summary>
+		public static int Labeled(this TextureRegion[] regions, string label_seek, int no_match_index = -1)
+		{
+			for (int i = 0; i < regions.Length; i++)
+				if(regions[i].Label == label_seek)
+					return i;
+			return no_match_index;
+		}
+		/// <summary>
+		/// Returns the index of the texture region matching a given label; unoptimized multi-region lookup
+		/// </summary>
+		public static int[] Labeled(this TextureRegion[] regions, int no_match_index, params string[] labels_seek)
+		{
+			int[] region_indices = new int[labels_seek.Length];
+			for(int i = 0; i < labels_seek.Length; i++)
+				region_indices[i] = regions.Labeled(labels_seek[i], no_match_index);
+			return region_indices;
+		}
+		/// <summary>
+		/// Returns the index of the texture region matching a given label; unoptimized multi-region lookup
+		/// </summary>
+		public static int[] Labeled(this TextureRegion[] regions, params string[] labels_seek)
+		{
+			return regions.Labeled(-1, labels_seek);
+		}
 		public static IWorldObject GetWorldObject(this Body body)
 		{
 			return (IWorldObject)body.UserData;
@@ -64,6 +95,17 @@ namespace positron
 					}
 				}
 			}
+		}
+//		public static Microsoft.Xna.Framework.Vector2 ContactNormalAbsolute(this Contact contact)
+//		{
+//			FarseerPhysics.Collision.Manifold manifold = new Manifold();
+//			FixedArray2<Microsoft.Xna.Framework.Vector2> points = new FixedArray2<Microsoft.Xna.Framework.Vector2 >();
+//			contact.GetWorldManifold(out manifold.LocalNormal, out points); // Oh God why
+//			return manifold.LocalNormal;
+//		}
+		public static float ConactNormalError(this Contact contact, Microsoft.Xna.Framework.Vector2 v2)
+		{
+			return Microsoft.Xna.Framework.Vector2.Distance(contact.Manifold.LocalNormal, v2);
 		}
 	}
 }
