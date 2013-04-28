@@ -109,22 +109,22 @@ namespace positron
 			HealthChanged += (object sender, HealthChangedEventArgs e) => { _Health = Math.Max (0, e.HealthNow); };
 			OnHealthChanged(this, _HealthMax);
 
-			AnimationStationary = 	new SpriteAnimation(texture, 0);
-			AnimationWalk  = 		new SpriteAnimation(texture, true, 1, 2, 3, 4);
-			AnimationStationaryFw = new SpriteAnimation(texture, 5);
-			AnimationWalkFw = 		new SpriteAnimation(texture, true, 6, 7, 8, 9);
-			AnimationStationaryBk = new SpriteAnimation(texture, 10);
-			AnimationWalkBk = 		new SpriteAnimation(texture, true, 11, 12, 13, 14);
+			AnimationStationary = 	new SpriteAnimation(texture, "protag standing");
+			AnimationWalk  = 		new SpriteAnimation(texture, true, "protag walking 1", "protag walking 2", "protag walking 3", "protag walking 4");
+			AnimationStationaryFw = new SpriteAnimation(texture, "protag standing facing front");
+			AnimationWalkFw = 		new SpriteAnimation(texture, true, "protag walking front 1", "protag walking front 2", "protag walking front 3", "protag walking front 4");
+			AnimationStationaryBk = new SpriteAnimation(texture, "protag standing back" );
+			AnimationWalkBk = 		new SpriteAnimation(texture, true, "protag walking back 1", "protag walking back 2", "protag walking back 3", "protag walking back 4");
 			
-			AnimationPreJump = 		new SpriteAnimation(texture, 15);
-			AnimationJumping = 		new SpriteAnimation(texture, 17);
-			AnimationEndJump = 		new SpriteAnimation(texture, 19);
+			AnimationPreJump = 		new SpriteAnimation(texture, "protag jumping 1");
+			AnimationJumping = 		new SpriteAnimation(texture, "protag jumping 2");
+			AnimationEndJump = 		new SpriteAnimation(texture, "protag jumping 4");
 
-			AnimationAimGunFwd = 		new SpriteAnimation(texture, 20);
-			AnimationAimGunFwdUp = 		new SpriteAnimation(texture, 21);
-			AnimationAimGunFwdDown = 	new SpriteAnimation(texture, 22);
-			AnimationAimGunFwdCrouch = 	new SpriteAnimation(texture, 23);
-			AnimationAimGunFwdJump = 	new SpriteAnimation(texture, 24);
+			AnimationAimGunFwd = 		new SpriteAnimation(texture, "protag aiming gun");
+			AnimationAimGunFwdUp = 		new SpriteAnimation(texture, "protag aiming gun up");
+			AnimationAimGunFwdDown = 	new SpriteAnimation(texture, "protag aiming gun down");
+			AnimationAimGunFwdCrouch = 	new SpriteAnimation(texture, "protag aiming gun crouch");
+			AnimationAimGunFwdJump = 	new SpriteAnimation(texture, "protag aiming gun jump");
 
 			AnimationPreJump.Frames[0].FrameTime = 100;
 			//AnimationPreJump.Frames[1].FrameTime = 50;
@@ -152,7 +152,7 @@ namespace positron
 			float w, h, half_h, qtr_h, scl_h;
 			if (Texture.Regions != null && Texture.Regions.Length > 0)
 			{
-				var size = Texture.Regions[0].Size;
+				var size = Texture.DefaultRegion.Size;
 				w = (float)(_Scale.X * size.X) * pixel;
 				h = (float)(_Scale.Y * size.Y) * pixel;
 			}

@@ -128,41 +128,8 @@ namespace positron
 			bunker_wall.Regions.BuildTiledRegions(1, 16, 32);
 			
 			// Character
-			var character = LoadTexture ("sprite_player", "character", "sprite_protagonist.png");
-			int w = character.Width, h = character.Height;
-			int x = 40, y = h - 188;
-			int x1 = 37, y1 = h - 36;
-			character.Regions = new TextureRegion[25];
-			character.Regions[0] =	new TextureRegion(x + 0, 	y - 64, 	21, 	64);
-			character.Regions[1] =	new TextureRegion(x + 30, 	y - 64, 	21, 	64);
-			character.Regions[2] =	new TextureRegion(x + 59, 	y - 64, 	30, 	64);
-			character.Regions[3] =	new TextureRegion(x + 93, 	y - 64, 	21, 	64);
-			character.Regions[4] =	new TextureRegion(x + 124, 	y - 64, 	30, 	64);
-			
-			character.Regions[5] =	new TextureRegion(x + 0, 	y - 135, 	21, 	64);
-			character.Regions[6] =	new TextureRegion(x + 30, 	y - 135, 	21, 	64);
-			character.Regions[7] =	new TextureRegion(x + 59, 	y - 135, 	30, 	64);
-			character.Regions[8] =	new TextureRegion(x + 93, 	y - 135, 	21, 	64);
-			character.Regions[9] =	new TextureRegion(x + 124, 	y - 135, 	30, 	64);
-			
-			character.Regions[10] = new TextureRegion(x + 0,	y - 210, 	21, 	64);
-			character.Regions[11] = new TextureRegion(x + 30, 	y - 210, 	21, 	64);
-			character.Regions[12] = new TextureRegion(x + 59, 	y - 210, 	30, 	64);
-			character.Regions[13] = new TextureRegion(x + 93, 	y - 210, 	21, 	64);
-			character.Regions[14] = new TextureRegion(x + 124, 	y - 210, 	30, 	64);
-			
-			character.Regions[15] = new TextureRegion(x + 31,	y - 285, 	27, 	42);
-			character.Regions[16] = new TextureRegion(x + 70, 	y - 284, 	39, 	64);
-			character.Regions[17] = new TextureRegion(x + 125, 	y - 283, 	26, 	64);
-			character.Regions[18] = new TextureRegion(x + 161, 	y - 284, 	19, 	64);
-			character.Regions[19] = new TextureRegion(x + 191, 	y - 285, 	27, 	64);
-			
-			character.Regions[20] = new TextureRegion(x1 + 0-5, 	y1 - 66, 	37+5, 	64);
-			character.Regions[21] = new TextureRegion(x1 + 42-5, 	y1 - 66, 	34+5, 	64);
-			character.Regions[22] = new TextureRegion(x1 + 78-5, 	y1 - 66, 	33+5, 	64);
-			character.Regions[23] = new TextureRegion(x1 + 118-5, 	y1 - 66, 	29+5, 	64);
-			character.Regions[24] = new TextureRegion(x1 + 157-5, 	y1 - 64, 	31+5, 	64);
-			
+			var character = PsdLoader.LoadSpriteSheet ("sprite_player", "character", "sprite_protagonist.psd");
+
 			// Dialog box
 			LoadTexture ("sprite_dialog_box_tl", 	"dialog_box",	"sprite_dialog_box_tl.png");
 			LoadTexture ("sprite_dialog_box_t",		"dialog_box",	"sprite_dialog_box_t.png");

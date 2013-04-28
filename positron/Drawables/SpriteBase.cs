@@ -46,6 +46,27 @@ namespace positron
 				this(texture, frame_time, looping, ping_pong, texture.Regions.Labeled(region_labels))
 			{
 			}
+			public SpriteAnimation(Texture texture, int frame_time, bool looping, params string[] region_labels) :
+				this(texture, frame_time, looping, false, region_labels)
+			{
+			}
+//			public SpriteAnimation(Texture texture, int frame_time, params string[] region_labels) :
+//				this(texture, frame_time, false, region_labels)
+//			{
+//			}
+			public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params string[] region_labels) :
+				this(texture, _FrameTimeDefault, looping, ping_pong, region_labels)
+			{
+			}
+			public SpriteAnimation(Texture texture, bool looping, params string[] region_labels) :
+				this(texture, looping, false, region_labels)
+			{
+			}
+			public SpriteAnimation(Texture texture, params string[] region_labels) :
+				this(texture, false, region_labels)
+			{
+			}
+
 			public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params int[] region_incices) :
 				this(texture, _FrameTimeDefault, looping, ping_pong, region_incices)
 			{
