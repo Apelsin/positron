@@ -193,15 +193,15 @@ namespace positron
 				{
 					if(KeysPressed.Contains (Key.ShiftLeft) || KeysPressed.Contains (Key.ShiftRight) )
 					{
-						lock (Program.MainUpdateLock)
-						{
-							Program.MainGame = new PositronGame(); // Godspeed.
-							Program.MainGame.Setup ();
-							Program.MainGame.SetupTests ();
-							GC.Collect();
-							GC.WaitForPendingFinalizers();
-							return;
-						}
+                        Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
+                        {
+                            Program.MainGame = new PositronGame(); // Godspeed.
+                            Program.MainGame.Setup();
+                            Program.MainGame.SetupTests();
+                            GC.Collect();
+                            GC.WaitForFullGCComplete();
+                            return false;
+                        });
 					}
 					else
 						this.Exit();
