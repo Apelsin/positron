@@ -27,8 +27,10 @@ namespace positron
 		{
 			Extend = new SpriteAnimation(Texture, 50, false, false, new[] { "collapsed", "t1", "t2", "extended" });
 			Collapse = new SpriteAnimation(Texture, 50, false, false, new[] { "extended", "t2", "t1", "collapsed" });
-			//Console.WriteLine("Default region for extender platform is {0}", Texture.DefaultRegion.Label);
 			_State = sync_state;
+			RenderSetEntry += (sender, e) => {
+				PlayAnimation(_AnimationDefault = new SpriteAnimation(false, false, _State ? Collapse.Frames[0] : Extend.Frames[0]));
+			};
 			_State.SharedStateChanged += (sender, e) => 
 			{
 				PlayAnimation (e.CurrentState ? Extend : Collapse);

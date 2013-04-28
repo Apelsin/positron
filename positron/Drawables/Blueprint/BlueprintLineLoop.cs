@@ -12,13 +12,13 @@ namespace positron
 	{
 		protected int Lifespan;
 		protected Stopwatch Timer;
-		protected ISceneObject _Instance;
+		protected ISceneElement _Instance;
 		public Vector3d[] Vertices;
-		public BlueprintLineLoop (ISceneObject instance, params Vector3d[] vertices):
+		public BlueprintLineLoop (ISceneElement instance, params Vector3d[] vertices):
 			this(instance, 0, vertices)
 		{
 		}
-		public BlueprintLineLoop (ISceneObject instance, int millis, params Vector3d[] vertices)
+		public BlueprintLineLoop (ISceneElement instance, int millis, params Vector3d[] vertices)
 		{
 			_Instance = instance;
 			Vertices = vertices;

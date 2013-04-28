@@ -168,7 +168,6 @@ namespace positron
 				(float)(_Position.X) * pixel,
 				(float)(_Position.Y) * pixel);
 			_SpriteBody = BodyFactory.CreateBody(_RenderSet.Scene.World, Microsoft.Xna.Framework.Vector2.Zero, this);
-			Position = _Position;
 
 			Microsoft.Xna.Framework.Vector2 a, b, c, d, e00, e01, e10, e11;
 
@@ -209,9 +208,10 @@ namespace positron
 			Body.OnSeparation += HandleOnSeparation;
 			Preserve = true;
 
+			Body.SleepingAllowed = false; // Avoid dumb shit
+
 			// HACK: Only enable bodies for which the object is in the current scene
 			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
-			Body.SleepingAllowed = false; // Avoid dumb shit
 
 			InitBlueprints();
 
@@ -383,12 +383,10 @@ namespace positron
 				if(FixtureLower.CollisionCategories == Category.None && _AnimationCurrent == AnimationJumping)
 					FixtureUpper.GetAABB (out aabb, 0);
 				else
-					FixtureLower.GetAABB (out aabb, 0); // Probably disabled lower during jump
+					FixtureLower.GetAABB (out aabb, 0); // Probably disabled lower fixture during jump
 			}
 			float w = aabb.UpperBound.X - aabb.LowerBound.X;
 			float h = aabb.UpperBound.Y - aabb.LowerBound.Y;
-
-			//Console.WriteLine("{0}", aabb.LowerBound.Y);
 
 			float pixel = 1.0f / (float)Configuration.MeterInPixels;
 

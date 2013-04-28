@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace positron
 {
 	public delegate void RenderSetChangeEventHandler(object sender, RenderSetChangeEventArgs e);
-	public interface ISceneObject
+	public interface ISceneElement
 	{
 		event RenderSetChangeEventHandler RenderSetEntry;
 		event RenderSetChangeEventHandler RenderSetTransfer;

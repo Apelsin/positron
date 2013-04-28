@@ -5,7 +5,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
-	public abstract class Drawable : IRenderable, ISceneObject
+	public abstract class Drawable : IRenderable, ISceneElement
 	{
 		public event RenderSetChangeEventHandler RenderSetEntry;
 		public event RenderSetChangeEventHandler RenderSetTransfer;

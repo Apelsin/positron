@@ -4,7 +4,7 @@ using FarseerPhysics.Dynamics;
 
 namespace positron
 {
-	public interface IWorldObject : ISceneObject
+	public interface IWorldObject : ISceneElement
 	{
 		void Update(double time);
 

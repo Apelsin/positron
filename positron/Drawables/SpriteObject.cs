@@ -34,13 +34,12 @@ namespace positron
 			get {
 				// HACK: tl;dr redo this
 				if(Body != null && Body.Enabled)
-					return new Vector3d(Body.Position.X, Body.Position.Y, _Position.Z);
+					return new Vector3d(Body.Position.X, Body.Position.Y, _Position.Z / Configuration.MeterInPixels);
 				else
-					return _Position;
+					return _Position / Configuration.MeterInPixels;
 			}
 			set {
 				// HACK: same as above
-				_Position = value;
 				if(Body != null && Body.Enabled)
 				{
 					Body.Position =
@@ -50,6 +49,7 @@ namespace positron
 				}
 				else
 				{
+					_Position = value * Configuration.MeterInPixels;
 //					if(this is Door && this.RenderSet.Scene.GetType() == typeof(SceneThree))
 //					{
 //						Console.WriteLine ("{{ Move door to {0} }}, idx becomes {1}", value, Program.MainGame.UpdateEventList.Count);

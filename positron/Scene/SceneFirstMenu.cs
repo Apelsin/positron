@@ -19,7 +19,7 @@ namespace positron
 			SceneExit += (sender, e) => {
 				Player player_1 = Program.MainGame.Player1 = new Player (e.To.Stage, e.To.DoorToPreviousScene.CornerX, e.To.DoorToPreviousScene.CornerY, Texture.Get ("sprite_player"));
 
-				e.To.Follow(player_1);
+				//e.To.Follow(player_1, true);
 
 				Program.MainGame.SetInputAccepters("Player1", new IInputAccepter[]{ player_1 });
 				Follow(player_1);

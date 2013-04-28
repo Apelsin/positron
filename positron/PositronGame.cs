@@ -52,7 +52,7 @@ namespace positron
 		public Hashtable Scenes { get { return _Scenes; } }
 		public Scene CurrentScene {
 			get { return _CurrentScene; }
-			set { ChangeScene (ref _CurrentScene, value); }
+			set { ChangeScene (value); }
 		}
 		public World WorldMain { get { return _WorldMain; } set { _WorldMain = value; } }
 		// TODO: ensure thread safety here:
@@ -123,15 +123,6 @@ namespace positron
 		{
 			TestWatch.Start();
 		}
-		public void ChangeScene (Scene next_scene)
-		{
-			if (_CurrentScene == null) {
-				_CurrentScene = next_scene;
-			}
-			else {
-				ChangeScene (ref _CurrentScene, next_scene);
-			}
-		}
 		protected void ProcessUpdateEventList (double time)
 		{
 			lock (_UpdateEventList)
@@ -159,31 +150,30 @@ namespace positron
 				}
 			}
 		}
-		public void ChangeScene (ref Scene current_scene, Scene next_scene)
+		public void ChangeScene (Scene next_scene)
 		{
-			if (current_scene == next_scene)
+			if (_CurrentScene == next_scene)
 				return;
-			SceneChangeEventArgs scea = new SceneChangeEventArgs(current_scene, next_scene);
-			next_scene.OnSceneEntry(this, scea);
-			if (current_scene != null) {
-				// TODO: Make this better
-				// Get the enumerable for the render sets; these need to be in the same order!
-				IEnumerable<RenderSet> current_sets = current_scene.AllRenderSetsInOrder ();
-				IEnumerable<RenderSet> next_sets = next_scene.AllRenderSetsInOrder ();
-				//IEnumerator<RenderSet> current_set_enum = current_sets.GetEnumerator ();
-				IEnumerator<RenderSet> next_set_enum = next_sets.GetEnumerator ();
-				RenderSetChangeEventArgs rscea;
-				lock (Program.MainUpdateLock) {										// Don't even think about not locking this threaded monstrosity
-					ProcessUpdateEventList(0.0);
+			SceneChangeEventArgs scea = new SceneChangeEventArgs (_CurrentScene, next_scene);
+			IEnumerable<RenderSet> next_sets = next_scene.AllRenderSetsInOrder ();
+			IEnumerator<RenderSet> next_set_enum = next_sets.GetEnumerator ();
+			IEnumerable<RenderSet> current_sets = null;
+			IEnumerator<RenderSet> current_set_enum = null;
+			RenderSetChangeEventArgs rscea;
+			lock (Program.MainUpdateLock) {												// Don't even think about not locking this threaded monstrosity
+				if (_CurrentScene != null) {
+					// Get the enumerable for the render sets; these need to be in the same order!
+					current_sets = _CurrentScene.AllRenderSetsInOrder ();
+					current_set_enum = current_sets.GetEnumerator ();					// Enumerate from the beginning of the set enumerable
 					foreach (RenderSet render_set in current_sets) {
 						if (!next_set_enum.MoveNext ())
 							break;
-						rscea = new RenderSetChangeEventArgs(render_set, next_set_enum.Current);
+						rscea = new RenderSetChangeEventArgs (render_set, next_set_enum.Current);
 						// Process this scene
 						for (int i = 0; i < render_set.Count;) {						// For each renderable in render set
 							var renderable = render_set [i];
-							if (renderable is ISceneObject) {							// If object also implements scene object
-								ISceneObject scene_object = (ISceneObject)renderable;	// Cast to scene object
+							if (renderable is ISceneElement) {							// If object also implements scene object
+								ISceneElement scene_object = (ISceneElement)renderable;	// Cast to scene object
 								if (scene_object is IWorldObject) {
 									IWorldObject world_object = (IWorldObject)scene_object;
 									// Disable the body object is not preserved
@@ -198,29 +188,63 @@ namespace positron
 							}
 							i++;
 						}
-						// Process next scene
-						foreach (IRenderable renderable in next_set_enum.Current) {
-							if (renderable is ISceneObject) {							// If object also implements scene object
-								ISceneObject scene_object = (ISceneObject)renderable;	// Cast to scene object
-								scene_object.OnRenderSetEntry(this, rscea);
+					}
+					foreach (RenderSet render_set in next_scene.AllRenderSetsInOrder()) {
+						if (!current_set_enum.MoveNext ())
+							break;
+						// Process next scene, PART 1
+						foreach (IRenderable renderable in render_set) {
+							if (renderable is ISceneElement) {							// If object also implements scene object
+								if (renderable is IWorldObject) {
+									IWorldObject world_object = (IWorldObject)renderable;
+									// HACK: temporarily enable all bodies in this renderset
+									// in order to allow deferred updates to affect bodies
+									world_object.Body.Enabled = true;
+								}
 							}
 						}
 					}
-					// Scene exit event must be synchronized with update event list
-					// for world-dependent operations
-					AddUpdateEventHandler(this, (sender, e) => {
-						if(_CurrentScene == scea.To)
-							scea.From.OnSceneExit (this, scea); return true;
-					});
 				}
-				if (current_scene.FollowTarget != null && current_scene.FollowTarget.Preserve) {
-					next_scene.Follow (current_scene.FollowTarget, true);
-					//next_scene._ViewPosition = current_scene._ViewPosition;
+				// HACK: Perform a zero-time update to transparently perform
+				// deferred updates without affecting their fixtures, etc.
+				//_WorldMain.Step (0.0f);
+				// HACK: Perform deferred updates while all bodies are enabled
+				// and have their fixtures' proxies set up (???) and yeah...
+				ProcessUpdateEventList (0.0);
+				if(_CurrentScene != null)
+					_CurrentScene.OnSceneExit (this, scea);
+				next_scene.OnSceneEntry (this, scea);
+				// Enumerate from the beginning of the set enumerable
+				if(_CurrentScene != null)
+					current_set_enum = current_sets.GetEnumerator ();
+				// Process next scene, PART 2
+				foreach (RenderSet render_set in next_scene.AllRenderSetsInOrder()) {
+					if(current_set_enum != null)
+					{
+						if (!current_set_enum.MoveNext ())
+							break;
+						rscea = new RenderSetChangeEventArgs (current_set_enum.Current, render_set);
+					}
+					else
+						rscea = new RenderSetChangeEventArgs (null, render_set);
+					foreach (IRenderable renderable in render_set) {
+						if (renderable is ISceneElement) {
+							ISceneElement scene_element = (ISceneElement)renderable;
+							// Body.Enabled should be updated with a RenderSetEntry event handler
+							scene_element.OnRenderSetEntry (this, rscea);
+						}
+					}
 				}
-				
+				var last_scene = _CurrentScene;
+				AddUpdateEventHandler(this, (sender, e) => {
+					if (last_scene != null && last_scene.FollowTarget != null && last_scene.FollowTarget.Preserve) {
+						next_scene.Follow (last_scene.FollowTarget, true);
+						//next_scene._ViewPosition = current_scene._ViewPosition;
+					}
+					return true;
+				});
 			}
-			current_scene = next_scene;	// Update the scene reference
-			ProcessUpdateEventList(0.0);
+			_CurrentScene = next_scene;	// Update the scene reference
 		}
 		public void Draw(double time)
 		{

@@ -72,7 +72,6 @@
     <Compile Include="Drawables\SpriteBase.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintLine.cs" />
     <Compile Include="VertexBuffer.cs" />
-    <Compile Include="Drawables\ISceneObject.cs" />
     <Compile Include="Drawables\HUD\HealthMeter.cs" />
     <Compile Include="PositronGame.cs" />
     <Compile Include="Drawables\SceneElements\BunkerFloor.cs" />
@@ -107,6 +106,7 @@
     <Compile Include="Drawables\SceneElements\ExtenderPlatform.cs" />
     <Compile Include="Drawables\SceneElements\BaddieRobotCrawlerShooter.cs" />
     <Compile Include="IShooter.cs" />
+    <Compile Include="Drawables\ISceneElement.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

@@ -257,10 +257,8 @@ namespace positron
 				{
                     if (_FollowTarget != null)
                     {
-						Vector3d pan = CalculatePan();
-						//float a = Math.Min (1.0f, 2.0f * (float)time + 1.0f / Math.Max(1.0f, (float)(pan - _ViewPosition).LengthFast));
-						float a = Math.Min (1.0f, (5000f * (float)time) / (float)Math.Max(50f, (pan - _ViewPosition).Length));
-						_ViewPosition = Vector3d.Lerp(_ViewPosition, pan, a);
+						CalculatePan((float)time);
+
                         GL.Translate(Math.Round(_ViewPosition.X), Math.Round(_ViewPosition.Y), Math.Round(_ViewPosition.Z));
                         //GL.Translate(ScenePan);
                     }
@@ -276,29 +274,24 @@ namespace positron
 				HUDBlueprint.Render (time);
 			}
 		}
-		protected Vector3d CalculatePan()
+		protected void CalculatePan (float time)
 		{
-			double view_size_by_two_x = _ViewSize.X * 0.5;
-			double view_size_by_two_y = _ViewSize.Y * 0.5;
-			double view_size_by_5_x = _ViewSize.X * 0.2;
-			double view_size_by_5_y = _ViewSize.Y * 0.2;
-
-			Vector3d pan = new Vector3d(0.5 * ViewWidth, 0.4 * ViewHeight, 0.0 ) - _FollowTarget.Position;
-			double a = Math.Abs (_ViewPosition.X - pan.X);
-			double b = Math.Abs (_ViewPosition.Y - pan.Y);
-			//Console.WriteLine("a  == {0}, b  == {1}", a, b);
-			a = Helper.SmootherStep(view_size_by_5_x - 64, view_size_by_5_x, a);
-			b = Helper.SmootherStep(view_size_by_5_y - 64, view_size_by_5_y, b);
-			//Console.WriteLine("a' == {0}, b' == {1}", a, b);
-
-			pan.X = _ViewPosition.X + (pan.X - _ViewPosition.X) * a;
-			pan.Y = _ViewPosition.Y + (pan.Y - _ViewPosition.Y) * b;
-
-			pan += _ViewOffset;
-
-			//if(typeof(Player) == typeof(Player))
-			//	pan -= ((Player)_FollowTarget).DampVeloNormal * 50;
-			return pan;
+			double view_size_scaled_x = _ViewSize.X * 0.2;
+			double view_size_scaled_y = _ViewSize.Y * 0.2;
+			Vector3d pan = new Vector3d (0.5 * ViewWidth, 0.4 * ViewHeight, 0.0) - _FollowTarget.Position;
+			if (time > 0.0f) {
+				double a = Math.Abs (_ViewPosition.X - pan.X);
+				double b = Math.Abs (_ViewPosition.Y - pan.Y);
+				a = Helper.SmootherStep (view_size_scaled_x - 64, view_size_scaled_x, a);
+				b = Helper.SmootherStep (view_size_scaled_y - 64, view_size_scaled_y, b);
+				pan.X = _ViewPosition.X + (pan.X - _ViewPosition.X) * a;
+				pan.Y = _ViewPosition.Y + (pan.Y - _ViewPosition.Y) * b;
+				float alpha = Math.Min (1.0f, (2000f * (float)time) / (float)Math.Max (50f, (pan - _ViewPosition).Length));
+				pan = Vector3d.Lerp (_ViewPosition, pan, alpha);
+				//if(typeof(Player) == typeof(Player))
+				//	pan -= ((Player)_FollowTarget).DampVeloNormal * 50;
+			}
+			_ViewPosition = pan;
 		}
 		public IEnumerable<RenderSet> AllRenderSetsInOrder()
 		{
@@ -328,7 +321,7 @@ namespace positron
 		{
 			_FollowTarget = follow_target;
 			if (cut)
-				_ViewPosition = CalculatePan ();
+				CalculatePan (1.0f);
 		}
 		public void RayCast (RayCastCallback callback, Microsoft.Xna.Framework.Vector2 point1, Microsoft.Xna.Framework.Vector2 point2)
 		{
