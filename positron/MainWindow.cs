@@ -199,7 +199,7 @@ namespace positron
                             Program.MainGame.Setup();
                             Program.MainGame.SetupTests();
                             GC.Collect();
-                            GC.WaitForFullGCComplete();
+                            GC.WaitForPendingFinalizers();
                             return false;
                         });
 					}
