@@ -75,64 +75,79 @@ namespace positron
 //					Console.Write("[{0}]", slices_resource.Data[i]);
 //			}
 
-			PsdSlicesHeader psd_slices_header = new PsdSlicesHeader();
+			PsdSlicesHeader psd_slices_header = new PsdSlicesHeader ();
 			PsdSlice[] psd_slices;
 			// FixedEndianness and ReadPascalString are defined in Utility.Structure
 			using (BinaryReader reader = new BinaryReader(new MemoryStream(slices_resource.Data), Encoding.BigEndianUnicode)) {
-				psd_slices_header.Version = reader.ReadInt32().FixEndianness();
-				psd_slices_header.Top = reader.ReadInt32().FixEndianness();
-				psd_slices_header.Left = reader.ReadInt32().FixEndianness();
-				psd_slices_header.Bottom = reader.ReadInt32().FixEndianness();
-				psd_slices_header.Right = reader.ReadInt32().FixEndianness();
-				psd_slices_header.GroupName = reader.ReadPascalString();
-				psd_slices_header.SliceCount = reader.ReadInt32().FixEndianness();
+				psd_slices_header.Version = reader.ReadInt32 ().FixEndianness ();
+				psd_slices_header.Top = reader.ReadInt32 ().FixEndianness ();
+				psd_slices_header.Left = reader.ReadInt32 ().FixEndianness ();
+				psd_slices_header.Bottom = reader.ReadInt32 ().FixEndianness ();
+				psd_slices_header.Right = reader.ReadInt32 ().FixEndianness ();
+				psd_slices_header.GroupName = reader.ReadPascalString ();
+				psd_slices_header.SliceCount = reader.ReadInt32 ().FixEndianness ();
 
 				int len = psd_slices_header.SliceCount;
 				psd_slices = new PsdSlice[len];
 
 				// This is terrifying
 				for (int i = 0; i < len; i++) {
-					psd_slices[i] = new PsdSlice();
-					psd_slices[i].Id = reader.ReadInt32().FixEndianness();
-					psd_slices[i].GroupId = reader.ReadInt32().FixEndianness();
-					psd_slices[i].Origin = reader.ReadInt32().FixEndianness();
-					if(psd_slices[i].Origin == 1)
-						psd_slices[i].AssociatedLayerId = reader.ReadInt32().FixEndianness();
-					psd_slices[i].Name = reader.ReadPascalString();
-					psd_slices[i].Type = reader.ReadInt32().FixEndianness();
-					psd_slices[i].Left = reader.ReadInt32().FixEndianness();
-					psd_slices[i].Top = reader.ReadInt32().FixEndianness();
-					psd_slices[i].Right = reader.ReadInt32().FixEndianness();
-					psd_slices[i].Bottom = reader.ReadInt32().FixEndianness();
-					psd_slices[i].URL = reader.ReadPascalString();
-					psd_slices[i].Target = reader.ReadPascalString();
-					psd_slices[i].Message = reader.ReadPascalString();
-					psd_slices[i].AltTag = reader.ReadPascalString();
-					psd_slices[i].CellIsHTML = reader.ReadBoolean();
-					psd_slices[i].CellText = reader.ReadPascalString();
-					psd_slices[i].HorizontalAlignment = reader.ReadInt32().FixEndianness();
-					psd_slices[i].VerticalAlignment = reader.ReadInt32().FixEndianness();
-					psd_slices[i].A = reader.ReadByte();
-					psd_slices[i].R = reader.ReadByte();
-					psd_slices[i].G = reader.ReadByte();
-					psd_slices[i].B = reader.ReadByte();
+					psd_slices [i] = new PsdSlice ();
+					psd_slices [i].Id = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].GroupId = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].Origin = reader.ReadInt32 ().FixEndianness ();
+					if (psd_slices [i].Origin == 1)
+						psd_slices [i].AssociatedLayerId = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].Name = reader.ReadPascalString ();
+					psd_slices [i].Type = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].Left = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].Top = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].Right = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].Bottom = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].URL = reader.ReadPascalString ();
+					psd_slices [i].Target = reader.ReadPascalString ();
+					psd_slices [i].Message = reader.ReadPascalString ();
+					psd_slices [i].AltTag = reader.ReadPascalString ();
+					psd_slices [i].CellIsHTML = reader.ReadBoolean ();
+					psd_slices [i].CellText = reader.ReadPascalString ();
+					psd_slices [i].HorizontalAlignment = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].VerticalAlignment = reader.ReadInt32 ().FixEndianness ();
+					psd_slices [i].A = reader.ReadByte ();
+					psd_slices [i].R = reader.ReadByte ();
+					psd_slices [i].G = reader.ReadByte ();
+					psd_slices [i].B = reader.ReadByte ();
 				}
 			}
 
-			var tr = new List<TextureRegion>();
+			var tr = new List<TextureRegion> ();
+			var set_corner = new List<TextureRegion> ();
 			for (int i = 0; i < psd_slices.Length; i++) {
-				PsdSlice slice = psd_slices[i];
-				if(slice.Name != "")
-				{
-					tr.Add(
-						new TextureRegion(slice.Name, // Vertical axis (Y) is flipped
-					                  new Vector2d(slice.Left, psd.RowCount - slice.Bottom ),
-					                  new Vector2d(slice.Right, psd.RowCount - slice.Top)));
-					if(slice.Target.ToLower() == "default")
+				PsdSlice slice = psd_slices [i];
+				if (slice.Name != "") {
+					TextureRegion region =
+						new TextureRegion (slice.Name,
+						                  new Vector2d (slice.Left, psd.RowCount - slice.Bottom),
+						                  new Vector2d (slice.Right, psd.RowCount - slice.Top)); // Vertical axis (Y) is flipped
+
+					if (slice.Target.ToLower () == "default")
 						texture.DefaultRegionIndex = i;
+					if (slice.Target.ToLower () == "corner") {
+						set_corner.Add (region);
+					}
+					tr.Add (region);
 				}
 			}
+
 			texture.Regions = tr.ToArray();
+
+			// Set the origin of these regions to a position that aligns its
+			// lower left corner with the default region
+			for (int i = 0; i < set_corner.Count; i++) {
+				Vector2d origin_offset = 0.5 * (set_corner[i].Size - texture.DefaultRegion.Size);
+				//Console.WriteLine("Expected: {0}", origin);
+				set_corner[i].OriginOffset = origin_offset;
+				//Console.WriteLine("Result: {0}", set_corner[i].Origin);
+			}
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using OpenTK;
 
@@ -25,6 +26,9 @@ namespace positron
 				Follow(player_1);
 				var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
 				health_meter.Preserve = true;
+
+				var dialog = new Dialog(e.To.HUD, "Dialog", new List<DialogStanza>());
+				dialog.Begin();
 			};
 		}
 		protected override void InitializeScene ()
@@ -33,13 +37,14 @@ namespace positron
 			var texture = Texture.Get ("sprite_main_menu_buttons");
 			double x_center = (ViewWidth) * 0.5;
 			double y_center = (ViewHeight) * 0.5;
-			new UIButton(this, x_center, y_center + 32,
+			new SpriteBase(HUD, x_center, y_center + 128, Texture.Get("sprite_android_now"));
+			new UIButton(this, x_center, y_center,
 			             new SpriteBase.SpriteFrame(texture, 4),
 			             new SpriteBase.SpriteFrame(texture, 2), UIGroup).Action += (sender, e) =>
 			{
 				Program.MainGame.CurrentScene = (Scene)Program.MainGame.Scenes[(string)Configuration.Get("SceneBeginning")];
 			};
-			new UIButton(this, x_center, y_center - 32,
+			new UIButton(this, x_center, y_center - 48,
 			             new SpriteBase.SpriteFrame(texture, 5),
 			                         new SpriteBase.SpriteFrame(texture, 3), UIGroup).Action += (sender, e) =>
 			{

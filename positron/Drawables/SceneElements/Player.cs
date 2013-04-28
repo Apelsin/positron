@@ -51,29 +51,36 @@ namespace positron
 		protected float _MovementDamping = 3.0f;
 
 		protected bool _WieldingGun = false;
+		protected bool _WouldCrouch = false;
 
 		protected Vector3d _DampVeloNormal = new Vector3d();
 		protected Stopwatch JumpTimer = new Stopwatch();
 		protected Stopwatch WalkAnimationTimer = new Stopwatch();
 		protected Stopwatch GunStowTimer = new Stopwatch();
 
-		protected SpriteAnimation AnimationStationary;
-		protected SpriteAnimation AnimationWalk;
-		protected SpriteAnimation AnimationStationaryFw;
-		protected SpriteAnimation AnimationWalkFw;
-		protected SpriteAnimation AnimationStationaryBk;
-		protected SpriteAnimation AnimationWalkBk;
+		protected SpriteAnimation
+			AnimationStand,
+			AnimationWalk,
+			AnimationStationaryFw,
+			AnimationWalkFw,
+			AnimationStationaryBk,
+			AnimationWalkBk,
 
-		protected SpriteAnimation AnimationPreJump;
-		protected SpriteAnimation AnimationJumping;
-		protected SpriteAnimation AnimationEndJump;
+			AnimationCrouch,
+			AnimationCrawl,
 
-		protected SpriteAnimation AnimationAimGunFwd;
-		protected SpriteAnimation AnimationAimGunFwdUp;
-		protected SpriteAnimation AnimationAimGunFwdDown;
-		protected SpriteAnimation AnimationAimGunFwdCrouch;
-		protected SpriteAnimation AnimationAimGunFwdJump;
+			AnimationPreJump,
+			AnimationJumping,
+			AnimationEndJump,
 
+			AnimationAimGunFwd,
+			AnimationAimGunFwdUp,
+			AnimationAimGunFwdDown,
+			AnimationAimGunFwdCrouch,
+			AnimationAimGunFwdJump;
+
+		SpriteAnimation AnimationStationary { get { return _WouldCrouch ? AnimationCrouch : AnimationStand; } }
+		SpriteAnimation AnimationMove { get { return _WouldCrouch ? AnimationCrawl : AnimationWalk; } }
 
 		protected ManualResetEvent JumpRayMRE = new ManualResetEvent(false);
 		protected float[] JumpRayXDirections = new float[] { 0.0f, 0.2f, -0.2f, 0.45f, -0.45f };
@@ -109,22 +116,25 @@ namespace positron
 			HealthChanged += (object sender, HealthChangedEventArgs e) => { _Health = Math.Max (0, e.HealthNow); };
 			OnHealthChanged(this, _HealthMax);
 
-			AnimationStationary = 	new SpriteAnimation(texture, "protag standing");
+			AnimationStand = 	new SpriteAnimation(texture, "protag standing");
 			AnimationWalk  = 		new SpriteAnimation(texture, true, "protag walking 1", "protag walking 2", "protag walking 3", "protag walking 4");
 			AnimationStationaryFw = new SpriteAnimation(texture, "protag standing facing front");
 			AnimationWalkFw = 		new SpriteAnimation(texture, true, "protag walking front 1", "protag walking front 2", "protag walking front 3", "protag walking front 4");
 			AnimationStationaryBk = new SpriteAnimation(texture, "protag standing back" );
 			AnimationWalkBk = 		new SpriteAnimation(texture, true, "protag walking back 1", "protag walking back 2", "protag walking back 3", "protag walking back 4");
-			
+
+			AnimationCrouch =		new SpriteAnimation(texture, true, "protag crouch");
+			AnimationCrawl =		new SpriteAnimation(texture, true, "protag crouch"); // TODO
+
 			AnimationPreJump = 		new SpriteAnimation(texture, "protag jumping 1");
 			AnimationJumping = 		new SpriteAnimation(texture, "protag jumping 2");
 			AnimationEndJump = 		new SpriteAnimation(texture, "protag jumping 4");
 
-			AnimationAimGunFwd = 		new SpriteAnimation(texture, "protag aiming gun");
-			AnimationAimGunFwdUp = 		new SpriteAnimation(texture, "protag aiming gun up");
-			AnimationAimGunFwdDown = 	new SpriteAnimation(texture, "protag aiming gun down");
-			AnimationAimGunFwdCrouch = 	new SpriteAnimation(texture, "protag aiming gun crouch");
-			AnimationAimGunFwdJump = 	new SpriteAnimation(texture, "protag aiming gun jump");
+			AnimationAimGunFwd = 		new SpriteAnimation(texture, true, "protag aiming gun");
+			AnimationAimGunFwdUp = 		new SpriteAnimation(texture, true, "protag aiming gun up");
+			AnimationAimGunFwdDown = 	new SpriteAnimation(texture, true, "protag aiming gun down");
+			AnimationAimGunFwdCrouch = 	new SpriteAnimation(texture, true, "protag aiming gun crouch");
+			AnimationAimGunFwdJump = 	new SpriteAnimation(texture, true, "protag aiming gun jump");
 
 			AnimationPreJump.Frames[0].FrameTime = 100;
 			//AnimationPreJump.Frames[1].FrameTime = 50;
@@ -238,7 +248,8 @@ namespace positron
 						   _AnimationCurrent == AnimationJumping)
 						{
 							PlayAnimation(AnimationEndJump);
-							_AnimationNext = AnimationStationary;
+							_AnimationNext = new Lazy<SpriteAnimation>( // BECAUSE YOLO
+								() => { return _WouldCrouch ? AnimationCrouch : AnimationStand; });
 
 							// TODO: See the other comment regarding disabling the
 							// lower body fixture; this is for collision rather than
@@ -275,30 +286,6 @@ namespace positron
 			if(fixture_a == FixtureLower)
 				FixtureLowerColliders.Remove(fixture_b);
 		}
-		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
-		{
-			if (e.Key == Key.Space) {
-				Jump ();
-			} else if (e.Key == Key.E) {
-				DoActionHere ();
-			} else if (e.Key == Key.F) {
-                UpdateEventHandler late;
-                late = (u_sender, u_e) =>
-                {
-					// TODO: Un-hard-code this:
-					Vector2d shot_offset = new Vector2d((SizeX + 3) * TileX, SizeY * 0.23);
-					var bullet = new BasicBullet(this._RenderSet.Scene,
-					                             this.PositionX + shot_offset.X,
-					                             this.PositionY + shot_offset.Y,
-					                             1000 * TileX, 0);
-					WieldingGun = true;
-					GunStowTimer.Restart();
-					return true;
-                };
-                Program.MainGame.AddUpdateEventHandler(this, late);
-			}
-			return true;
-		}
 		protected void DoActionHere ()
 		{
 			var fixtures = _RenderSet.Scene.World.TestPointAll(Body.WorldCenter);
@@ -318,13 +305,50 @@ namespace positron
 				}
 			}
 		}
-		public bool KeyUp(object sender, KeyboardKeyEventArgs e)
+		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{
+			if (e.Key == Key.Space) {
+				Jump ();
+			} else if (e.Key == Key.W && !_WieldingGun) {
+				DoActionHere ();
+			} else if (e.Key == Key.LShift) {
+				_WieldingGun = true;
+			} else if (e.Key == Key.S) {
+				_WouldCrouch = true;
+			}
+			return true;
+		}
+
+		public bool KeyUp (object sender, KeyboardKeyEventArgs e)
+		{
+			if (e.Key == Key.LShift) {
+				UpdateEventHandler late;
+				late = (u_sender, u_e) =>
+				{
+					// TODO: Un-hard-code this:
+					Vector2d shot_offset = new Vector2d ((SizeX + 3) * TileX, SizeY * 0.23);
+					var bullet = new BasicBullet (this._RenderSet.Scene,
+					                             this.PositionX + shot_offset.X,
+					                             this.PositionY + shot_offset.Y,
+					                             1000 * TileX, 0);
+					GunStowTimer.Restart ();
+					return true;
+				};
+				Program.MainGame.AddUpdateEventHandler (this, late);
+			} else if (e.Key == Key.S) {
+				_WouldCrouch = false;
+			}
 			return true;
 		}
 		public KeysUpdateEventArgs KeysUpdate (object sender, KeysUpdateEventArgs e)
 		{
 			float fx = (e.KeysPressedWhen.Contains (Key.A) ? -1.0f : 0.0f) + (e.KeysPressedWhen.Contains (Key.D) ? 1.0f : 0.0f);
+			if (_WieldingGun) {
+				if (fx != 0.0f) {
+					_TileX = fx;
+					fx = 0.0f;
+				}
+			}
 			//float fy = (e.KeysPressed.Contains(Key.S) ? -1.0f : 0.0f) + (e.KeysPressed.Contains(Key.W) ? 1.0f : 0.0f);
 			fx *= 5f;
 			//vy *= 10f;
@@ -337,20 +361,26 @@ namespace positron
 			}
 
 			float v__x_mag = Math.Abs (v.X);
-
 			if (_AnimationCurrent != AnimationJumping &&
 				_AnimationCurrent != AnimationPreJump &&
 				_AnimationCurrent != AnimationEndJump) {
 				if (v__x_mag > 0.1) {
 					_TileX = v.X > 0.0 ? 1.0 : -1.0;
-					PlayAnimation (AnimationWalk);
-				} else if (v__x_mag < 0.01)
-				{
-					if(WieldingGun)
-						PlayAnimation(AnimationAimGunFwd);
-					else
-						PlayAnimation (AnimationStationary);
+					PlayAnimation (AnimationMove);
+				} else if (v__x_mag < 0.01) {
+					if (_WieldingGun) {
+						if (e.KeysPressedWhen.Contains (Key.W))
+							PlayAnimation (AnimationAimGunFwdUp);
+						else if (e.KeysPressedWhen.Contains (Key.S))
+							PlayAnimation (AnimationAimGunFwdDown);
+						else
+							PlayAnimation (AnimationAimGunFwd);
+					}
+					PlayAnimation (AnimationStationary);
 				}
+				else
+					PlayAnimation (AnimationStationary);
+				_AnimationNext = null;
 			}
 
 			//Console.WriteLine("On Platform == {0}", OnPlatform);
@@ -427,7 +457,7 @@ namespace positron
 						Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, jump_imp_y);
 						GoneDown = false;
 						PlayAnimation (AnimationPreJump);
-						_AnimationNext = AnimationJumping;
+						_AnimationNext = new Lazy<SpriteAnimation>(() => { return AnimationJumping; });
 
 						FixtureLower.CollisionCategories = Category.None;
 					}

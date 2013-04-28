@@ -38,9 +38,7 @@ namespace positron
 		protected int StanzaIndex = 0;
 		protected float _PauseTime = 0.0f;
 		protected float _RevertTime = 1.0f;
-		protected Texture	BackTL,	BackT,	BackTR,
-							BackL,	BackC,	BackR,
-							BackBL, BackB, 	BackBR;
+		protected Texture FadeUp;
 		public string Title { get { return _Title; } }
 		public DialogStanza CurrentStanza {
 			get { return Stanzas [StanzaIndex]; }
@@ -62,106 +60,30 @@ namespace positron
 			_Shown = false;
 			ScaleX = _RenderSet.Scene.ViewSize.X;
 			ScaleY = (int)(_RenderSet.Scene.ViewSize.Y * 0.25);
-			// TODO: use one texture and use texture mapping
-			BackTL = Texture.Get ("sprite_dialog_box_tl");
-			BackT = Texture.Get ("sprite_dialog_box_t");
-			BackTR = Texture.Get ("sprite_dialog_box_tr");
-			BackL = Texture.Get ("sprite_dialog_box_l");
-			BackC = Texture.Get ("sprite_dialog_box_c");
-			BackR = Texture.Get ("sprite_dialog_box_r");
-			BackBL = Texture.Get ("sprite_dialog_box_bl");
-			BackB = Texture.Get ("sprite_dialog_box_b");
-			BackBR = Texture.Get ("sprite_dialog_box_br");
+			FadeUp = Texture.Get("sprite_dialog_fade_up");
 		}
 		public override void Render (double time)
 		{
-			Texture t;
-			double sx = Math.Max (1.0, ScaleX - BackL.Width - BackR.Width);
-			double sy = Math.Max (1.0, ScaleY - BackT.Height - BackB.Width);
-			GL.Color4(Color.White);
+
+			GL.Color4(0, 0, 0, 0.5);
 			GL.PushMatrix();
 			{
-				// So much for DRY...
-				GL.Translate (_Position.X, _Position.Y + ScaleY - BackT.Height, _Position.Z);
-				GL.PushMatrix();
-				{
-					/**********************/		(t = BackTL).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(t.Width,	0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(t.Width, t.Height);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	t.Height);
-					GL.End ();
-					GL.Translate(t.Width, 0, 0);	(t = BackT).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(sx,		0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(sx,		t.Height);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	t.Height);
-					GL.End ();
-					GL.Translate(sx, 0, 0);	(t = BackTR).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(t.Width,	0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(t.Width, t.Height);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	t.Height);
-					GL.End ();
-				}
-				GL.PopMatrix();
-				GL.Translate (0.0, -sy, 0.0);
-				GL.PushMatrix();
-				{
-					/**********************/		(t = BackL).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(t.Width,	0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(t.Width, sy		);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	sy		);
-					GL.End ();
-					GL.Translate(t.Width, 0, 0);	(t = BackC).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(sx,		0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(sx, 		sy		);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	sy		);
-					GL.End ();
-					GL.Translate(sx, 0, 0);	(t = BackR).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(t.Width,	0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(t.Width, sy		);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	sy		);
-					GL.End ();
-				}
-				GL.PopMatrix();
-				GL.Translate (0.0, -t.Height, 0.0);
-				GL.PushMatrix();
-				{
-					/**********************/		(t = BackBL).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(t.Width,	0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(t.Width, t.Height);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	t.Height);
-					GL.End ();
-
-					GL.Translate(t.Width, 0, 0);	(t = BackB).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(sx,		0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(sx,		t.Height);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	t.Height);
-					GL.End ();
-
-					GL.Translate(sx, 0, 0);	(t = BackBR).Bind ();
-					GL.Begin (BeginMode.Quads);
-					GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-					GL.TexCoord2(1.0,  0.0);		GL.Vertex2(t.Width,	0.0		);
-					GL.TexCoord2(1.0, -1.0);		GL.Vertex2(t.Width, t.Height);
-					GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	t.Height);
-					GL.End ();
-				}
-				GL.PopMatrix();
+				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.Translate (_Position.X, _Position.Y, 0.0);
+				GL.Begin (BeginMode.Quads);
+				GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
+				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);
+				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	ScaleY);
+				GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	ScaleY);
+				GL.End ();
+				GL.Translate (0.0, ScaleY, 0.0);
+				Texture.Bind(FadeUp);
+				GL.Begin (BeginMode.Quads);
+				GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
+				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);
+				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	FadeUp.Height);
+				GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	FadeUp.Height);
+				GL.End ();
 			}
 			GL.PopMatrix();
 		}

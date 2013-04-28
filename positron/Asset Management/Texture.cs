@@ -8,11 +8,11 @@ using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
-    public struct TextureRegion
+    public class TextureRegion
     {
 		private string _Label;
-		private Vector2d _Low, _High;
-        
+		private Vector2d _Low, _High, _OriginOffset = Vector2d.Zero;
+
 		public TextureRegion(Vector2d l, Vector2d h):
 			this("Region", l, h)
 		{
@@ -36,6 +36,12 @@ namespace positron
 		public string Label { get { return _Label; } set { _Label = value; } }
 		public Vector2d Low { get { return _Low; } set { _Low = value; } }
 		public Vector2d High { get { return _High; } set { _High = value; } }
+		public Vector2d OriginOffset { get { return _OriginOffset; } set { _OriginOffset = value; } }
+		public double OriginOffsetX { get { return _OriginOffset.X; } set { _OriginOffset.X = value; } }
+		public double OriginOffsetY { get { return _OriginOffset.Y; } set { _OriginOffset.Y = value; } }
+		public Vector2d Center { get { return 0.5 * (_Low + _High); } }
+		public double CenterX { get { return 0.5 * (_Low.X + _High.X); } }
+		public double CenterY { get { return 0.5 * (_Low.Y + _High.Y); } }
         public Vector2d Size { get { return _High - _Low; } }
 		public double SizeX { get { return _High.X - _Low.X; } }
 		public double SizeY { get { return _High.Y -  _Low.Y; } }
@@ -131,15 +137,16 @@ namespace positron
 			var character = PsdLoader.LoadSpriteSheet ("sprite_player", "character", "sprite_protagonist.psd");
 
 			// Dialog box
-			LoadTexture ("sprite_dialog_box_tl", 	"dialog_box",	"sprite_dialog_box_tl.png");
-			LoadTexture ("sprite_dialog_box_t",		"dialog_box",	"sprite_dialog_box_t.png");
-			LoadTexture ("sprite_dialog_box_tr", 	"dialog_box",	"sprite_dialog_box_tr.png");
-			LoadTexture ("sprite_dialog_box_l", 	"dialog_box",	"sprite_dialog_box_l.png");
-			LoadTexture ("sprite_dialog_box_c", 	"dialog_box",	"sprite_dialog_box_c_transparent.png");
-			LoadTexture ("sprite_dialog_box_r", 	"dialog_box",	"sprite_dialog_box_r.png");
-			LoadTexture ("sprite_dialog_box_bl", 	"dialog_box",	"sprite_dialog_box_bl.png");
-			LoadTexture ("sprite_dialog_box_b", 	"dialog_box",	"sprite_dialog_box_b.png");
-			LoadTexture ("sprite_dialog_box_br", 	"dialog_box",	"sprite_dialog_box_br.png");
+			LoadTexture ("sprite_dialog_fade_up",	"dialog_box",	"sprite_dialog_fade_up.png");
+//			LoadTexture ("sprite_dialog_box_tl", 	"dialog_box",	"sprite_dialog_box_tl.png");
+//			LoadTexture ("sprite_dialog_box_t",		"dialog_box",	"sprite_dialog_box_t.png");
+//			LoadTexture ("sprite_dialog_box_tr", 	"dialog_box",	"sprite_dialog_box_tr.png");
+//			LoadTexture ("sprite_dialog_box_l", 	"dialog_box",	"sprite_dialog_box_l.png");
+//			LoadTexture ("sprite_dialog_box_c", 	"dialog_box",	"sprite_dialog_box_c_transparent.png");
+//			LoadTexture ("sprite_dialog_box_r", 	"dialog_box",	"sprite_dialog_box_r.png");
+//			LoadTexture ("sprite_dialog_box_bl", 	"dialog_box",	"sprite_dialog_box_bl.png");
+//			LoadTexture ("sprite_dialog_box_b", 	"dialog_box",	"sprite_dialog_box_b.png");
+//			LoadTexture ("sprite_dialog_box_br", 	"dialog_box",	"sprite_dialog_box_br.png");
 			
 			// User interface
 			var health_meter = LoadTexture ("sprite_health_meter_atlas",	"user_interface",	"sprite_health_meter_atlas.png");
@@ -149,6 +156,8 @@ namespace positron
 			var main_menu_buttons = LoadTexture ("sprite_main_menu_buttons",	"user_interface", "sprite_main_menu_buttons.png");
 			main_menu_buttons.Regions = new TextureRegion[6];
 			main_menu_buttons.Regions.BuildTiledRegions(2, 128, 32);
+
+			var android_now = PsdLoader.LoadSpriteSheet("sprite_android_now", "sprite_android_now.psd");
 			
 			// Background
 			// TODO: make this not-hardcoded

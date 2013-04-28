@@ -25,7 +25,7 @@ namespace positron
         }
         public static readonly int Stride = Marshal.SizeOf(default(Vertex));
     }
-    public sealed class VertexBuffer // Sealed for performance boost
+    public sealed class VertexBuffer : IDisposable // Sealed for performance boost
     {
         private int _Id;
         public int Id
@@ -77,5 +77,9 @@ namespace positron
             GL.TexCoordPointer(2, TexCoordPointerType.Double, Vertex.Stride, new IntPtr(2 * Vector3d.SizeInBytes));
             GL.DrawArrays(BeginMode.Quads, 0, _DataLength); // TODO: Make this part not-hardcoded
         }
+		public void Dispose()
+		{
+			GL.DeleteBuffer(_Id);
+		}
     }
 }
