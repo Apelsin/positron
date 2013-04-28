@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8AE43567-4988-4E3E-84A4-8258167EBDEA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>PsdFile</RootNamespace>
+    <AssemblyName>PsdFile</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="ImageResources\AlphaChannelNames.cs" />
+    <Compile Include="ImageResources\RawImageResource.cs" />
+    <Compile Include="ImageResources\ResolutionInfo.cs" />
+    <Compile Include="ImageResources\Thumbnail.cs" />
+    <Compile Include="ImageResources\VersionInfo.cs" />
+    <Compile Include="Layers\BlendingRanges.cs" />
+    <Compile Include="Layers\Channel.cs" />
+    <Compile Include="Layers\Layer.cs" />
+    <Compile Include="Layers\LayerInfo.cs" />
+    <Compile Include="Layers\Mask.cs" />
+    <Compile Include="Layers\LayerInfo\LayerSectionInfo.cs" />
+    <Compile Include="Layers\LayerInfo\LayerUnicodeName.cs" />
+    <Compile Include="Layers\LayerInfo\RawLayerInfo.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="ImageResource.cs" />
+    <Compile Include="PsdBinaryReader.cs" />
+    <Compile Include="PsdBinaryWriter.cs" />
+    <Compile Include="PsdBlendMode.cs" />
+    <Compile Include="PsdBlockLengthWriter.cs" />
+    <Compile Include="RleReader.cs" />
+    <Compile Include="RleWriter.cs" />
+    <Compile Include="Util.cs" />
+    <Compile Include="PsdFileStandalone.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ImageResources\" />
+    <Folder Include="Layers\" />
+  </ItemGroup>
+</Project>
