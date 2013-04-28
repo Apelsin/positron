@@ -30,8 +30,8 @@ namespace positron
 		protected override void InitializeScene ()
 		{
 			// Assign base class variables here, before calling the base class initializer
-			PerimeterOffsetX = -3;
-			PerimeterOffsetY = -1;
+			PerimeterOffsetX = -2;
+			PerimeterOffsetY = -2;
 			PerimeterX = 32;
 			PerimeterY = 12;
 
@@ -42,7 +42,8 @@ namespace positron
 			// X and Y positioner variables
 			double xp = TileSize * PerimeterOffsetX;
 			double yp = TileSize * PerimeterOffsetY;
-			
+
+            xp += TileSize * PerimeterX * 0.5;
 			yp += TileSize;
 
 			// Set up previous door:
@@ -58,7 +59,7 @@ namespace positron
 			BackgroundTiles.Build ();
 
 			// Control key indicators (info graphics)
-			var f_infogfx = new SpriteBase (Rear, _DoorToPreviousScene.PositionX - 2 * TileSize, _DoorToPreviousScene.PositionY, Texture.Get ("sprite_infogfx_key_f"));
+            var f_infogfx = new SpriteBase(Rear, xp - 2 * TileSize, yp, Texture.Get("sprite_infogfx_key_f"));
 
 			// Get cross-scene variables
 			Scene previous_scene = (Scene)Program.MainGame.Scenes["SceneOne"];
@@ -66,8 +67,7 @@ namespace positron
 			double floor_y = 32.0;
 			double floor_sw_y = -4.0;
 
-			xp = _DoorToPreviousScene.CornerX;
-			yp = _DoorToPreviousScene.CornerY;
+			
 
 			for (int i = 0; i < 5; i++) {
 				var spidey = new Spidey (Stage, xp - (5 + 0.25 * i) * TileSize, yp);

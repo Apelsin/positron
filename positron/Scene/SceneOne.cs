@@ -26,12 +26,12 @@ namespace positron
 		}
 		protected override void InstantiateConnections ()
 		{
-			_DoorToNextScene = new Door(Rear, 512 - 68, 0);
+			_DoorToNextScene = new Door(Rear, 512 - 68, -TileSize);
 		}
 		protected override void InitializeScene ()
 		{
 			// Assign base class variables here, before calling the base class initializer
-			PerimeterOffsetX = -1;
+			PerimeterOffsetX = 0;
 			PerimeterOffsetY = -2;
 
 			// Store width and height in local variables for easy access
@@ -67,7 +67,7 @@ namespace positron
 
 			// Control key indicators (info graphics)
             var a_infogfx = new SpriteBase(Rear, ft1.CornerX + TileSize, ft1.CornerY + TileSize, Texture.Get("sprite_infogfx_key_a"));
-            var d_infogfx = new SpriteBase(Rear, a_infogfx.PositionX + TileSize, a_infogfx.PositionX, Texture.Get("sprite_infogfx_key_d"));
+            var d_infogfx = new SpriteBase(Rear, a_infogfx.CornerX + TileSize, a_infogfx.CornerY, Texture.Get("sprite_infogfx_key_d"));
 
 			// Gateways
 			var gw1 = new Gateway (Front, xp + TileSize * 4, yp, false);

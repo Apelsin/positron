@@ -30,7 +30,7 @@ namespace positron
         {
 			// Define these before calling the base class initializer
 			PerimeterOffsetX = 12;
-			PerimeterOffsetY = 5;
+			PerimeterOffsetY = 4;
 
 			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;

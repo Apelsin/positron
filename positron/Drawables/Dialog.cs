@@ -33,7 +33,6 @@ namespace positron
 	{
 		protected string _Title;
 		protected bool _Shown;
-		protected RenderSet _RenderSet;
 		protected List<DialogStanza> Stanzas;
 		protected int StanzaIndex = 0;
 		protected float _PauseTime = 0.0f;
