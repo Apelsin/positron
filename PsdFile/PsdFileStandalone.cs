@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 
 namespace PhotoshopFile
@@ -492,17 +493,18 @@ namespace PhotoshopFile
     private void DecompressImages()
     {
       var imageLayers = Layers.Concat(new List<Layer>() { this.BaseLayer });
+      List<WaitCallback> callbacks = new List<WaitCallback>();
       foreach (var layer in imageLayers)
       {
         foreach (var channel in layer.Channels)
         {
           var dcc = new DecompressChannelContext(channel);
           var waitCallback = new WaitCallback(dcc.DecompressChannel);
-          ThreadPool.QueueUserWorkItem(waitCallback);
+          callbacks.Add(waitCallback);
         }
       }
-
-      foreach (var layer in Layers)
+      Parallel.For(0, callbacks.Count, i => { callbacks[i].Invoke(this); });
+	  foreach (var layer in Layers)
       {
         foreach (var channel in layer.Channels)
         {
