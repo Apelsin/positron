@@ -7,6 +7,7 @@ using FarseerPhysics.Dynamics;
 
 using OpenTK;
 using OpenTK.Input;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace positron
@@ -31,6 +32,8 @@ namespace positron
 	}
 	public class Dialog : Drawable, IInputAccepter
 	{
+		private static Font font = new Font(FontFamily.GenericSansSerif, 18.0f);
+		//private static TextPrinter printer = new TextPrinter(TextQuality.High);
 		protected string _Title;
 		protected bool _Shown;
 		protected List<DialogStanza> Stanzas;
@@ -83,6 +86,14 @@ namespace positron
 				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	FadeUp.Height);
 				GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	FadeUp.Height);
 				GL.End ();
+
+			}
+			GL.PopMatrix();
+			GL.Color4(0.5, 0.5, 0.75, 1.0);
+			GL.PushMatrix();
+			{
+				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.Translate (_Position.X + 64, _Position.Y + ScaleY - 64, 0.0);
 			}
 			GL.PopMatrix();
 		}
