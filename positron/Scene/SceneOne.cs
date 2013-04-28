@@ -32,7 +32,7 @@ namespace positron
 		{
 			// Assign base class variables here, before calling the base class initializer
 			PerimeterOffsetX = -1;
-			PerimeterOffsetY = -1;
+			PerimeterOffsetY = -2;
 
 			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;
@@ -66,8 +66,8 @@ namespace positron
 			var ft1 = new FloorTile (Rear, xp + TileSize, yp - TileSize * 0.5);
 
 			// Control key indicators (info graphics)
-			var a_infogfx = new SpriteBase (Rear, ft1.CornerX, ft1.CornerY + TileSize, Texture.Get ("sprite_infogfx_key_a"));
-			var d_infogfx = new SpriteBase (Rear, a_infogfx.PositionX + TileSize, a_infogfx.PositionY, Texture.Get ("sprite_infogfx_key_d"));
+            var a_infogfx = new SpriteBase(Rear, ft1.CornerX + TileSize, ft1.CornerY + TileSize, Texture.Get("sprite_infogfx_key_a"));
+            var d_infogfx = new SpriteBase(Rear, a_infogfx.PositionX + TileSize, a_infogfx.PositionX, Texture.Get("sprite_infogfx_key_d"));
 
 			// Gateways
 			var gw1 = new Gateway (Front, xp + TileSize * 4, yp, false);

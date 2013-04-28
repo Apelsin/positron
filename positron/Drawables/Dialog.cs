@@ -87,14 +87,6 @@ namespace positron
 			}
 			GL.PopMatrix();
 		}
-		public override double RenderSizeX()
-		{
-			return ScaleX;
-		}
-		public override double RenderSizeY()
-		{
-			return ScaleY;
-		}
 		public override string ToString ()
 		{
 			return string.Format ("[Dialog: Title={0}, Scene={1}]", _Title, _RenderSet);

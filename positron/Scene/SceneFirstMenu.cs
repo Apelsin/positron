@@ -18,17 +18,29 @@ namespace positron
 				Program.MainGame.SetInputAccepters("Main Menu",  new IInputAccepter[] { UIGroup });
 			};
 			SceneExit += (sender, e) => {
-				Player player_1 = Program.MainGame.Player1 = new Player (e.To.Stage, e.To.DoorToPreviousScene.CornerX, e.To.DoorToPreviousScene.CornerY, Texture.Get ("sprite_player"));
+                Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
+                {
+                    double start_x = 0, start_y = 0;
+                    if(e.To.DoorToPreviousScene != null)
+                    {
+                        start_x = e.To.DoorToPreviousScene.CornerX;
+                        start_y = e.To.DoorToPreviousScene.CornerY;
+                    }
 
-				//e.To.Follow(player_1, true);
+                    Player player_1 = Program.MainGame.Player1 = new Player(e.To.Stage, start_x, start_y, Texture.Get("sprite_player"));
 
-				Program.MainGame.SetInputAccepters("Player1", new IInputAccepter[]{ player_1 });
-				Follow(player_1);
-				var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
-				health_meter.Preserve = true;
+                    //e.To.Follow(player_1, true);
 
-				var dialog = new Dialog(e.To.HUD, "Dialog", new List<DialogStanza>());
-				dialog.Begin();
+                    Program.MainGame.SetInputAccepters("Player1", new IInputAccepter[] { player_1 });
+                    Follow(player_1);
+                    var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
+                    health_meter.Preserve = true;
+
+                    var dialog = new Dialog(e.To.HUD, "Dialog", new List<DialogStanza>());
+                    dialog.Begin();
+
+                    return true;
+                });
 			};
 		}
 		protected override void InitializeScene ()

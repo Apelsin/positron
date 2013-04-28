@@ -30,8 +30,6 @@ namespace positron
 			GL.Vertex2(PositionX, PositionY);
 			GL.End();
 		}
-		public override double RenderSizeX() { return _Scale.X; }
-		public override double RenderSizeY() { return _Scale.Y; }
 	}
 }
 

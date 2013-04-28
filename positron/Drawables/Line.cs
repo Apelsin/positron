@@ -92,8 +92,6 @@ namespace positron
 			this._RenderSet.Scene.World.RemoveBody(Body);
 			this._RenderSet.Remove(this);
 		}
-		public override double RenderSizeX() { return _Scale.X; }
-		public override double RenderSizeY() { return _Scale.Y; }
 	}
 }
 

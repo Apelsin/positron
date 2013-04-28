@@ -88,18 +88,6 @@ namespace positron
 			get { return PositionWorldY * Configuration.MeterInPixels; }
 			set { PositionWorldY = value / Configuration.MeterInPixels; }
 		}
-		public Vector3d Corner {
-			get { return Position - new Vector3d(0.5 * SizeX, 0.5 * SizeY, Position.Z); }
-			set { Position = value + new Vector3d(0.5 * SizeX, 0.5 * SizeY, Position.Z); }
-		}
-		public double CornerX {
-			get { return PositionX - 0.5 * SizeX; }
-			set { PositionX = value + 0.5 * SizeX; }
-		}
-		public double CornerY {
-			get { return PositionY - 0.5 * SizeY; }
-			set { PositionY = value + 0.5 * SizeY; }
-		}
 		public Vector3d VelocityWorld {
 			get {
 				return new Vector3d(
@@ -157,10 +145,8 @@ namespace positron
 		public SpriteObject (RenderSet render_set, double x, double y, double scalex, double scaley, Texture texture):
 			base(render_set, x, y, scalex, scaley, texture)
 		{
-			Position = new Vector3d(_Position.X + 0.5 * SizeX, _Position.Y + 0.5 * SizeY, 0.0);
 			_RenderSet = render_set;
 			InitPhysics();
-
 			RenderSetEntry += EnteredRenderSet; // Virtual default event handler
 		}
 		protected virtual void InitPhysics()

@@ -311,7 +311,7 @@ namespace positron
 				Jump ();
 			} else if (e.Key == Key.W && !_WieldingGun) {
 				DoActionHere ();
-			} else if (e.Key == Key.LShift) {
+			} else if (e.Key == Key.F) {
 				_WieldingGun = true;
 			} else if (e.Key == Key.S) {
 				_WouldCrouch = true;
@@ -321,7 +321,7 @@ namespace positron
 
 		public bool KeyUp (object sender, KeyboardKeyEventArgs e)
 		{
-			if (e.Key == Key.LShift) {
+			if (e.Key == Key.F) {
 				UpdateEventHandler late;
 				late = (u_sender, u_e) =>
 				{
