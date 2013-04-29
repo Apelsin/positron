@@ -44,6 +44,9 @@ namespace positron
             GL.Vertex3(D);
             GL.End();
         }
+		public virtual void Dispose()
+		{
+		}
     }
 }
 

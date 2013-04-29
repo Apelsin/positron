@@ -52,7 +52,7 @@ namespace positron
 			*/
 			Console.WriteLine ("Using artwork path {0}", artwork_path);
 			Set("ArtworkPath", artwork_path);
-			Set ("SceneBeginning", "SceneOne");
+			Set ("SceneBeginning", "SceneIntro");
 			_MetersInPixels = 96.0;
 			_ForceDueToGravity = -9.8;
 			_KeyPressTimeTolerance = 0.1;

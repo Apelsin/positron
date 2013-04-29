@@ -410,6 +410,11 @@ namespace positron
 				_FrameTimer.Restart();
 			}
 		}
+		public override void Dispose()
+		{
+			VBO.Dispose();
+			base.Dispose();
+		}
 		#endregion
 	}
 }

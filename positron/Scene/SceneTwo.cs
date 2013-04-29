@@ -31,7 +31,7 @@ namespace positron
 		{
 			// Assign base class variables here, before calling the base class initializer
 			PerimeterOffsetX = -2;
-			PerimeterOffsetY = -2;
+			PerimeterOffsetY = 0;
 			PerimeterX = 32;
 			PerimeterY = 12;
 

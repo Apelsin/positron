@@ -33,6 +33,9 @@ namespace positron
 				base.Remove (item);
 			}
 		}
+		public virtual void Dispose()
+		{
+		}
 	}
 }
 

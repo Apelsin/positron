@@ -39,7 +39,7 @@ namespace positron
 	#endregion
 	public delegate void SceneEntryEventHandler(object sender, SceneChangeEventArgs e);
 	public delegate void SceneExitEventHandler(object sender, SceneChangeEventArgs e);
-	public class Scene
+	public class Scene : IDisposable
 	{
 		#region Events
 		public event SceneEntryEventHandler SceneEntry;
@@ -157,7 +157,7 @@ namespace positron
 			HUD = new RenderSet(this);
 			HUDBlueprint = new RenderSet(this);
 
-			// This should contain everything AllRednerSetsInOrder would contain
+			// This should contain everything AllRenderSetsInOrder would contain
 			// This is an optimization over using an enumerable
 			All = new RenderSet(this, Background, Rear, Stage, Tests, Front, HUD, HUDBlueprint);
 
@@ -267,11 +267,13 @@ namespace positron
 					Stage.Render (time);
 					Tests.Render (time);
 					Front.Render (time);
-					WorldBlueprint.Render (time);
+					if (Configuration.DrawBlueprints)
+						WorldBlueprint.Render (time);
 				}
 				GL.PopMatrix ();
 				HUD.Render (time);
-				HUDBlueprint.Render (time);
+				if (Configuration.DrawBlueprints)
+					HUDBlueprint.Render (time);
 			}
 		}
 		protected void CalculatePan (float time)
@@ -335,6 +337,11 @@ namespace positron
 						WorldBlueprint);
 				}
 			}
+		}
+		public virtual void Dispose()
+		{
+			SceneEntry = null;
+			SceneExit = null;
 		}
 		#endregion
 		#region Static

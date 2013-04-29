@@ -17,7 +17,7 @@ using FarseerPhysics.Factories;
 
 namespace positron
 {
-	public class PositronGame: IUpdateSync
+	public class PositronGame: IUpdateSync, IDisposable
     {
         #region Event-Related
 		protected List<KeyValuePair<object, UpdateEventHandler>> _UpdateEventList = new List<KeyValuePair<object, UpdateEventHandler>>();
@@ -78,6 +78,7 @@ namespace positron
 		{
 			// Load textures into graphics memory space
 			Texture.InitialSetup();
+			DialogSpeaker.InitialSetup();
 		}
 		public void Setup ()
 		{
@@ -94,8 +95,17 @@ namespace positron
 			lock (_InputAccepterGroupsLock) {
 				if(!InputAccepterGroups.Contains(name))
 				{
+					InputAccepterGroups.Insert (0, name, input_accepters);
+					InputAccepterGroupIdx = 0;
+				}
+			}
+		}
+		public void SetLastInputAccepters (string name, params IInputAccepter[] input_accepters)
+		{
+			lock (_InputAccepterGroupsLock) {
+				if(!InputAccepterGroups.Contains(name))
+				{
 					InputAccepterGroups.Add (name, input_accepters);
-					InputAccepterGroupIdx = InputAccepterGroups.Count - 1;
 				}
 			}
 		}
@@ -108,11 +118,11 @@ namespace positron
 					mixed[idx++] = InputAccepterGroup[i];
 				for(int i = 0; i < input_accepters.Length; i++)
 					mixed[idx++] = input_accepters[i];
-				InputAccepterGroups.Add (name, mixed);
-				InputAccepterGroupIdx = InputAccepterGroups.Count - 1;
+				InputAccepterGroups.Insert (0, name, mixed);
+				InputAccepterGroupIdx = 0;
 			}
 		}
-		public void RemoveInputAccepter (string name)
+		public void RemoveInputAccepters (string name)
 		{
 			lock (_InputAccepterGroupsLock) {
 				InputAccepterGroups.Remove (name);
@@ -249,6 +259,29 @@ namespace positron
 		public void Draw(double time)
 		{
 			_CurrentScene.Render (time);
+		}
+		public void Dispose ()
+		{
+			lock (Program.MainUpdateLock) {
+				foreach(Scene scene in Scenes.Values)
+					scene.Dispose();
+			}
+		}
+		public void Demolish()
+		{
+			lock (Program.MainUpdateLock) {
+				foreach(Scene scene in Scenes.Values)
+				{
+					foreach(RenderSet render_set in scene.AllRenderSetsInOrder())
+					{
+						foreach(IRenderable renderable in render_set)
+							renderable.Dispose();
+						render_set.Dispose();
+					}
+					scene.Dispose();
+				}
+				Dispose ();
+			}
 		}
 	}
 }

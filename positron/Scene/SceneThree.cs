@@ -21,6 +21,13 @@ namespace positron
 		protected SceneThree ():
 			base()
 		{
+			SceneEntry += (sender, e) => {
+				var stanzas = new List<DialogStanza>();
+				DialogSpeaker speaker = DialogSpeaker.Get("protagonist");
+				stanzas.Add(new DialogStanza(speaker, "Holy cow, there's a robot thing in here!\nNEATO."));
+				var dialog = new Dialog(e.To.HUD, "Dialog", stanzas);
+				dialog.Begin();
+			};
 		}
 		protected override void InstantiateConnections()
 		{
@@ -30,7 +37,7 @@ namespace positron
         {
 			// Define these before calling the base class initializer
 			PerimeterOffsetX = 12;
-			PerimeterOffsetY = 4;
+			PerimeterOffsetY = 6;
 
 			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;

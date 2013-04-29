@@ -195,6 +195,7 @@ namespace positron
 					{
                         Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
                         {
+							Program.MainGame.Demolish();
                             Program.MainGame = new PositronGame(); // Godspeed.
                             Program.MainGame.Setup();
                             Program.MainGame.SetupTests();

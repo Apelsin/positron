@@ -35,31 +35,30 @@ namespace positron
 			if (psdFile.Layers.Count == 0) {
 				psdFile.BaseLayer.CreateMissingChannels ();
 			}
-			var layer = psdFile.Layers[0];
-			Bitmap bmp = new Bitmap(psdFile.ColumnCount, psdFile.RowCount);
-			using (Graphics gfx = Graphics.FromImage(bmp)) {
-				gfx.Clear (Color.Transparent);
-				var bmp_data = bmp.LockBits(layer.Rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-				int pixel_size = 4 * sizeof(byte);
-				int idx = 0;
-				for(int i = 0; i < bmp_data.Height; i++)
-				{
-					for(int j = 0; j < bmp_data.Width; j++)
-					{
-						Marshal.Copy(new byte[]{
-							layer.Channels[3].ImageData[idx],
-							layer.Channels[2].ImageData[idx],
-							layer.Channels[1].ImageData[idx],
-							layer.Channels[0].ImageData[idx],
-						}, 0, new IntPtr((long)bmp_data.Scan0 + i * bmp_data.Stride + j * pixel_size), pixel_size);
-						idx++;
+			var layer = psdFile.Layers [0];
+			using (Bitmap bmp = new Bitmap(psdFile.ColumnCount, psdFile.RowCount)) {
+				using (Graphics gfx = Graphics.FromImage(bmp)) {
+					gfx.Clear (Color.Transparent);
+					var bmp_data = bmp.LockBits (layer.Rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+					int pixel_size = 4 * sizeof(byte);
+					int idx = 0;
+					for (int i = 0; i < bmp_data.Height; i++) {
+						for (int j = 0; j < bmp_data.Width; j++) {
+							Marshal.Copy (new byte[]{
+							layer.Channels [3].ImageData [idx],
+							layer.Channels [2].ImageData [idx],
+							layer.Channels [1].ImageData [idx],
+							layer.Channels [0].ImageData [idx],
+						}, 0, new IntPtr ((long)bmp_data.Scan0 + i * bmp_data.Stride + j * pixel_size), pixel_size);
+							idx++;
+						}
 					}
+					bmp.UnlockBits (bmp_data);
 				}
-				bmp.UnlockBits(bmp_data);
+				var texture = Texture.LoadTexture (title, bmp);
+				psdFile.SlicesToTextureRegionInfo (ref texture);
+				return texture;
 			}
-			var texture = Texture.LoadTexture(title, bmp);
-			psdFile.SlicesToTextureRegionInfo (ref texture);
-			return texture;
 		}
 		public static void SlicesToTextureRegionInfo (this PsdFile psd, ref Texture texture)
 		{
@@ -130,7 +129,7 @@ namespace positron
 						                  new Vector2d (slice.Right, psd.RowCount - slice.Top)); // Vertical axis (Y) is flipped
 
 					if (slice.Target.ToLower () == "default")
-						texture.DefaultRegionIndex = i;
+						texture.DefaultRegionIndex = tr.Count;
 					if (slice.Target.ToLower () == "corner") {
 						set_corner.Add (region);
 					}

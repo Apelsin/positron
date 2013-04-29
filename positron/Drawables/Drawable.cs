@@ -145,5 +145,10 @@ namespace positron
 			double depth = 10.0 / MathUtil.Clamp(_Position.Z + 10.0, 1000.0, 0.1) - 1.0;
 			return this._RenderSet.Scene.ViewPosition * (depth);
 		}
+		public virtual void Dispose()
+		{
+			RenderSetEntry = null;
+			RenderSetTransfer = null;
+		}
 	}
 }

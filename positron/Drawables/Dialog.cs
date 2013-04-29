@@ -16,8 +16,19 @@ namespace positron
 	{
 		public string Name;
 		public Texture Picture;
-		public DialogSpeaker ()
+		protected static Hashtable DialogSpeakers = new Hashtable();
+		public DialogSpeaker (string name, Texture picture)
 		{
+			Name = name;
+			Picture = picture;
+		}
+		public static void InitialSetup()
+		{
+			DialogSpeakers.Add ("protagonist", new DialogSpeaker("Volta", Texture.Get ("sprite_protagonist_picture")));
+		}
+		public static DialogSpeaker Get (object key)
+		{
+			return (DialogSpeaker)DialogSpeakers[key];
 		}
 	}
 	public class DialogStanza
@@ -30,10 +41,15 @@ namespace positron
 			Message = message;
 		}
 	}
+	public class DialogEndEventArgs : EventArgs
+	{
+	}
+	public delegate void DialogEndEventHandler(object sender, DialogEndEventArgs e);
 	public class Dialog : Drawable, IInputAccepter
 	{
-		private static Font font = new Font(FontFamily.GenericSansSerif, 18.0f);
-		//private static TextPrinter printer = new TextPrinter(TextQuality.High);
+		public event DialogEndEventHandler DialogEnd;
+		protected PTextWriter SpeakerWriter;
+		protected PTextWriter SpeechWriter;
 		protected string _Title;
 		protected bool _Shown;
 		protected List<DialogStanza> Stanzas;
@@ -63,13 +79,15 @@ namespace positron
 			ScaleX = _RenderSet.Scene.ViewSize.X;
 			ScaleY = (int)(_RenderSet.Scene.ViewSize.Y * 0.25);
 			FadeUp = Texture.Get("sprite_dialog_fade_up");
+
+			SpeakerWriter = new PTextWriter(new Size((int)ScaleX, 24));
+			SpeechWriter = new PTextWriter(new Size((int)ScaleX, (int)ScaleY - 24));
 		}
 		public override void Render (double time)
 		{
-
-			GL.Color4(0, 0, 0, 0.5);
 			GL.PushMatrix();
 			{
+				GL.Color4(0, 0, 0, 0.5);
 				GL.BindTexture(TextureTarget.Texture2D, 0);
 				GL.Translate (_Position.X, _Position.Y, 0.0);
 				GL.Begin (BeginMode.Quads);
@@ -87,13 +105,30 @@ namespace positron
 				GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	FadeUp.Height);
 				GL.End ();
 
+
 			}
 			GL.PopMatrix();
 			GL.Color4(0.5, 0.5, 0.75, 1.0);
 			GL.PushMatrix();
 			{
-				GL.BindTexture(TextureTarget.Texture2D, 0);
-				GL.Translate (_Position.X + 64, _Position.Y + ScaleY - 64, 0.0);
+				SpeakerWriter.Render(time);
+				GL.Translate (0.0, 24, 0.0);
+				if(CurrentStanza.Speaker != null)
+				{
+					var picture = CurrentStanza.Speaker.Picture;
+					if(picture != null)
+					{
+						picture.Bind();
+						GL.Begin (BeginMode.Quads);
+						GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 			0.0);
+						GL.TexCoord2(1.0,  0.0);		GL.Vertex2(picture.Width,	0.0);
+						GL.TexCoord2(1.0, -1.0);		GL.Vertex2(picture.Width,	picture.Height);
+						GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 			picture.Height);
+						GL.End ();
+						GL.Translate(picture.Width + 24, 0.0, 0.0);
+					}
+				}
+				SpeechWriter.Render(time);
 			}
 			GL.PopMatrix();
 		}
@@ -108,6 +143,7 @@ namespace positron
 			_RenderSet.Add(this);
 			_Shown = true;
 			StanzaIndex = 0;
+			UpdateContent();
 			Program.MainGame.SetInputAccepters(ToString(), this);
 		}
 		public void Next ()
@@ -116,15 +152,35 @@ namespace positron
 				End ();
 			} else {
 				StanzaIndex++;
+				UpdateContent();
 			}
+		}
+		protected void UpdateContent ()
+		{
+			// Update the actual GL Texture with the rendered text in the thread
+			// with the GL context
+			Program.MainGame.AddUpdateEventHandler (this, (sender2, e2) => {
+				SpeakerWriter.Clear();
+				if(CurrentStanza.Speaker != null)
+				{
+					string speaker_text = CurrentStanza.Speaker.Name;
+					SpeakerWriter.AddLine (speaker_text, PointF.Empty, Brushes.LightBlue);
+				}
+
+				string stanza_text = CurrentStanza.Message;
+				SpeechWriter.Clear ();
+				SpeechWriter.AddLine (stanza_text);
+				return true;
+			});
 		}
 		public void End()
 		{
-
-			Program.MainGame.RemoveInputAccepter(ToString());
+			Program.MainGame.RemoveInputAccepters(ToString());
 			_Shown = false;
 			_RenderSet.Remove(this);
 			Program.MainGame.TimeStepCoefficient = _RevertTime;
+			if(DialogEnd != null)
+				DialogEnd(this, new DialogEndEventArgs());
 		}
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{
