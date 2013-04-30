@@ -110,6 +110,8 @@ namespace positron
 			gateway.Regions = new TextureRegion[4];
 			gateway.Regions.BuildTiledRegions(4, 32, 72);
 
+			PsdLoader.LoadSpriteSheet("sprite_projectile_switch",	"scene_element",	"sprite_projectile_switch.psd");
+
 			var extender_platform = PsdLoader.LoadSpriteSheet("sprite_extender_platform", "scene_element", "sprite_extender_platform.psd");
 
 			// Enemies

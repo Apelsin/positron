@@ -12,6 +12,7 @@ namespace positron
 {
 	public class Line : Drawable, IColorable, IWorldObject
 	{
+		public event DerezEventHandler DerezEvent;
 		private Color _Color;
 		private Vector3d _Direction;
 

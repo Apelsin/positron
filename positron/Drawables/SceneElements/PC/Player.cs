@@ -102,16 +102,12 @@ namespace positron
 		}
 		#region Behavior
 		public Player(RenderSet render_set, Texture texture):
-			this(render_set, 0.0, 0.0, 1.0, 1.0, texture)
-		{
-		}
-		public Player (RenderSet render_set, double x, double y, Texture texture):
-			this(render_set, x, y, 1.0, 1.0, texture)
+			this(render_set, 0.0, 0.0, texture)
 		{
 		}
 		// Main constructor:
-		public Player (RenderSet render_set, double x, double y, double scalex, double scaley, Texture texture):
-			base(render_set, x, y, scalex, scaley, texture)
+		public Player (RenderSet render_set, double x, double y, Texture texture):
+			base(render_set, x, y, texture)
 		{
 			HealthChanged += (object sender, HealthChangedEventArgs e) => { _Health = Math.Max (0, e.HealthNow); };
 			OnHealthChanged(this, _HealthMax);
@@ -227,7 +223,7 @@ namespace positron
 		}
 		protected bool HandleOnCollision (Fixture fixture_a, Fixture fixture_b, Contact contact)
 		{
-			if(fixture_a == FixtureLower)
+ 			if(fixture_a == FixtureLower)
 				FixtureLowerColliders.Add(fixture_b);
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
 				// TODO: Have these values be not hard-coded
@@ -241,8 +237,7 @@ namespace positron
 						   _AnimationCurrent == AnimationJumping)
 						{
 							PlayAnimation(AnimationEndJump);
-							_AnimationNext = new Lazy<SpriteAnimation>( // BECAUSE YOLO
-								() => { return _WouldCrouch ? AnimationCrouch : AnimationStand; });
+							_AnimationNext = new Lazy<SpriteAnimation>(() => { return AnimationStationary; });
 
 							// TODO: See the other comment regarding disabling the
 							// lower body fixture; this is for collision rather than
@@ -255,7 +250,7 @@ namespace positron
 
 							AABB fixture_upper_aabb, fixture_lower_aabb;
 
-							FixtureLower.CollisionCategories = Category.All;
+							FixtureLower.CollisionCategories = Category.Cat1;
 
 							FixtureUpper.GetAABB(out fixture_upper_aabb, 0);
 							FixtureLower.GetAABB(out fixture_lower_aabb, 0);
@@ -271,7 +266,8 @@ namespace positron
 				}
 				return 0;
 			};
-			BodyPlatformRayCast(callback);
+			lock(Program.MainUpdateLock) // Paranoid
+				BodyPlatformRayCast(callback);
 			return true;
 		}
 		protected void HandleOnSeparation (Fixture fixture_a, Fixture fixture_b)
@@ -361,7 +357,7 @@ namespace positron
 					_TileX = v.X > 0.0 ? 1.0 : -1.0;
 					PlayAnimation (AnimationMove);
 				} else if (v__x_mag < 0.01) {
-					if (_WieldingGun) {
+ 					if (_WieldingGun) {
 						if (e.KeysPressedWhen.Contains (Key.W))
 							PlayAnimation (AnimationAimGunFwdUp);
 						else if (e.KeysPressedWhen.Contains (Key.S))
@@ -369,7 +365,8 @@ namespace positron
 						else
 							PlayAnimation (AnimationAimGunFwd);
 					}
-					PlayAnimation (AnimationStationary);
+					else
+						PlayAnimation (AnimationStationary);
 				}
 				else
 					PlayAnimation (AnimationStationary);
@@ -402,7 +399,7 @@ namespace positron
 		{
 			// TODO: make the foot reach distance (in pixels) a member variable
 			AABB aabb;
-			lock (Body) {
+			lock (Body) { // Paraoid...
 				if(FixtureLower.CollisionCategories == Category.None && _AnimationCurrent == AnimationJumping)
 					FixtureUpper.GetAABB (out aabb, 0);
 				else
@@ -476,7 +473,8 @@ namespace positron
 					return 1.0f;
 				}
 			};
-			BodyPlatformRayCast(callback);
+			lock(Program.MainUpdateLock) // Paranoid
+				BodyPlatformRayCast(callback);
 		}
 		public override void Update (double time)
 		{

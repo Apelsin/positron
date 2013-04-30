@@ -34,7 +34,8 @@ namespace positron
 					Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
 					{
 						Program.MainGame.Player1.PositionX = FirstTile.PositionX;
-						Program.MainGame.Player1.PositionY = FirstTile.PositionY + TileSize;
+						Program.MainGame.Player1.PositionY =
+							FirstTile.PositionY + 0.5 * (FirstTile.SizeY + Program.MainGame.Player1.Texture.DefaultRegion.SizeY);
 						return true;
 					});
 				}
@@ -67,15 +68,16 @@ namespace positron
 
 			yp += TileSize;
 
-			// Set up background tiles
-			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg_atlas"));
-			BackgroundTiles.PositionX = xp - 10 * TileSize;
-			BackgroundTiles.PositionY = yp - 4 * TileSize;
+			// Setup background tiles
+			var BackgroundTiles = new TileMap (Background, 36, 16, Texture.Get ("sprite_tile_bg_atlas"));
+			BackgroundTiles.PositionX = (PerimeterOffsetX - 9) * TileSize;
+			BackgroundTiles.PositionY = (PerimeterOffsetY - 4) * TileSize;
 			BackgroundTiles.PositionZ = 1.0;
 			BackgroundTiles.RandomMap ();
 			BackgroundTiles.Build ();
 
-			double floor_sw_dy = -4.0;
+			double recess_switch = -4.0;
+			double recess_gw = -2.0;
 
 			// Stage elements
 			var ft0 = new FloorTile (Rear, xp, yp);
@@ -90,27 +92,27 @@ namespace positron
 			w_infogfx.PositionX = _DoorToNextScene.PositionX;
 
 			// Gateways
-			var gw1 = new Gateway (Front, xp + TileSize * 4, yp, false);
-			var gw2 = new Gateway (Front, xp + TileSize * 10, yp, false);
+			var gw1 = new Gateway (Front, xp + TileSize * 4, yp + recess_gw, false);
+			var gw2 = new Gateway (Front, xp + TileSize * 10, yp + recess_gw, false);
 
-			var fs00 = new FloorSwitch (Front, xp + TileSize * 3, yp + floor_sw_dy, (sender, e) => {
+			var fs00 = new FloorSwitch (Front, xp + TileSize * 3, yp + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			});
-			var fs01 = new FloorSwitch (Front, xp + TileSize * 5, yp + floor_sw_dy, (sender, e) => {
+			var fs01 = new FloorSwitch (Front, xp + TileSize * 5, yp + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs00);
 
-			var fs10 = new FloorSwitch (Front, xp + TileSize * 7, yp + floor_sw_dy, (sender, e) => {
+			var fs10 = new FloorSwitch (Front, xp + TileSize * 7, yp + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, 0.2);
 
-			var fs11 = new FloorSwitch (Front, xp + TileSize * 9 + 14, yp + floor_sw_dy + TileSize * 3, (sender, e) => {
+			var fs11 = new FloorSwitch (Front, xp + TileSize * 9 + 14, yp + recess_switch + TileSize * 3, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
@@ -119,7 +121,7 @@ namespace positron
 			var space_infogfx = new SpriteBase (Rear, xp + fs11.PositionX - 128, yp + fs10.PositionY, Texture.Get ("sprite_infogfx_key_spacebar"));
 
 			fs11.Theta = Math.PI * 0.5;
-			var fs12 = new FloorSwitch (Front, xp + TileSize * 12, yp + floor_sw_dy, (sender, e) => {
+			var fs12 = new FloorSwitch (Front, xp + TileSize * 12, yp + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);

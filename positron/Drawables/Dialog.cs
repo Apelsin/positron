@@ -98,6 +98,7 @@ namespace positron
 				GL.End ();
 				GL.Translate (0.0, ScaleY, 0.0);
 				Texture.Bind(FadeUp);
+				GL.Color4(0, 0, 0, 0.5);
 				GL.Begin (BeginMode.Quads);
 				GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
 				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);
@@ -108,9 +109,9 @@ namespace positron
 
 			}
 			GL.PopMatrix();
-			GL.Color4(0.5, 0.5, 0.75, 1.0);
 			GL.PushMatrix();
 			{
+				GL.Translate(16, 0.0, 0.0);
 				SpeakerWriter.Render(time);
 				GL.Translate (0.0, 24, 0.0);
 				if(CurrentStanza.Speaker != null)
@@ -125,7 +126,7 @@ namespace positron
 						GL.TexCoord2(1.0, -1.0);		GL.Vertex2(picture.Width,	picture.Height);
 						GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 			picture.Height);
 						GL.End ();
-						GL.Translate(picture.Width + 24, 0.0, 0.0);
+						GL.Translate(picture.Width + 16, 0.0, 0.0);
 					}
 				}
 				SpeechWriter.Render(time);

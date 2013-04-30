@@ -43,7 +43,6 @@ namespace positron
 		public float TimeStepCoefficient = 1.0f;
 		protected OrderedDictionary InputAccepterGroups;
 		protected readonly Object _InputAccepterGroupsLock = new Object();
-		protected int InputAccepterGroupIdx = 0;
 
 		#endregion
 		#region Static Variables
@@ -58,8 +57,8 @@ namespace positron
 		// TODO: ensure thread safety here:
 		public IInputAccepter[] InputAccepterGroup {
 			get { 
-				if(InputAccepterGroups != null && InputAccepterGroupIdx < InputAccepterGroups.Count)
-					return (IInputAccepter[])InputAccepterGroups[InputAccepterGroupIdx];
+				if(InputAccepterGroups != null && InputAccepterGroups.Count > 0)
+					return (IInputAccepter[])InputAccepterGroups[0];
 				else
 					return new IInputAccepter[] { };
 			}
@@ -94,10 +93,7 @@ namespace positron
 		{
 			lock (_InputAccepterGroupsLock) {
 				if(!InputAccepterGroups.Contains(name))
-				{
 					InputAccepterGroups.Insert (0, name, input_accepters);
-					InputAccepterGroupIdx = 0;
-				}
 			}
 		}
 		public void SetLastInputAccepters (string name, params IInputAccepter[] input_accepters)
@@ -119,14 +115,12 @@ namespace positron
 				for(int i = 0; i < input_accepters.Length; i++)
 					mixed[idx++] = input_accepters[i];
 				InputAccepterGroups.Insert (0, name, mixed);
-				InputAccepterGroupIdx = 0;
 			}
 		}
 		public void RemoveInputAccepters (string name)
 		{
 			lock (_InputAccepterGroupsLock) {
 				InputAccepterGroups.Remove (name);
-				InputAccepterGroupIdx = MathUtil.Clamp (InputAccepterGroupIdx, InputAccepterGroups.Count - 1, 0);
 			}
 		}
 		public void SetupTests ()

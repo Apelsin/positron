@@ -4,8 +4,10 @@ using FarseerPhysics.Dynamics;
 
 namespace positron
 {
+	public delegate void DerezEventHandler(object sender, EventArgs e);
 	public interface IWorldObject : ISceneElement
 	{
+		event DerezEventHandler DerezEvent;
 		void Update(double time);
 
 		/// <summary>

@@ -52,8 +52,8 @@ namespace positron
 
 			// Setup background tiles
 			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg2_atlas"));
-			BackgroundTiles.PositionX = xp - 8 * TileSize;
-			BackgroundTiles.PositionY = yp - 4 * TileSize;
+			BackgroundTiles.PositionX = (PerimeterOffsetX - 9) * TileSize;
+			BackgroundTiles.PositionY = (PerimeterOffsetY - 4) * TileSize;
 			BackgroundTiles.PositionZ = 1.0;
 			BackgroundTiles.RandomMap ();
 			BackgroundTiles.Build ();
@@ -64,10 +64,8 @@ namespace positron
 			// Get cross-scene variables
 			Scene previous_scene = (Scene)Program.MainGame.Scenes["SceneOne"];
 
-			double floor_y = 32.0;
-			double floor_sw_y = -4.0;
-
-			
+			double recess_switch = -4.0;
+			double recess_gw = -2.0;
 
 			for (int i = 0; i < 5; i++) {
 				var spidey = new Spidey (Stage, xp - (5 + 0.25 * i) * TileSize, yp);
@@ -75,8 +73,8 @@ namespace positron
 			}
 
 			// Gateways
-			var gw1 = new Gateway (Front, xp - TileSize * 3, yp, false);
-			var gw2 = new Gateway (Front, xp + TileSize * 3, yp, false);
+			var gw1 = new Gateway (Front, xp - TileSize * 3, yp + recess_gw, false);
+			var gw2 = new Gateway (Front, xp + TileSize * 3, yp + recess_gw, false);
 
 			// Walls above gateways
 			for (int i = 2; i < PerimeterY - 1; i++) {
@@ -84,20 +82,20 @@ namespace positron
 				new FloorTile (Rear, gw2.CornerX, gw2.CornerY + (i) * TileSize + 8);
 			}
 
-			var fs10 = new FloorSwitch (Front, gw1.CornerX + TileSize, gw1.CornerY + floor_sw_y, (sender, e) => {
+			var fs10 = new FloorSwitch (Front, gw1.CornerX + TileSize, yp + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 			});
-			var fs11 = new FloorSwitch (Front, gw1.CornerX - TileSize, gw1.CornerY + floor_sw_y, (sender, e) => {
+			var fs11 = new FloorSwitch (Front, gw1.CornerX - TileSize, yp + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 			}, fs10);
 
-			var fs20 = new FloorSwitch (Front, gw2.CornerX - TileSize, gw1.CornerY + floor_sw_y, (sender, e) => {
+			var fs20 = new FloorSwitch (Front, gw2.CornerX - TileSize, yp + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 			});
-			var fs21 = new FloorSwitch (Front, gw2.CornerX + TileSize, gw1.CornerY + floor_sw_y, (sender, e) => {
+			var fs21 = new FloorSwitch (Front, gw2.CornerX + TileSize, yp + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 			}, fs20);
@@ -137,7 +135,7 @@ namespace positron
 			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
 
 
-			var fs30 = new FloorSwitch (Front, ft_room_r.CornerX + TileSize, ft_room_r.CornerY + TileSize + floor_sw_y, (sender, e) => {
+			var fs30 = new FloorSwitch (Front, ft_room_r.CornerX + TileSize, ft_room_r.CornerY + TileSize + recess_switch, (sender, e) => {
 				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
 				last_platform_0.OnAction (e.Self, new ActionEventArgs (bstate, last_platform_0));
 			}, 5.0);

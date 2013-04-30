@@ -2,7 +2,7 @@ using System;
 
 namespace positron
 {
-	public class SceneBasicBox : Scene
+	public class SceneBasicBox : Scene, ISceneGameplay
 	{
 		protected int PerimeterOffsetX = 0;
 		protected int PerimeterOffsetY = 0;
