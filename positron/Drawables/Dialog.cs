@@ -89,7 +89,7 @@ namespace positron
 			{
 				GL.Color4(0, 0, 0, 0.5);
 				GL.BindTexture(TextureTarget.Texture2D, 0);
-				GL.Translate (_Position.X, _Position.Y, 0.0);
+			    GL.Translate (_Position.X, _Position.Y, 0.0);
 				GL.Begin (BeginMode.Quads);
 				GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
 				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);

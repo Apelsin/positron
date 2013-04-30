@@ -30,7 +30,12 @@ namespace positron
 			ColorBrushes = new List<Brush>();
 			
 			TextBitmap = new Bitmap(areaSize.Width, areaSize.Height);
-			TextureID = CreateTexture();
+            // HACK FIXIE
+            Program.MainGame.AddUpdateEventHandler(this, (sender, e) =>
+                {
+                    TextureID = CreateTexture();
+                    return true;
+                });
 		}
 		private int CreateTexture()
 		{
@@ -95,7 +100,7 @@ namespace positron
 				using (Graphics gfx = Graphics.FromImage(TextBitmap))
 				{
 					gfx.Clear(Color.Transparent);
-					gfx.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
+					gfx.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;
 					for (int i = 0; i < Lines.Count; i++)
 						gfx.DrawString(Lines[i], TextFont, ColorBrushes[i], Positions[i]);
 				}
