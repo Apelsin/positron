@@ -134,20 +134,12 @@ namespace positron
 			bunker_wall.Regions.BuildTiledRegions(1, 16, 32);
 			
 			// Character
-			var character = PsdLoader.LoadSpriteSheet ("sprite_player", "character", "sprite_protagonist.psd");
+			PsdLoader.LoadSpriteSheet ("sprite_player", "character",	"sprite_protagonist.psd");
+			LoadTexture("sprite_protagonist_picture", 	"character",	"sprite_protagonist_picture.png");
 
 			// Dialog box
 			LoadTexture ("sprite_dialog_fade_up",	"dialog_box",	"sprite_dialog_fade_up.png");
-//			LoadTexture ("sprite_dialog_box_tl", 	"dialog_box",	"sprite_dialog_box_tl.png");
-//			LoadTexture ("sprite_dialog_box_t",		"dialog_box",	"sprite_dialog_box_t.png");
-//			LoadTexture ("sprite_dialog_box_tr", 	"dialog_box",	"sprite_dialog_box_tr.png");
-//			LoadTexture ("sprite_dialog_box_l", 	"dialog_box",	"sprite_dialog_box_l.png");
-//			LoadTexture ("sprite_dialog_box_c", 	"dialog_box",	"sprite_dialog_box_c_transparent.png");
-//			LoadTexture ("sprite_dialog_box_r", 	"dialog_box",	"sprite_dialog_box_r.png");
-//			LoadTexture ("sprite_dialog_box_bl", 	"dialog_box",	"sprite_dialog_box_bl.png");
-//			LoadTexture ("sprite_dialog_box_b", 	"dialog_box",	"sprite_dialog_box_b.png");
-//			LoadTexture ("sprite_dialog_box_br", 	"dialog_box",	"sprite_dialog_box_br.png");
-			
+
 			// User interface
 			var health_meter = LoadTexture ("sprite_health_meter_atlas",	"user_interface",	"sprite_health_meter_atlas.png");
 			health_meter.Regions = new TextureRegion[18];
@@ -230,8 +222,8 @@ namespace positron
 		{	
 			if(!System.IO.File.Exists(file_path))
 				throw new FileNotFoundException("File missing: ", file_path);
-			Bitmap bitmap = new Bitmap(file_path);
-			return LoadTexture(title, bitmap);
+			using (Bitmap bitmap = new Bitmap(file_path))
+				return LoadTexture(title, bitmap);
 		}
 		public static Texture LoadTexture(string title, Bitmap bitmap)
 		{

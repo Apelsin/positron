@@ -135,10 +135,12 @@ namespace positron
 				get { return _TextureRegionIndex; }
 			}
 			public double SizeX {
-				get { return _Texture.Regions == null ? _Texture.Width : _Texture.Regions [_TextureRegionIndex].SizeX; }
+				get { return _Texture.Regions == null || _Texture.Regions.Length == 0 ?
+                    _Texture.Width : _Texture.Regions [_TextureRegionIndex].SizeX; }
 			}
 			public double SizeY {
-				get { return _Texture.Regions == null ? _Texture.Height : _Texture.Regions [_TextureRegionIndex].SizeY; }
+                get { return _Texture.Regions == null || _Texture.Regions.Length == 0 ?
+                    _Texture.Height : _Texture.Regions[_TextureRegionIndex].SizeY; }
 			}
 			public VertexBuffer VBO { get { return _VBO; } }
 			//public VertexBuffer BPVBO { get { return _BPVBO; } }
@@ -276,10 +278,11 @@ namespace positron
 			get { return _TileY; }
 			set { _TileY = value; }
 		}
-		public double SizeX {
+		public override double SizeX {
 			get { return _Scale.X * FrameCurrent.SizeX; }
 		}
-		public double SizeY {
+        public override double SizeY
+        {
 			get { return _Scale.Y * FrameCurrent.SizeY; }
 		}
 
@@ -319,8 +322,7 @@ namespace positron
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
 			_FrameStatic = _AnimationDefault.Frames[0];
-			_Position.X = x;// + SizeX * 0.5;
-			_Position.Y = y;// + SizeY * 0.5;
+            Corner = new Vector3d(x, y, 0.0);
 		}
 		public SpriteBase CenterShift ()
 		{
@@ -328,9 +330,6 @@ namespace positron
 			PositionY -= FrameCurrent.SizeY * 0.5;
 			return this;
 		}
-		// TODO: rotation stuff here
-		public override double RenderSizeX () { return _Scale.X * Texture.Width; }
-		public override double RenderSizeY () { return _Scale.Y * Texture.Height; }
 		public override void Render (double time)
 		{
 			GL.PushMatrix();
@@ -410,6 +409,11 @@ namespace positron
 				_AnimationCurrent = animation;
 				_FrameTimer.Restart();
 			}
+		}
+		public override void Dispose()
+		{
+			VBO.Dispose();
+			base.Dispose();
 		}
 		#endregion
 	}

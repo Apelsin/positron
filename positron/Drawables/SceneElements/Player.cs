@@ -224,13 +224,6 @@ namespace positron
 			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
 
 			InitBlueprints();
-
-//			AABB lol;
-//			FixtureLower.GetAABB(out lol, 0);
-//			Console.WriteLine("AT FIRST I WAS ALL LIKE: {0}", lol.LowerBound);
-//			Position = _Position;
-//			FixtureLower.GetAABB(out lol, 0);
-//			Console.WriteLine("BUT THEN I: {0}", lol.LowerBound);
 		}
 		protected bool HandleOnCollision (Fixture fixture_a, Fixture fixture_b, Contact contact)
 		{
@@ -311,7 +304,7 @@ namespace positron
 				Jump ();
 			} else if (e.Key == Key.W && !_WieldingGun) {
 				DoActionHere ();
-			} else if (e.Key == Key.LShift) {
+			} else if (e.Key == Key.F) {
 				_WieldingGun = true;
 			} else if (e.Key == Key.S) {
 				_WouldCrouch = true;
@@ -321,7 +314,7 @@ namespace positron
 
 		public bool KeyUp (object sender, KeyboardKeyEventArgs e)
 		{
-			if (e.Key == Key.LShift) {
+			if (e.Key == Key.F) {
 				UpdateEventHandler late;
 				late = (u_sender, u_e) =>
 				{
@@ -494,6 +487,11 @@ namespace positron
 			base.Update(time);
 			GoneDown = GoneDown || Body.LinearVelocity.Y < 0.0f;
 			//((BooleanIndicator)Program.MainGame.TestIndicators[0]).State = GoneDown;
+		}
+		public override void Dispose()
+		{
+			HealthChanged = null;
+			base.Dispose();
 		}
 		#endregion
 	}

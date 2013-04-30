@@ -15,7 +15,6 @@ namespace positron
 		public int Bottom;
 		public int Right;
 		public int SliceCount;
-		[MarshalAs(UnmanagedType.ByValTStr)]
 		public String GroupName;
 	}
 	/// <summary>
@@ -27,23 +26,17 @@ namespace positron
 		public int GroupId;
 		public int Origin;
 		public int AssociatedLayerId;
-		[MarshalAs(UnmanagedType.ByValTStr)]
 		public String Name;
 		public int Type;
 		public int Left;
 		public int Top;
 		public int Right;
 		public int Bottom;
-		[MarshalAs(UnmanagedType.ByValTStr)]
 		public String URL;
-		[MarshalAs(UnmanagedType.ByValTStr)]
 		public String Target;
-		[MarshalAs(UnmanagedType.ByValTStr)]
 		public String Message;
-		[MarshalAs(UnmanagedType.ByValTStr)]
 		public String AltTag;
 		public Boolean CellIsHTML;
-		[MarshalAs(UnmanagedType.ByValTStr)]
 		public String CellText;
 		public int HorizontalAlignment;
 		public int VerticalAlignment;

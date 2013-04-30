@@ -30,6 +30,7 @@ namespace positron
 		/// NOTE: UPDATING THE BODY POSITION WHILE THE BODY IS
 		/// DISABLED WILL ALTER ITS FIXTURES AND AABBS!!!
 		///</description>
+		#region Hell
 		public Vector3d PositionWorld {
 			get {
 				// HACK: tl;dr redo this
@@ -40,16 +41,18 @@ namespace positron
 			}
 			set {
 				// HACK: same as above
-				if(Body != null && Body.Enabled)
+				_Position = value * Configuration.MeterInPixels;
+//				if(Body != null && Body.Enabled)
+//				{
+//					if(this is Player)
+//						value = value; // bad debugger
+//					Body.Position =
+//						new Microsoft.Xna.Framework.Vector2(
+//							(float)value.X,
+//							(float)value.Y);
+//				}
+//				else
 				{
-					Body.Position =
-						new Microsoft.Xna.Framework.Vector2(
-							(float)value.X,
-							(float)value.Y);
-				}
-				else
-				{
-					_Position = value * Configuration.MeterInPixels;
 //					if(this is Door && this.RenderSet.Scene.GetType() == typeof(SceneThree))
 //					{
 //						Console.WriteLine ("{{ Move door to {0} }}, idx becomes {1}", value, Program.MainGame.UpdateEventList.Count);
@@ -57,6 +60,8 @@ namespace positron
 					Program.MainGame.AddUpdateEventHandler(this, (sender, e) => {
 						if(Body.Enabled)
 						{
+//							if(this is Player)
+//								value = value;
 							Body.Position =
 								new Microsoft.Xna.Framework.Vector2(
 									(float)value.X,
@@ -69,12 +74,62 @@ namespace positron
 			}
 		}
 		public double PositionWorldX {
-			get { return PositionWorld.X; }
-			set { PositionWorld = new Vector3d(value, PositionWorldY, PositionWorld.Z); }
+			get {
+				// HACK: tl;dr redo this
+				if(Body != null && Body.Enabled)
+					return Body.Position.X;
+				else
+					return _Position.X / Configuration.MeterInPixels;
+			}
+			set {
+				// HACK: same as above
+				_Position.X = value * Configuration.MeterInPixels;	
+//				if(this is Player)
+// 					value = value;
+//				if(Body != null && Body.Enabled)
+//					Body.Position = new Microsoft.Xna.Framework.Vector2((float)value, Body.Position.Y);
+//				else
+				{
+					Program.MainGame.AddUpdateEventHandler(this, (sender, e) => {
+						if(Body.Enabled) {
+							if(this is Player)
+								value = value;
+							Body.Position = new Microsoft.Xna.Framework.Vector2((float)value, Body.Position.Y);
+							return true;
+						}
+						return false;
+					});
+				}
+			}
 		}
 		public double PositionWorldY {
-			get { return PositionWorld.Y; }
-			set { PositionWorld = new Vector3d(PositionWorldX, value, PositionWorld.Z); }
+			get {
+				// HACK: tl;dr redo this
+				if(Body != null && Body.Enabled)
+					return Body.Position.Y;
+				else
+					return _Position.Y / Configuration.MeterInPixels;
+			}
+			set {
+				// HACK: same as above
+				_Position.Y = value * Configuration.MeterInPixels;
+//				if(this is Player)
+//					value = value;
+//				if(Body != null && Body.Enabled)
+//					Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)value);
+//				else
+				{
+					Program.MainGame.AddUpdateEventHandler(this, (sender, e) => {
+						if(Body.Enabled) {
+//							if(this is Player)
+//								value = value;
+							Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)value);
+							return true;
+						}
+						return false;
+					});
+				}
+			}
 		}
 		public override Vector3d Position {
 			get { return PositionWorld * Configuration.MeterInPixels; }
@@ -87,18 +142,6 @@ namespace positron
 		public override double PositionY {
 			get { return PositionWorldY * Configuration.MeterInPixels; }
 			set { PositionWorldY = value / Configuration.MeterInPixels; }
-		}
-		public Vector3d Corner {
-			get { return Position - new Vector3d(0.5 * SizeX, 0.5 * SizeY, Position.Z); }
-			set { Position = value + new Vector3d(0.5 * SizeX, 0.5 * SizeY, Position.Z); }
-		}
-		public double CornerX {
-			get { return PositionX - 0.5 * SizeX; }
-			set { PositionX = value + 0.5 * SizeX; }
-		}
-		public double CornerY {
-			get { return PositionY - 0.5 * SizeY; }
-			set { PositionY = value + 0.5 * SizeY; }
 		}
 		public Vector3d VelocityWorld {
 			get {
@@ -139,6 +182,7 @@ namespace positron
 			get { return Body.Rotation; }
 			set { Body.Rotation = (float)value; }
 		}
+		#endregion
 
 		#region Behavior
 		public SpriteObject(RenderSet render_set):
@@ -157,10 +201,8 @@ namespace positron
 		public SpriteObject (RenderSet render_set, double x, double y, double scalex, double scaley, Texture texture):
 			base(render_set, x, y, scalex, scaley, texture)
 		{
-			Position = new Vector3d(_Position.X + 0.5 * SizeX, _Position.Y + 0.5 * SizeY, 0.0);
 			_RenderSet = render_set;
 			InitPhysics();
-
 			RenderSetEntry += EnteredRenderSet; // Virtual default event handler
 		}
 		protected virtual void InitPhysics()
@@ -259,6 +301,11 @@ namespace positron
 		{
             _SpriteBody.Dispose();
 			_RenderSet.Remove(this);
+		}
+		public override void Dispose()
+		{
+			Body.Dispose();
+			base.Dispose();
 		}
 		#endregion
 	}

@@ -107,6 +107,8 @@
     <Compile Include="Drawables\SceneElements\BaddieRobotCrawlerShooter.cs" />
     <Compile Include="IShooter.cs" />
     <Compile Include="Drawables\ISceneElement.cs" />
+    <Compile Include="Scene\SceneIntro.cs" />
+    <Compile Include="PTextWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

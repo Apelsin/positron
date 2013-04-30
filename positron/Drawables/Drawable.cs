@@ -38,6 +38,29 @@ namespace positron
 			get { return _Position.Z; }
 			set { _Position.Z = value; }
 		}
+        public virtual Vector3d Corner
+        {
+            get { return Position - new Vector3d(0.5 * SizeX, 0.5 * SizeY, Position.Z); }
+            set { Position = value + new Vector3d(0.5 * SizeX, 0.5 * SizeY, Position.Z); }
+        }
+        public virtual double CornerX
+        {
+            get { return PositionX - 0.5 * SizeX; }
+            set { PositionX = value + 0.5 * SizeX; }
+        }
+        public virtual double CornerY
+        {
+            get { return PositionY - 0.5 * SizeY; }
+            set { PositionY = value + 0.5 * SizeY; }
+        }
+        public virtual double SizeX
+        {
+            get { return ScaleX; }
+        }
+        public virtual double SizeY
+        {
+            get { return ScaleY; }
+        }
 		public virtual Vector3d Velocity {
 			get { return _Velocity; }
 			set { _Velocity = value; }
@@ -115,14 +138,17 @@ namespace positron
 				RenderSetTransfer(sender, e);
 		}
 		public abstract void Render(double time);
-		public abstract double RenderSizeX();
-		public abstract double RenderSizeY();
 		protected virtual Vector3d CalculateMovementParallax ()
 		{
 			if(this._RenderSet == this._RenderSet.Scene.HUD)
 				return Vector3d.Zero;
 			double depth = 10.0 / MathUtil.Clamp(_Position.Z + 10.0, 1000.0, 0.1) - 1.0;
 			return this._RenderSet.Scene.ViewPosition * (depth);
+		}
+		public virtual void Dispose()
+		{
+			RenderSetEntry = null;
+			RenderSetTransfer = null;
 		}
 	}
 }

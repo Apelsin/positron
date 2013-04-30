@@ -66,6 +66,9 @@ namespace positron
 		{
 			return 0;
 		}
+		public virtual void Dispose()
+		{
+		}
 	}
 }
 

@@ -11,6 +11,12 @@ namespace positron
 		protected int[,] IndexMap;
 		public int CountX { get { return _CountX; } }
 		public int CountY { get { return _CountY; } }
+        public override double SizeX {
+            get { return CountX * Texture.Regions[0].Size.X; }
+        }
+        public override double SizeY {
+            get { return CountY * Texture.Regions[0].Size.Y; }
+        }
 		protected VertexBuffer VBO;
 		public TileMap (RenderSet render_set, int countx, int county, Texture texture):
 			base(render_set)
@@ -72,14 +78,6 @@ namespace positron
             Texture.Bind(); // Bind to (current) sprite texture
             VBO.Render(); // Render the vertex buffer object
         }
-		public override double RenderSizeX()
-		{
-            return CountX * Texture.Regions[0].Size.X;
-		}
-		public override double RenderSizeY()
-		{
-            return CountY * Texture.Regions[0].Size.Y;
-		}
 	}
 }
 

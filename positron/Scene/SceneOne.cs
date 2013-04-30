@@ -18,21 +18,37 @@ namespace positron
 {
 	public class SceneOne : SceneBasicBox
 	{
+		protected SpriteObject FirstTile;
 		protected SceneOne ():
 			base()
 		{
-			//UIGroup = new UIElementGroup();
-
+			SceneEntry += (sender, e) => {
+				if(!(e.From is SceneTwo))
+				{
+					var stanzas = new List<DialogStanza>();
+					DialogSpeaker speaker = DialogSpeaker.Get("protagonist");
+					stanzas.Add(new DialogStanza(speaker, "Here I am"));
+					stanzas.Add (new DialogStanza(speaker, "TO SAVE THE DAY!"));
+					var dialog = new Dialog(e.To.HUD, "Dialog", stanzas);
+					dialog.Begin();
+					Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
+					{
+						Program.MainGame.Player1.PositionX = FirstTile.PositionX;
+						Program.MainGame.Player1.PositionY = FirstTile.PositionY + TileSize;
+						return true;
+					});
+				}
+			};
 		}
 		protected override void InstantiateConnections ()
 		{
-			_DoorToNextScene = new Door(Rear, 512 - 68, 0);
+			_DoorToNextScene = new Door(Rear, 512 - 68, TileSize);
 		}
 		protected override void InitializeScene ()
 		{
 			// Assign base class variables here, before calling the base class initializer
-			PerimeterOffsetX = -1;
-			PerimeterOffsetY = -1;
+			PerimeterOffsetX = 0;
+			PerimeterOffsetY = 0;
 
 			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;
@@ -62,12 +78,16 @@ namespace positron
 			double floor_sw_dy = -4.0;
 
 			// Stage elements
-			var ft0 = new FloorTile (Rear, xp + 0, yp);
-			var ft1 = new FloorTile (Rear, xp + TileSize, yp - TileSize * 0.5);
+			var ft0 = new FloorTile (Rear, xp, yp);
+			FirstTile = ft0;
+			var ft1 = new FloorTile (Rear, xp + TileSize, yp);
+			var ft2 = new FloorTile (Rear, xp + 2 * TileSize, yp - TileSize * 0.5);
 
 			// Control key indicators (info graphics)
-			var a_infogfx = new SpriteBase (Rear, ft1.CornerX, ft1.CornerY + TileSize, Texture.Get ("sprite_infogfx_key_a"));
-			var d_infogfx = new SpriteBase (Rear, a_infogfx.PositionX + TileSize, a_infogfx.PositionY, Texture.Get ("sprite_infogfx_key_d"));
+            var a_infogfx = new SpriteBase(Rear, ft1.CornerX + TileSize, ft1.CornerY + TileSize, Texture.Get("sprite_infogfx_key_a"));
+            var d_infogfx = new SpriteBase(Rear, a_infogfx.CornerX + TileSize, a_infogfx.CornerY, Texture.Get("sprite_infogfx_key_d"));
+			var w_infogfx = new SpriteBase(Rear, 0, _DoorToNextScene.CornerY + _DoorToNextScene.SizeY + 4, Texture.Get("sprite_infogfx_key_w"));
+			w_infogfx.PositionX = _DoorToNextScene.PositionX;
 
 			// Gateways
 			var gw1 = new Gateway (Front, xp + TileSize * 4, yp, false);
