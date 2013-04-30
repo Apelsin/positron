@@ -20,6 +20,7 @@ namespace positron
 			SceneExit += (sender, e) => {
 				Program.MainGame.RemoveInputAccepters("Main Menu");
 			};
+			SetupPlayerOnExit();
 		}
 		protected override void InitializeScene ()
 		{

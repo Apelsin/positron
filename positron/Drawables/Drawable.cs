@@ -40,8 +40,8 @@ namespace positron
 		}
         public virtual Vector3d Corner
         {
-            get { return Position - new Vector3d(0.5 * SizeX, 0.5 * SizeY, Position.Z); }
-            set { Position = value + new Vector3d(0.5 * SizeX, 0.5 * SizeY, Position.Z); }
+			get { return Position - new Vector3d(0.5 * SizeX, 0.5 * SizeY, PositionZ); }
+            set { Position = value + new Vector3d(0.5 * SizeX, 0.5 * SizeY, PositionZ); }
         }
         public virtual double CornerX
         {

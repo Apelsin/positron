@@ -35,7 +35,7 @@ namespace positron
 			if (psdFile.Layers.Count == 0) {
 				psdFile.BaseLayer.CreateMissingChannels ();
 			}
-			var layer = psdFile.Layers [0];
+			var layer = psdFile.BaseLayer;
 			using (Bitmap bmp = new Bitmap(psdFile.ColumnCount, psdFile.RowCount)) {
 				using (Graphics gfx = Graphics.FromImage(bmp)) {
 					gfx.Clear (Color.Transparent);
@@ -45,10 +45,10 @@ namespace positron
 					for (int i = 0; i < bmp_data.Height; i++) {
 						for (int j = 0; j < bmp_data.Width; j++) {
 							Marshal.Copy (new byte[]{
-							layer.Channels [3].ImageData [idx],
 							layer.Channels [2].ImageData [idx],
 							layer.Channels [1].ImageData [idx],
 							layer.Channels [0].ImageData [idx],
+							layer.Channels [3].ImageData [idx],
 						}, 0, new IntPtr ((long)bmp_data.Scan0 + i * bmp_data.Stride + j * pixel_size), pixel_size);
 							idx++;
 						}
@@ -145,7 +145,7 @@ namespace positron
 				Vector2d origin_offset = 0.5 * (set_corner[i].Size - texture.DefaultRegion.Size);
 				//Console.WriteLine("Expected: {0}", origin);
 				set_corner[i].OriginOffset = origin_offset;
-				//Console.WriteLine("Result: {0}", set_corner[i].Origin);
+				Console.WriteLine("Result: {0}", set_corner[i].OriginOffset);
 			}
 		}
 	}

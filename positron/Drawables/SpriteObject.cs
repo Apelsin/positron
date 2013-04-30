@@ -16,6 +16,7 @@ namespace positron
 {
 	public class SpriteObject: SpriteBase, IWorldObject
 	{
+		public event DerezEventHandler DerezEvent;
 		protected int _WorldIndex;
 		protected Body _SpriteBody;
 		public int WorldIndex { get { return _WorldIndex; } }
@@ -31,105 +32,18 @@ namespace positron
 		/// DISABLED WILL ALTER ITS FIXTURES AND AABBS!!!
 		///</description>
 		#region Hell
+		private static void noop() { }
 		public Vector3d PositionWorld {
-			get {
-				// HACK: tl;dr redo this
-				if(Body != null && Body.Enabled)
-					return new Vector3d(Body.Position.X, Body.Position.Y, _Position.Z / Configuration.MeterInPixels);
-				else
-					return _Position / Configuration.MeterInPixels;
-			}
-			set {
-				// HACK: same as above
-				_Position = value * Configuration.MeterInPixels;
-//				if(Body != null && Body.Enabled)
-//				{
-//					if(this is Player)
-//						value = value; // bad debugger
-//					Body.Position =
-//						new Microsoft.Xna.Framework.Vector2(
-//							(float)value.X,
-//							(float)value.Y);
-//				}
-//				else
-				{
-//					if(this is Door && this.RenderSet.Scene.GetType() == typeof(SceneThree))
-//					{
-//						Console.WriteLine ("{{ Move door to {0} }}, idx becomes {1}", value, Program.MainGame.UpdateEventList.Count);
-//					}
-					Program.MainGame.AddUpdateEventHandler(this, (sender, e) => {
-						if(Body.Enabled)
-						{
-//							if(this is Player)
-//								value = value;
-							Body.Position =
-								new Microsoft.Xna.Framework.Vector2(
-									(float)value.X,
-									(float)value.Y);
-							return true;
-						}
-						return false;
-					});
-				}
-			}
+			get { return new Vector3d(Body.Position.X, Body.Position.Y, _Position.Z / Configuration.MeterInPixels); }
+			set { Body.Position = new Microsoft.Xna.Framework.Vector2((float)value.X, (float)value.Y); _Position.Z = value.Z * Configuration.MeterInPixels; }
 		}
 		public double PositionWorldX {
-			get {
-				// HACK: tl;dr redo this
-				if(Body != null && Body.Enabled)
-					return Body.Position.X;
-				else
-					return _Position.X / Configuration.MeterInPixels;
-			}
-			set {
-				// HACK: same as above
-				_Position.X = value * Configuration.MeterInPixels;	
-//				if(this is Player)
-// 					value = value;
-//				if(Body != null && Body.Enabled)
-//					Body.Position = new Microsoft.Xna.Framework.Vector2((float)value, Body.Position.Y);
-//				else
-				{
-					Program.MainGame.AddUpdateEventHandler(this, (sender, e) => {
-						if(Body.Enabled) {
-							if(this is Player)
-								value = value;
-							Body.Position = new Microsoft.Xna.Framework.Vector2((float)value, Body.Position.Y);
-							return true;
-						}
-						return false;
-					});
-				}
-			}
+			get { return Body.Position.X; }
+			set { Body.Position = new Microsoft.Xna.Framework.Vector2((float)value, Body.Position.Y); }
 		}
 		public double PositionWorldY {
-			get {
-				// HACK: tl;dr redo this
-				if(Body != null && Body.Enabled)
-					return Body.Position.Y;
-				else
-					return _Position.Y / Configuration.MeterInPixels;
-			}
-			set {
-				// HACK: same as above
-				_Position.Y = value * Configuration.MeterInPixels;
-//				if(this is Player)
-//					value = value;
-//				if(Body != null && Body.Enabled)
-//					Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)value);
-//				else
-				{
-					Program.MainGame.AddUpdateEventHandler(this, (sender, e) => {
-						if(Body.Enabled) {
-//							if(this is Player)
-//								value = value;
-							Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)value);
-							return true;
-						}
-						return false;
-					});
-				}
-			}
+			get { return Body.Position.Y; }
+			set { Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)value); }
 		}
 		public override Vector3d Position {
 			get { return PositionWorld * Configuration.MeterInPixels; }
@@ -186,23 +100,30 @@ namespace positron
 
 		#region Behavior
 		public SpriteObject(RenderSet render_set):
-			this(render_set, 0.0, 0.0, 1.0, 1.0, Texture.DefaultTexture)
-		{
-		}
-		public SpriteObject(RenderSet render_set, Texture texture):
-			this(render_set, 0.0, 0.0, 1.0, 1.0, texture)
+			this(render_set,Texture.DefaultTexture)
 		{
 		}
 		public SpriteObject (RenderSet render_set, double x, double y, Texture texture):
-			this(render_set, x, y, 1.0, 1.0, texture)
-		{		
+			this(render_set, texture)
+		{
+			Corner = new Vector3d(x, y, 0.0);
 		}
-		// Main constructor:
-		public SpriteObject (RenderSet render_set, double x, double y, double scalex, double scaley, Texture texture):
-			base(render_set, x, y, scalex, scaley, texture)
+		public SpriteObject (RenderSet render_set, SpriteObject relative_to, double x, double y, Texture texture):
+			this(render_set, x, y, texture)
+		{
+			Corner = new Vector3d(relative_to.CornerX + x, relative_to.CornerY + y, relative_to.PositionZ);;
+		}
+		public SpriteObject (RenderSet render_set, Texture texture):
+			base(render_set, texture)
 		{
 			_RenderSet = render_set;
+
 			InitPhysics();
+			// HACK: Positioning the body must occur after world
+			// has been solved at least one time in order to avoid
+			// fixtures being shifted rather than the bodies.
+			Program.MainGame.WorldMain.Step (0.0f);
+
 			RenderSetEntry += EnteredRenderSet; // Virtual default event handler
 		}
 		protected virtual void InitPhysics()
@@ -299,11 +220,14 @@ namespace positron
 		}
 		public virtual void Derez()
 		{
+			if(DerezEvent != null)
+				DerezEvent(this, null);
             _SpriteBody.Dispose();
 			_RenderSet.Remove(this);
 		}
 		public override void Dispose()
 		{
+			DerezEvent = null;
 			Body.Dispose();
 			base.Dispose();
 		}

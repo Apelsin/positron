@@ -322,7 +322,10 @@ namespace positron
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
 			_FrameStatic = _AnimationDefault.Frames[0];
-            Corner = new Vector3d(x, y, 0.0);
+            
+			// Position for world objects is handled differently
+			if(!(this is IWorldObject))
+				Corner = new Vector3d(x, y, 0.0);
 		}
 		public SpriteBase CenterShift ()
 		{
@@ -412,6 +415,7 @@ namespace positron
 		}
 		public override void Dispose()
 		{
+			//_RenderSet.Remove(this);
 			VBO.Dispose();
 			base.Dispose();
 		}

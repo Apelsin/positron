@@ -338,6 +338,41 @@ namespace positron
 				}
 			}
 		}
+		protected void SetupPlayerOnExit()
+		{
+			SceneExit += (sender, e) => {
+				if(e.To is ISceneGameplay)
+				{
+					Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) => {
+						double start_x = 0, start_y = 0;
+						if(e.To.DoorToPreviousScene != null)
+						{
+							start_x = e.To.DoorToPreviousScene.CornerX;
+							start_y = e.To.DoorToPreviousScene.CornerY;
+						}
+						//new Spidey(e.To.Stage, start_x, start_y);
+						Player player_1 = Program.MainGame.Player1;
+						if(player_1 != null)
+						{
+							player_1.Derez();
+							Program.MainGame.RemoveInputAccepters("Player1");
+						}
+						player_1 = Program.MainGame.Player1 = new Player(e.To.Stage, start_x, start_y, Texture.Get("sprite_player"));
+						player_1.CornerY += 32;
+						//e.To.Follow(player_1, true);
+						Program.MainGame.SetLastInputAccepters("Player1", new IInputAccepter[] { player_1 });
+						Follow(player_1);
+						
+						var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
+						health_meter.Preserve = true;
+
+						player_1.DerezEvent += (sender3, e3) => { health_meter.Dispose(); };
+
+						return true;
+					});
+				}
+			};
+		}
 		public virtual void Dispose()
 		{
 			SceneEntry = null;
