@@ -110,6 +110,7 @@
     <Compile Include="Drawables\SceneElements\Misc\PsdSpriteTest.cs" />
     <Compile Include="Drawables\SceneElements\Prop\FloorSwitch.cs" />
     <Compile Include="Drawables\SceneElements\Prop\ExtenderPlatform.cs" />
+    <Compile Include="Drawables\SceneElements\Prop\SmallGateway.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

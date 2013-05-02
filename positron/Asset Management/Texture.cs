@@ -107,6 +107,7 @@ namespace positron
 			floor_switch.Regions = new TextureRegion[4];
 			floor_switch.Regions.BuildTiledRegions(4, 32, 10);
 			var gateway = LoadTexture ("sprite_gateway",	 		"scene_element",	"sprite_gateway.png");
+			PsdLoader.LoadSpriteSheet("sprite_mini_gate",			"scene_element",	"sprite_mini_gate.psd");
 			gateway.Regions = new TextureRegion[4];
 			gateway.Regions.BuildTiledRegions(4, 32, 72);
 
@@ -126,10 +127,14 @@ namespace positron
 			var bunker_floor = LoadTexture("sprite_bunker_floor",		"scene_element",   "sprite_bunker_floor.png");
 			bunker_floor.Regions = new TextureRegion[4];
 			bunker_floor.Regions.BuildTiledRegions(4, 32, 32);
-			
+
+			var floor = LoadTexture("sprite_tile_floor_atlas",		"background",   "sprite_tile_floor_atlas.png");
+			floor.Regions = new TextureRegion[3];
+			floor.Regions.BuildTiledRegions(4, 32, 32);
+
 			var bunker_floor_2 = LoadTexture("sprite_bunker_floor_2",		"scene_element",   "sprite_bunker_floor_2.png");
 			bunker_floor_2.Regions = new TextureRegion[4];
-			bunker_floor_2.Regions.BuildTiledRegions(4, 32, 128);
+			bunker_floor_2.Regions.BuildTiledRegions(4, 32, 104);
 			
 			var bunker_wall = LoadTexture("sprite_bunker_wall",		"scene_element",   "sprite_bunker_wall.png");
 			bunker_wall.Regions = new TextureRegion[4];
@@ -166,10 +171,12 @@ namespace positron
 			var bg3 = LoadTexture("sprite_tile_bg3_atlas",		"background",   "sprite_tile_bg3_atlas.png");
 			bg3.Regions = new TextureRegion[32];
 			bg3.Regions.BuildTiledRegions(4, 32, 32);
-			
-			var floor = LoadTexture("sprite_tile_floor_atlas",		"background",   "sprite_tile_floor_atlas.png");
-			floor.Regions = new TextureRegion[3];
-			floor.Regions.BuildTiledRegions(4, 32, 32);
+
+			var bg_rubble = LoadTexture("sprite_dark_rubble_atlas",		"background",   "sprite_dark_rubble_atlas.png");
+			bg_rubble.Regions = new TextureRegion[32];
+			bg_rubble.Regions.BuildTiledRegions(4, 32, 32);
+
+			var bg_pipes = LoadTexture("sprite_bg_pipes", "background", "sprite_bg_pipes.png");
 			
 			
 			var infogfx_key_spacebar = LoadTexture ("sprite_infogfx_key_spacebar",	"user_interface",	"sprite_infogfx_key_spacebar.png");

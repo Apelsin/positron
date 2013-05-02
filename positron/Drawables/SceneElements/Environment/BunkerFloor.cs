@@ -18,7 +18,7 @@ namespace positron
 			base(scene.Stage, x, y, texture)
 		{
 			_Variant = Variance.Next(Texture.Regions.Length);
-			PlayAnimation(new SpriteAnimation(Texture, _Variant));
+			PlayAnimation(_AnimationDefault = new SpriteAnimation(Texture, _Variant));
 		}
 		protected override void Draw()
 		{
@@ -32,8 +32,6 @@ namespace positron
 		public BunkerFloor2 (Scene scene, double x, double y):
 			base(scene, x, y, Texture.Get("sprite_bunker_floor_2"))
 		{
-			_Variant = Variance.Next(Texture.Regions.Length);
-			PlayAnimation(new SpriteAnimation(Texture, _Variant));
 		}
 	}
 }

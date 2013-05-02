@@ -53,6 +53,8 @@ namespace positron
 		protected bool _WieldingGun = false;
 		protected bool _WouldCrouch = false;
 
+		protected double _AimAngle = 0.0;
+
 		protected Vector3d _DampVeloNormal = new Vector3d();
 		protected Stopwatch JumpTimer = new Stopwatch();
 		protected Stopwatch WalkAnimationTimer = new Stopwatch();
@@ -79,8 +81,16 @@ namespace positron
 			AnimationAimGunFwdCrouch,
 			AnimationAimGunFwdJump;
 
-		SpriteAnimation AnimationStationary { get { return _WouldCrouch ? AnimationCrouch : AnimationStand; } }
-		SpriteAnimation AnimationMove { get { return _WouldCrouch ? AnimationCrawl : AnimationWalk; } }
+		bool Crouching  { get { return _AnimationCurrent == AnimationCrouch || _AnimationCurrent == AnimationCrawl; } }
+
+		SpriteAnimation AnimationStationary { get {
+				return _WouldCrouch ? AnimationCrouch :
+					Crouching ? (CrouchHeadroomHitTest() ? AnimationStand : AnimationCrouch) : AnimationStand;
+			} }
+		SpriteAnimation AnimationMove { get {
+				return _WouldCrouch ? AnimationCrawl :
+					Crouching ? (CrouchHeadroomHitTest() ? AnimationWalk : AnimationCrawl) : AnimationWalk;
+			} }
 
 		protected ManualResetEvent JumpRayMRE = new ManualResetEvent(false);
 		protected float[] JumpRayXDirections = new float[] { 0.0f, 0.2f, -0.2f, 0.45f, -0.45f };
@@ -120,9 +130,9 @@ namespace positron
 			AnimationWalkBk = 		new SpriteAnimation(texture, true, "protag walking back 1", "protag walking back 2", "protag walking back 3", "protag walking back 4");
 
 			AnimationCrouch =		new SpriteAnimation(texture, true, "protag crouch");
-			AnimationCrawl =		new SpriteAnimation(texture, true, "protag crouch"); // TODO
+			AnimationCrawl =		new SpriteAnimation(texture, 150, true, "protag crouch walk 1", "protag crouch walk 2", "protag crouch walk 3", "protag crouch walk 4");
 
-			AnimationPreJump = 		new SpriteAnimation(texture, "protag jumping 1");
+			AnimationPreJump = 		new SpriteAnimation(texture, "protag jumping 2");
 			AnimationJumping = 		new SpriteAnimation(texture, "protag jumping 2");
 			AnimationEndJump = 		new SpriteAnimation(texture, "protag jumping 4");
 
@@ -277,7 +287,7 @@ namespace positron
 		}
 		protected void DoActionHere ()
 		{
-			var fixtures = _RenderSet.Scene.World.TestPointAll(Body.WorldCenter);
+			var fixtures = _RenderSet.Scene.TestPointAll(Body.WorldCenter);
 			foreach(Fixture fixture in fixtures)
 			{
 				if (fixture != null) {
@@ -315,11 +325,16 @@ namespace positron
 				late = (u_sender, u_e) =>
 				{
 					// TODO: Un-hard-code this:
+					Vector2d bullet_velo =
+						new Vector2d(TileX * Math.Cos(_AimAngle), Math.Sin (_AimAngle));
+					//bullet_velo.Normalize();
+					bullet_velo *= 1000;
 					Vector2d shot_offset = new Vector2d ((SizeX + 3) * TileX, SizeY * 0.23);
+
 					var bullet = new BasicBullet (this._RenderSet.Scene,
 					                             this.PositionX + shot_offset.X,
 					                             this.PositionY + shot_offset.Y,
-					                             1000 * TileX, 0);
+					                              bullet_velo.X, bullet_velo.Y);
 					GunStowTimer.Restart ();
 					return true;
 				};
@@ -333,6 +348,7 @@ namespace positron
 		{
 			float fx = (e.KeysPressedWhen.Contains (Key.A) ? -1.0f : 0.0f) + (e.KeysPressedWhen.Contains (Key.D) ? 1.0f : 0.0f);
 			if (_WieldingGun) {
+				_AimAngle =  Math.PI * ((e.KeysPressedWhen.Contains (Key.S) ? -0.25 : 0.0f) + (e.KeysPressedWhen.Contains (Key.W) ? 0.25f : 0.0f));
 				if (fx != 0.0f) {
 					_TileX = fx;
 					fx = 0.0f;
@@ -425,14 +441,47 @@ namespace positron
 				_RenderSet.Scene.RayCast (callback, start, end);
 			}
 		}
+		/// <summary>
+		/// Return whether the player has headroom
+		/// </summary>
+		public bool CrouchHeadroomHitTest ()
+		{
+			AABB aabb;
+			lock (Body) { // Paraoid...
+				FixtureLower.GetAABB (out aabb, 0);
+			}
+			float w = aabb.UpperBound.X - aabb.LowerBound.X;
+			float h = aabb.UpperBound.Y - aabb.LowerBound.Y;
+			
+			float pixel = 1.0f / (float)Configuration.MeterInPixels;
+			
+			float px = (float)PositionX * pixel;
+			float py = (float)PositionY * pixel;
+			
+			float x_start = 0.0f;
+			float spread = 3.0f * pixel;
+			float y_start = aabb.UpperBound.Y - spread;
+			//float y_end = aabb.UpperBound.Y + spread;
+
+			for (int j = 0; j < 4; j++) {
+				for (int i = 0; i < JumpRayXDirections.Length; i++) {
+					float dx = (float)(_Scale.X * w * JumpRayXDirections [i]);
+					var start = new Microsoft.Xna.Framework.Vector2 (px + x_start + dx, py + y_start + 5 * pixel * j);
+					//var end = new Microsoft.Xna.Framework.Vector2 (start.X, py + y_end);
+					List<Fixture> hit_fixtures = _RenderSet.Scene.TestPointAll (start);
+					foreach(Fixture fixture in hit_fixtures)
+					{
+						if (fixture != FixtureUpper && fixture != FixtureLower && fixture.CollisionCategories == Category.Cat1)
+							return false;
+					}
+				}
+			}
+			return true;
+		}
 		public void Jump()
 		{
-			/// <summary>
-			/// Called for each fixture found in the query. You control how the ray cast
-			/// proceeds by returning a float:
-			/// <returns>-1 to filter, 0 to terminate, fraction to clip the ray for closest hit, 1 to continue</returns>
-			/// </summary>
-
+			if(!CrouchHeadroomHitTest())
+				return;
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
 				lock(Program.MainUpdateLock)
 				{
@@ -479,9 +528,14 @@ namespace positron
 		public override void Update (double time)
 		{
 			if (GunStowTimer.Elapsed.TotalSeconds > 0.2) {
-				GunStowTimer.Reset();
+				GunStowTimer.Reset ();
 				WieldingGun = false;
 			}
+			if (Crouching) {
+				FixtureUpper.CollisionCategories = Category.None;
+			}
+			else
+				FixtureUpper.CollisionCategories =  Category.Cat1;
 			base.Update(time);
 			GoneDown = GoneDown || Body.LinearVelocity.Y < 0.0f;
 			//((BooleanIndicator)Program.MainGame.TestIndicators[0]).State = GoneDown;

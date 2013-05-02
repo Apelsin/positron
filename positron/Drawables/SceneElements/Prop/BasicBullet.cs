@@ -48,10 +48,11 @@ namespace positron
 		}
 		public override void Update(double time)
 		{
-			if(Body != null)
-				Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, 0.1f);
+			//if(Body != null)
+			//	Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, 0.1f);
+			Theta = Math.Atan2(VelocityY * _TileX, VelocityX * _TileX);
 			_TileX = VelocityX > 0.0 ? 1.0 : -1.0;
-			//Body.ApplyForce(_RenderSet.Scene.World.Gravity * -0.5f);
+			Body.ApplyForce(-_RenderSet.Scene.World.Gravity * Body.Mass);
 		}
 	}
 }

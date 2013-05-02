@@ -338,6 +338,25 @@ namespace positron
 				}
 			}
 		}
+		public List<Fixture> TestPointAll (Microsoft.Xna.Framework.Vector2 point)
+		{
+			List<Fixture> hit_fixture = _World.TestPointAll (point);
+			if (Configuration.DrawBlueprints) {
+				lock(RenderLock)
+				{
+					double cross = 2;
+					new BlueprintLine (
+						new Vector3d (point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels - cross, 0.0),
+						new Vector3d (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels + cross, 0.0),
+						WorldBlueprint);
+					new BlueprintLine (
+						new Vector3d (point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels + cross, 0.0),
+						new Vector3d (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels - cross, 0.0),
+						WorldBlueprint);
+				}
+			}
+			return hit_fixture;
+		}
 		protected void SetupPlayerOnExit()
 		{
 			SceneExit += (sender, e) => {
