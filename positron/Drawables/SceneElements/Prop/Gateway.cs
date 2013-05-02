@@ -19,10 +19,14 @@ namespace positron
 		{
 		}
 		protected Gateway (RenderSet render_set, double x, double y, SharedState<bool> sync_state):
-			base(render_set, x, y, Texture.Get("sprite_gateway"))
+			this(render_set, x, y, sync_state, Texture.Get("sprite_gateway"))
 		{
 			Open = new SpriteAnimation(Texture, 50, new int [] {0, 1, 2, 3});
 			Close = new SpriteAnimation(Texture, 50, new int [] {3, 2, 1, 0});
+		}
+		protected Gateway (RenderSet render_set, double x, double y, SharedState<bool> sync_state, Texture texture):
+			base(render_set, x, y, texture)
+		{
 			_State = sync_state;
 			_State.SharedStateChanged += (sender, e) => 
 			{
@@ -33,6 +37,7 @@ namespace positron
 		protected override void EnteredRenderSet (object sender, RenderSetChangeEventArgs e)
 		{
 			Body.Enabled = (RenderSet.Scene == e.To.Scene) && !_State;
+			PlayAnimation (_State ? Open : Close);
 		}
 		public void OnAction (object sender, ActionEventArgs e)
 		{

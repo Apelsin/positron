@@ -1,5 +1,7 @@
 using System;
 using System.Drawing;
+
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace positron
@@ -11,6 +13,18 @@ namespace positron
 		protected int[,] IndexMap;
 		public int CountX { get { return _CountX; } }
 		public int CountY { get { return _CountY; } }
+		public override Vector3d Corner {
+			get { return _Position; }
+			set { _Position = value; }
+		}
+		public override double CornerX {
+			get { return _Position.X; }
+			set { _Position.X = value; }
+		}
+		public override double CornerY {
+			get { return _Position.Y; }
+			set { _Position.Y = value; }
+		}
         public override double SizeX {
             get { return CountX * Texture.Regions[0].Size.X; }
         }

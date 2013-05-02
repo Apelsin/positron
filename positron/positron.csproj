@@ -113,6 +113,7 @@
     <Compile Include="Scene\SceneFour.cs">
       <DependentUpon>SceneTwo.cs</DependentUpon>
     </Compile>
+    <Compile Include="Drawables\SceneElements\Prop\SmallGateway.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
