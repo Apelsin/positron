@@ -7,27 +7,77 @@ using OpenTK.Graphics.OpenGL;
 
 namespace positron
 {
-    public struct Vertex
+    public struct VertexLite
     {
-        public Vector3d Position, Normal;
+        public Vector3d Position;
         public Vector2d TexCoord;
-        public Vertex(Vector3d p, Vector3d n, Vector2d tc)
+        public VertexLite(Vector3d p, Vector2d tc)
         {
             Position = p;
-            Normal = n;
             TexCoord = tc;
         }
-        public Vertex(double px, double py, double pz, double nx, double ny, double nz, double tcx, double tcy)
+        public VertexLite(Vector3d p, Vector2d tc, Vector4 c)
+        {
+            Position = p;
+            TexCoord = tc;
+        }
+        public VertexLite(double px, double py, double pz, double tcx, double tcy)
         {
             Position = new Vector3d(px, py, pz);
-            Normal = new Vector3d(nx, ny, nz);
             TexCoord = new Vector2d(tcx, tcy);
+        }
+        public VertexLite(double px, double py, double pz, double tcx, double tcy, float r, float b, float g, float a)
+        {
+            Position = new Vector3d(px, py, pz);
+            TexCoord = new Vector2d(tcx, tcy);
+        }
+        public static readonly int Stride = Marshal.SizeOf(default(VertexLite));
+    }
+    public struct Vertex
+    {
+        public Vector3d Position;
+        //public Vector3d Normal;
+        public Vector2d TexCoord;
+        public Vector4 Color;
+        public Vertex(Vector3d p, /*Vector3d n,*/ Vector2d tc)
+        {
+            Position = p;
+            //Normal = n;
+            TexCoord = tc;
+            Color = Vector4.One;
+        }
+        public Vertex(Vector3d p, /*Vector3d n,*/ Vector2d tc, Vector4 c)
+        {
+            Position = p;
+            //Normal = n;
+            TexCoord = tc;
+            Color = c;
+        }
+        public Vertex(double px, double py, double pz, /*double nx, double ny, double nz,*/ double tcx, double tcy)
+        {
+            Position = new Vector3d(px, py, pz);
+            //Normal = new Vector3d(nx, ny, nz);
+            TexCoord = new Vector2d(tcx, tcy);
+            Color = Vector4.One;
+        }
+        public Vertex(double px, double py, double pz, /*double nx, double ny, double nz,*/ double tcx, double tcy, float r, float b, float g, float a)
+        {
+            Position = new Vector3d(px, py, pz);
+            //Normal = new Vector3d(nx, ny, nz);
+            TexCoord = new Vector2d(tcx, tcy);
+            Color = new Vector4(r, g, b, a);
         }
         public static readonly int Stride = Marshal.SizeOf(default(Vertex));
     }
     public sealed class VertexBuffer : IDisposable // Sealed for performance boost
     {
-        private int _Id;
+        private static IntPtr VertexPtr = new IntPtr(0);
+        //private static IntPtr NormalPtr = new IntPtr(Vector3d.SizeInBytes + VertexPtr.ToInt64());
+        private static IntPtr TexCoordPtr = new IntPtr(Vector3d.SizeInBytes + VertexPtr.ToInt64());
+        private static IntPtr ColorPtr = new IntPtr(Vector2d.SizeInBytes + TexCoordPtr.ToInt64());
+        
+
+        protected int _Id;
         public int Id
         {
             get
@@ -43,38 +93,63 @@ namespace positron
                 return _Id;
             }
         }
-        private int _DataLength;
+        protected int _DataLength;
         public int DataLength { get { return _DataLength; } }
 
-        public VertexBuffer()
-        {
-        }
+        protected bool _ColorBufferUsed = false;
+        public bool ColorBufferUsed { get { return _ColorBufferUsed; } }
+
+        protected int _Size = VertexLite.Stride;
 
         public VertexBuffer(params Vertex[] data)
         {
             SetData(data);
         }
 
-        public void SetData(params Vertex[] data)
+        public VertexBuffer(params VertexLite[] data)
         {
-            if (data == null)
-                throw new ArgumentNullException("data");
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Id);
-            GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(data.Length * Vertex.Stride), data, BufferUsageHint.StaticDraw);
-            _DataLength = data.Length;
+            SetData(data);
         }
 
-        public void Render()
+        public void SetData (params Vertex[] data)
         {
-            GL.EnableClientState(ArrayCap.VertexArray);
-            GL.EnableClientState(ArrayCap.NormalArray);
-            GL.EnableClientState(ArrayCap.TextureCoordArray);
+            if (data == null)
+                throw new ArgumentNullException ("data");
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Id);
-            GL.VertexPointer(3, VertexPointerType.Double, Vertex.Stride, new IntPtr(0));
-            GL.NormalPointer(NormalPointerType.Double, Vertex.Stride, new IntPtr(Vector3d.SizeInBytes));
-            GL.TexCoordPointer(2, TexCoordPointerType.Double, Vertex.Stride, new IntPtr(2 * Vector3d.SizeInBytes));
+            _DataLength = data.Length;
+            _ColorBufferUsed = true;
+            _Size = Vertex.Stride;
+
+            GL.BindBuffer (BufferTarget.ArrayBuffer, Id);
+            GL.BufferData (BufferTarget.ArrayBuffer, new IntPtr (data.Length * _Size), data, BufferUsageHint.StaticDraw);
+        }
+
+        public void SetData (params VertexLite[] data)
+        {
+            if (data == null)
+                throw new ArgumentNullException ("data");
+            
+            _DataLength = data.Length;
+            _ColorBufferUsed = false;
+            _Size = VertexLite.Stride;
+            
+            GL.BindBuffer (BufferTarget.ArrayBuffer, Id);
+            GL.BufferData (BufferTarget.ArrayBuffer, new IntPtr (data.Length * _Size), data, BufferUsageHint.StaticDraw);
+        }
+
+        public void Render ()
+        {
+            GL.BindBuffer (BufferTarget.ArrayBuffer, Id);
+            GL.VertexPointer (3, VertexPointerType.Double, _Size, VertexPtr);
+            //GL.NormalPointer(NormalPointerType.Double, _Size, NormalPtr);
+            GL.TexCoordPointer (2, TexCoordPointerType.Double, _Size, TexCoordPtr);
+            //GL.ColorPointer (4, ColorPointerType.Float, _Size, ColorPtr);
+            if (_ColorBufferUsed) {
+                GL.EnableClientState(ArrayCap.ColorArray);
+                GL.ColorPointer (4, ColorPointerType.Float, _Size, ColorPtr);
+            }
+            else
+                GL.DisableClientState(ArrayCap.ColorArray);
             GL.DrawArrays(BeginMode.Quads, 0, _DataLength); // TODO: Make this part not-hardcoded
         }
 		public void Dispose()

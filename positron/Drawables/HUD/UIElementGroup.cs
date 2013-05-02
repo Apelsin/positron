@@ -16,14 +16,14 @@ namespace positron
 		}
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{
-			if (e.Key == Key.A || e.Key == Key.W) {
+			if (e.Key == Configuration.KeyUp || e.Key == Configuration.KeyLeft) {
 				_ElementFocusedIndex = (_ElementFocusedIndex + Count - 1) % Count;
 				this.ForEach(element => element.OnRefresh(this, new EventArgs()));
-			} else if (e.Key == Key.S || e.Key == Key.S) {
+            } else if (e.Key == Configuration.KeyDown || e.Key == Configuration.KeyRight) {
 				_ElementFocusedIndex = (_ElementFocusedIndex + 1) % Count;
 				this.ForEach(element => element.OnRefresh(this, new EventArgs()));
 			}
-			else if (e.Key == Key.Space) {
+            else if (e.Key == Configuration.KeyDoAction || e.Key == Configuration.KeyUseEquippedItem || e.Key == Configuration.KeyJump) {
 				ActuateFocused();
 				this.ForEach(element => element.OnRefresh(this, new EventArgs()));
 			}

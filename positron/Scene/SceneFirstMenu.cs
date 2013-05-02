@@ -15,7 +15,7 @@ namespace positron
 		{
 			UIGroup = new UIElementGroup();
 			this.SceneEntry += (sender, e) => {
-				Program.MainGame.SetInputAccepters("Main Menu",  new IInputAccepter[] { UIGroup });
+                Program.MainGame.SetInputAccepters("Main Menu",  new IInputAccepter[] { UIGroup });
 			};
 			SceneExit += (sender, e) => {
 				Program.MainGame.RemoveInputAccepters("Main Menu");
@@ -39,8 +39,22 @@ namespace positron
 			             new SpriteBase.SpriteFrame(texture, 5),
 			                         new SpriteBase.SpriteFrame(texture, 3), UIGroup).CenterShift()).Action += (sender, e) =>
 			{
-				Program.MainGame.CurrentScene = (Scene)Program.MainGame.Scenes[(string)Configuration.Get("SceneBeginning")];
+				Program.MainGame.CurrentScene = (Scene)Program.MainGame.Scenes["SceneCredits"];
 			};
+
+            var looper = new MusicLooperHACK(this, "camprespite_loop");
+            looper.Preserve = true;
+            looper.RenderSetTransfer += (sender, e) => {
+                if(!(e.From.Scene is ISceneGameplay) && (e.To.Scene is ISceneGameplay))
+                {
+                    looper.SetLoop("last_human_loop");
+                }
+                else if((e.From.Scene is ISceneGameplay) && !(e.To.Scene is ISceneGameplay))
+                {
+                    looper.SetLoop("camprespite_loop");
+                }
+            };
+
 		}
 	}
 }

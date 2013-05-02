@@ -24,7 +24,8 @@ namespace positron
 		}
 		public static void InitialSetup()
 		{
-			DialogSpeakers.Add ("protagonist", new DialogSpeaker("Volta", Texture.Get ("sprite_protagonist_picture")));
+            DialogSpeakers.Add ("protagonist", new DialogSpeaker("Volta", Texture.Get ("sprite_protagonist_picture")));
+			DialogSpeakers.Add ("radio", new DialogSpeaker("Radio", Texture.Get ("sprite_radio_picture")));
 		}
 		public static DialogSpeaker Get (object key)
 		{
@@ -78,7 +79,7 @@ namespace positron
 			_Shown = false;
 			ScaleX = _RenderSet.Scene.ViewSize.X;
 			ScaleY = (int)(_RenderSet.Scene.ViewSize.Y * 0.25);
-			FadeUp = Texture.Get("sprite_dialog_fade_up");
+            FadeUp = Texture.Get("sprite_dialog_fade_up");
 
 			SpeakerWriter = new PTextWriter(new Size((int)ScaleX, 24));
 			SpeechWriter = new PTextWriter(new Size((int)ScaleX, (int)ScaleY - 24));
@@ -87,7 +88,7 @@ namespace positron
 		{
 			GL.PushMatrix();
 			{
-				GL.Color4(0, 0, 0, 0.5);
+				GL.Color4(0.0, 0.0, 0.0, 0.75);
 				GL.BindTexture(TextureTarget.Texture2D, 0);
 			    GL.Translate (_Position.X, _Position.Y, 0.0);
 				GL.Begin (BeginMode.Quads);
@@ -96,11 +97,10 @@ namespace positron
 				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	ScaleY);
 				GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	ScaleY);
 				GL.End ();
-				GL.Translate (0.0, ScaleY, 0.0);
-				Texture.Bind(FadeUp);
-				GL.Color4(0, 0, 0, 0.5);
+                GL.Translate (0.0, ScaleY, 0.0);
+                Texture.Bind(FadeUp);
 				GL.Begin (BeginMode.Quads);
-				GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
+    			GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
 				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);
 				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	FadeUp.Height);
 				GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	FadeUp.Height);
@@ -129,8 +129,12 @@ namespace positron
 						GL.Translate(picture.Width + 16, 0.0, 0.0);
 					}
 				}
+                GL.Color4 (1.0, 1.0, 1.0, 1.0);
 				SpeechWriter.Render(time);
-			}
+//                GL.Translate (0.75, -0.75, 0.0);
+//                GL.Color4 (0.0, 0.0, 0.0, 1.0);
+//                SpeechWriter.Render(time);
+            }
 			GL.PopMatrix();
 		}
 		public override string ToString ()
@@ -185,7 +189,7 @@ namespace positron
 		}
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{
-			if (e.Key == Key.Space) {
+            if (e.Key == Configuration.KeyDoAction || e.Key == Configuration.KeyUseEquippedItem || e.Key == Configuration.KeyJump) {
 				Next();
 				return false;
 			}

@@ -19,11 +19,13 @@ namespace positron
 			protected SpriteFrame[] _Frames;
 			protected bool _Looping = false;
 			protected bool _PingPong = false;
+            protected Sound _Sound;
 
 			public SpriteFrame[] Frames { get { return _Frames; } }
 			public int FrameCount { get { return _Frames == null ? 0 : _Frames.Length; } }
 			public bool Looping { get { return _Looping; } set { _Looping = value; } }
 			public bool PingPong { get { return _PingPong; } set { _PingPong = value; } }
+            public Sound Sound { get { return _Sound; } set { _Sound = value; } }
 
 
 			public SpriteAnimation(Texture texture, int frame_time, bool looping, bool ping_pong, params int[] region_incices):
@@ -200,10 +202,10 @@ namespace positron
 				}
 				w_half = w * 0.5;
 				h_half = h * 0.5;
-				var A = new Vertex(corner_x - w_half, corner_y - h_half, 0.0, 0.0, 0.0, 1.0, x0, -y0);
-				var B = new Vertex(corner_x + w_half, corner_y - h_half, 0.0, 0.0, 0.0, 1.0, x1, -y0);
-				var C = new Vertex(corner_x + w_half, corner_y + h_half, 0.0, 0.0, 0.0, 1.0, x1, -y1);
-				var D = new Vertex(corner_x - w_half, corner_y + h_half, 0.0, 0.0, 0.0, 1.0, x0, -y1);
+				var A = new Vertex(corner_x - w_half, corner_y - h_half, 1.0, x0, -y0);
+				var B = new Vertex(corner_x + w_half, corner_y - h_half, 1.0, x1, -y0);
+				var C = new Vertex(corner_x + w_half, corner_y + h_half, 1.0, x1, -y1);
+				var D = new Vertex(corner_x - w_half, corner_y + h_half, 1.0, x0, -y1);
 				_VBO = new VertexBuffer(A, B, C, D);
 				//BPVBO = new VertexBuffer(A, B, C, D);
 			}
@@ -215,7 +217,7 @@ namespace positron
 		protected double _TileX;
 		protected double _TileY;
 
-		protected Dictionary<string, SpriteAnimation> _Animations;
+		//protected Dictionary<string, SpriteAnimation> _Animations;
 		protected Stopwatch _FrameTimer;
 		protected int _AnimationFrameIndex;
 
@@ -224,6 +226,9 @@ namespace positron
 		protected Lazy<SpriteAnimation> _AnimationNext;
 
 		protected SpriteFrame _FrameStatic;
+
+        protected bool _FirstUpdate = false;
+
         /// <summary>
         /// The blueprint vertex buffer object
         /// </summary>
@@ -370,7 +375,15 @@ namespace positron
 			// SpriteFrame handles Build() for frames
 		}
 		public virtual void Update (double time)
-		{
+        {
+            if (_FirstUpdate) {
+                _FirstUpdate = false;
+                if(_AnimationCurrent != null)
+                {
+                    if(_AnimationCurrent.Sound != null)
+                        _AnimationCurrent.Sound.Play();
+                }
+            }
 			if (_AnimationCurrent != null) {
 				if (_AnimationFrameIndex < _AnimationCurrent.FrameCount) {
 					if (_FrameTimer.Elapsed.TotalMilliseconds > FrameCurrent.FrameTime) {
@@ -380,6 +393,7 @@ namespace positron
 							if(_AnimationCurrent.Looping)
 							{
 								_AnimationFrameIndex = 0;
+                                _FirstUpdate = true;
 							}
 							else
 							{
@@ -401,6 +415,22 @@ namespace positron
 			if(animation != _AnimationCurrent)
 				StartAnimation(animation);
 		}
+        public void LoopSound__HACK(object sound_key)
+        {
+            Sound sound = Sound.Get (sound_key);
+            var sound_anim = new SpriteAnimation(Texture, (int)(1000 * sound.Duration),  true, false, Texture.DefaultRegionIndex);
+            PlayAnimation(sound_anim);
+        }
+        /// <summary>
+        /// Plays a new static animation (oxymoron) with a single frame
+        /// using the current animation with the specified region given
+        /// the region label
+        /// </summary>
+        public SpriteBase SetRegion (string region_label)
+        {
+            PlayAnimation(new SpriteAnimation(Texture, region_label));
+            return this;
+        }
 		protected void StartAnimation (SpriteAnimation animation)
 		{
 			if (animation == null) {
@@ -408,6 +438,7 @@ namespace positron
 					animation = _AnimationNext.Value;
 			}
 			if (animation != null) {
+                _FirstUpdate = true;
 				_AnimationFrameIndex = 0;
 				_AnimationCurrent = animation;
 				_FrameTimer.Restart();

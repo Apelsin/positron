@@ -63,7 +63,7 @@ namespace positron
 		/// <summary>
 		/// All of the render sets
 		/// </summary>
-		public RenderSet All;
+		//public RenderSet All;
 		/// <summary>
 		/// The background set is the farthest away from the viewport and is drawn first
 		/// </summary>
@@ -165,7 +165,7 @@ namespace positron
 
 			// This should contain everything AllRenderSetsInOrder would contain
 			// This is an optimization over using an enumerable
-			All = new RenderSet(this, Background, Rear, Stage, Tests, Front, HUD, HUDBlueprint, HUDDebug);
+			//All = new RenderSet(this, Background, Rear, Stage, Tests, Front, HUD, HUDBlueprint, HUDDebug);
 
 			SceneEntry += (sender, e) => 
 			{
@@ -292,8 +292,8 @@ namespace positron
 			if (time > 0.0f) {
 				double a = Math.Abs (_ViewPosition.X - pan.X);
 				double b = Math.Abs (_ViewPosition.Y - pan.Y);
-				a = Helper.SmootherStep (view_size_scaled_x - 64, view_size_scaled_x, a);
-				b = Helper.SmootherStep (view_size_scaled_y - 64, view_size_scaled_y, b);
+				a = Helper.SmootherStep (view_size_scaled_x - 128, view_size_scaled_x, a);
+				b = Helper.SmootherStep (view_size_scaled_y - 128, view_size_scaled_y, b);
 				pan.X = _ViewPosition.X + (pan.X - _ViewPosition.X) * a;
 				pan.Y = _ViewPosition.Y + (pan.Y - _ViewPosition.Y) * b;
 				float alpha = Math.Min (1.0f, (2000f * (float)time) / (float)Math.Max (50f, (pan - _ViewPosition).Length));
@@ -401,10 +401,13 @@ namespace positron
 				}
 			};
 		}
-		public virtual void Dispose()
-		{
-			SceneEntry = null;
-			SceneExit = null;
+		public virtual void Dispose ()
+        {
+            SceneEntry = null;
+            SceneExit = null;
+            foreach (RenderSet render_set in AllRenderSetsInOrder()) {
+                render_set.Clear ();
+            }
 		}
 		#endregion
 		#region Static
@@ -412,7 +415,7 @@ namespace positron
 		/// Instantiates and initializes one instnace
 		/// of every subclass of Scene in this assembly
 		/// </summary>
-		static public void InstantiateScenes (PositronGame game)
+		static public void InstantiateScenes (ref PositronGame game)
 		{
 			// Brave new world:
 			game.WorldMain = new World(new Microsoft.Xna.Framework.Vector2(0.0f, (float)Configuration.ForceDueToGravity));
@@ -429,13 +432,19 @@ namespace positron
 				game.Scenes.Add(scene.Name, scene);
 			}
 		}
-		static public void InitializeScenes(PositronGame game)
+		static public void InitializeScenes(ref PositronGame game)
 		{
 			foreach(Scene scene in game.Scenes.Values)
 				scene.InstantiateConnections();
 			foreach(Scene scene in game.Scenes.Values)
 				scene.InitializeScene();
 		}
+        static public void SetupScenes(ref PositronGame game)
+        {
+            Scene.InstantiateScenes(ref game); // Instantiate one of each of the scenes defined in this entire assembly
+            game.CurrentScene = (Scene)Program.MainGame.Scenes["SceneFirstMenu"];
+            Scene.InitializeScenes(ref game);
+        }
 		#endregion
 		#endregion
 	}

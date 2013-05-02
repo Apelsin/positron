@@ -26,24 +26,34 @@ namespace positron
         #region Member Variables
 		public void AddUpdateEventHandler(object sender, UpdateEventHandler handler)
 		{
-			_UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
+            lock(_UpdateEventList)
+			    _UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
 		}
         #region Test stuff
         Stopwatch TestWatch = new Stopwatch();
 		Random rand = new Random();
 		//public List<BooleanIndicator> TestIndicators = new List<BooleanIndicator>();
-		public Dialog TestDialog;
 		public Player Player1;
-		public TileMap BackgroundTiles;
 		int IncrementTest = 0;
 		#endregion
 		protected Hashtable _Scenes = new Hashtable();
 		protected Scene _CurrentScene;
 		protected World _WorldMain;
+
 		public float TimeStepCoefficient = 1.0f;
 		protected OrderedDictionary InputAccepterGroups;
-		protected readonly Object _InputAccepterGroupsLock = new Object();
 
+        /// <summary>
+        /// Lock to synchronize rendering and updating
+        /// </summary>
+        public readonly object MainUpdateLock = new object();
+        
+        /// <summary>
+        /// Lock to synchronize user input controls
+        /// </summary>
+        public readonly object MainUserInputLock = new object();
+
+        protected readonly Object _InputAccepterGroupsLock = new Object();
 		#endregion
 		#region Static Variables
 		#endregion
@@ -77,6 +87,7 @@ namespace positron
 		{
 			// Load textures into graphics memory space
 			Texture.InitialSetup();
+            Sound.InitialSetup();
 			DialogSpeaker.InitialSetup();
 		}
 		public void Setup ()
@@ -84,10 +95,6 @@ namespace positron
 			// TODO: world objects need to be pending initialization before the world is controlled by the scene
 			FarseerPhysics.Settings.VelocityIterations = 1;
 			InputAccepterGroups = new OrderedDictionary();
-
-			Scene.InstantiateScenes(this); // Instantiate one of each of the scenes defined in this entire assembly
-			CurrentScene = (Scene)Program.MainGame.Scenes["SceneFirstMenu"];
-			Scene.InitializeScenes(this);
 		}
 		public void SetInputAccepters (string name, params IInputAccepter[] input_accepters)
 		{
@@ -259,6 +266,14 @@ namespace positron
 			lock (Program.MainUpdateLock) {
 				foreach(Scene scene in Scenes.Values)
 					scene.Dispose();
+                _Scenes.Clear();
+                _Scenes = null;
+                InputAccepterGroups.Clear();
+                InputAccepterGroups = null;
+                _UpdateEventList.Clear();
+                _UpdateEventList = null;
+                _WorldMain.Clear();
+                _WorldMain = null;
 			}
 		}
 		public void Demolish()

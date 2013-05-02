@@ -112,6 +112,15 @@
     <Compile Include="Drawables\SceneElements\Prop\ExtenderPlatform.cs" />
     <Compile Include="Drawables\SceneElements\Prop\SmallGateway.cs" />
     <Compile Include="Drawables\SceneElements\Prop\PressureSwitch.cs" />
+    <Compile Include="Scene\SceneFour.cs">
+      <DependentUpon>SceneTwo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Scene\SceneFour.cs" />
+    <Compile Include="Scene\SceneFive.cs" />
+    <Compile Include="Drawables\SceneElements\Prop\RadioProp.cs" />
+    <Compile Include="Asset Management\Sound.cs" />
+    <Compile Include="Scene\SceneCredits.cs" />
+    <Compile Include="Drawables\SceneElements\Prop\MusicLooperHACK.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

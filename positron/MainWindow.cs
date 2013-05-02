@@ -95,7 +95,11 @@ namespace positron
 		/// Ordered dictionary containing the current keyboard keys being pressed in time order
 		/// </summary>
 		public OrderedDictionary KeysPressed = new OrderedDictionary();
-		/// <summary>
+        /// <summary>
+        /// Signifies that the main game needs to be destroyed and then reinstantiated / reinitialized
+        /// </summary>
+        bool Reset = false;
+        /// <summary>
 		/// Signifies that the program is exiting
 		/// </summary>
 		bool Exiting = false;
@@ -189,50 +193,44 @@ namespace positron
 			}
 			Keyboard.KeyDown += delegate(object sender, KeyboardKeyEventArgs e)
 			{
-				if (e.Key == Key.Escape)
+				if (e.Key == Configuration.KeyReset)
 				{
 					if(KeysPressed.Contains (Key.ShiftLeft) || KeysPressed.Contains (Key.ShiftRight) )
 					{
-                        Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
-                        {
-							Program.MainGame.Demolish();
-                            Program.MainGame = new PositronGame(); // Godspeed.
-                            Program.MainGame.Setup();
-                            Program.MainGame.SetupTests();
-                            GC.Collect();
-                            GC.WaitForPendingFinalizers();
-                            return false;
-                        });
+                        this.Exit();
 					}
 					else
-						this.Exit();
+                    {
+                        Reset = true;
+                    }
 				}
-				else if(e.Key == Key.B)
+				else if(e.Key == Configuration.KeyToggleDrawBlueprints)
 				{
 					Configuration.DrawBlueprints ^= true;
 				}
-				else if(e.Key == Key.V)
+				else if(e.Key == Configuration.KeyToggleShowDebugVisuals)
 				{
 					Configuration.ShowDebugVisuals ^= true;
 				}
-				IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
-				bool key_press = true;
 				lock(Program.MainUpdateLock)
 				{
+                    IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
+                    bool key_press = true;
 					for(int i = 0; i < accepters.Length; i++)
 						key_press = key_press && accepters[i].KeyDown(this, e);
-				}
-				if(key_press)
-				{
-					lock(Program.MainUserInputLock)
-						KeysPressed.Add (e.Key, DateTime.Now);
-				}
+                    if(key_press)
+                    {
+                        lock(Program.MainUserInputLock)
+                            KeysPressed.Add (e.Key, DateTime.Now);
+                    }
+                }
+				
 			};
 			Keyboard.KeyUp += delegate(object sender, KeyboardKeyEventArgs e)
 			{
-				/*if (e.Key == Key.F)
+				if (e.Key == Configuration.KeyToggleFullScreen)
 				{
-					lock(UpdateLock)
+					lock(Program.MainUpdateLock)
 					{
 						if (this.WindowState == WindowState.Fullscreen)
 							this.WindowState = WindowState.Normal;
@@ -240,7 +238,7 @@ namespace positron
 							this.WindowState = WindowState.Fullscreen;
 						OnResize(null);
 					}
-				}*/
+				}
 				IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
 				bool key_press = true;
 				lock(Program.MainUpdateLock)
@@ -305,10 +303,13 @@ namespace positron
 				Exit ();
 			}
 
-			// Depth buffer init
-			GL.Enable (EnableCap.DepthTest);
-			GL.ClearDepth (1.0);
-			GL.DepthFunc (DepthFunction.Lequal);
+            GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
+
+            GL.EnableClientState(ArrayCap.VertexArray);
+            //GL.EnableClientState(ArrayCap.NormalArray);
+            GL.EnableClientState(ArrayCap.TextureCoordArray);
+            GL.EnableClientState(ArrayCap.ColorArray);
+
 
 			// Blending init
 			GL.Enable (EnableCap.Blend);
@@ -316,12 +317,16 @@ namespace positron
 			GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One);
 
 			// Culling init
+            // Depth buffer init
+            GL.Enable (EnableCap.DepthTest);
+            GL.ClearDepth (1.0);
+            GL.DepthFunc (DepthFunction.Lequal);
 			GL.Enable (EnableCap.CullFace);
 
 			// Create Color Tex
 			GL.GenTextures (1, out CanvasTexture);
 			GL.BindTexture (TextureTarget.Texture2D, CanvasTexture);
-			GL.TexImage2D (TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8, _CanvasWidth, _CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+			GL.TexImage2D (TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, _CanvasWidth, _CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
 			GL.TexParameter (TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
 			GL.TexParameter (TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 			GL.TexParameter (TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
@@ -365,6 +370,7 @@ namespace positron
 
 			// Delete textures from graphics memory space
 			Texture.Teardown();
+            Sound.Teardown();
 
 			// Clean up what we allocated before exiting
 			if (CanvasTexture != 0)
@@ -491,40 +497,60 @@ namespace positron
 		{
 			MakeCurrent(); // The context now belongs to this thread. No other thread may use it!
 
-			GL.Enable(EnableCap.DepthTest);
-			GL.Enable(EnableCap.PointSmooth);
-			GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
+            while (!Exiting)
+            {
+                // Instantiate a main game in the current scope only
+                lock(Program.MainUpdateLock)
+                {
+                    Reset = false;
+                    if(Program.MainGame != null)
+                    {
+                        Program.MainGame.Demolish();
+                        Program.MainGame = null;
+                        GC.Collect();
+                    }
+                    Program.MainGame = new PositronGame ();
+                }
+                // Game setup
+                Program.MainGame.Setup ();
+                // Don't even ask me why this is like this
+                Scene.SetupScenes(ref Program.MainGame);
+                Program.MainGame.SetupTests ();
 
-			// Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
-			UpdateWatch.Start();
-			RenderWatch.Start();
-			FrameWatch.Start();
-            TestWatch.Start();
-            RenderDrawingWatch.Start();
+    			// Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
+    			UpdateWatch.Start();
+    			RenderWatch.Start();
+    			FrameWatch.Start();
+                TestWatch.Start();
+                RenderDrawingWatch.Start();
 
-			// Store this in a local variable because accessors have overhead!
-            // Bear with me...this will get a bit tricky to explain pefrectly...
-			while (!Exiting) {
-				// Sleep the thread for the most milliseconds less than the frame limit time
-				double time_until = FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001;
-				while (FrameWatch.Elapsed.TotalSeconds < time_until)
-					Thread.Sleep(Configuration.ThreadSleepTimeStep); // Does this help?
-				// Hard-loop the remainder
-				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
+                while(!Reset && !Exiting)
+                {
+        			// Store this in a local variable because accessors have overhead!
+                    // Bear with me...this will get a bit tricky to explain pefrectly...
+    			
+    				// Sleep the thread for the most milliseconds less than the frame limit time
+    				double time_until = FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001;
+    				while (FrameWatch.Elapsed.TotalSeconds < time_until)
+    					Thread.Sleep(Configuration.ThreadSleepTimeStep); // Does this help?
+    				// Hard-loop the remainder
+    				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
 
-                _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
-                //Console.WriteLine(_LastFrameTime);
-				FrameWatch.Restart();
-                UpdateWatch.Restart();
-				lock(Program.MainUpdateLock)
-					Update(_LastFrameTime);
-				_LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
-				RenderWatch.Restart();
-				lock(Program.MainUpdateLock)
-					RenderView(_LastFrameTime);
-                // TODO: Figure out why this does wild shit if FPS > 60
-				SwapBuffers();
-                _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
+                    _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
+                    //Console.WriteLine(_LastFrameTime);
+    				FrameWatch.Restart();
+                    UpdateWatch.Restart();
+    				lock(Program.MainUpdateLock)
+    					Update(_LastFrameTime);
+    				_LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
+    				RenderWatch.Restart();
+    				lock(Program.MainUpdateLock)
+    					RenderView(_LastFrameTime);
+                    // TODO: Figure out why this does wild shit if FPS > 60
+    				SwapBuffers();
+                    _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
+                }
+                Sound.KillTheNoise(); // I don't know where a better place for this could be...
 			}
 			Context.MakeCurrent(null);
 		}
@@ -555,20 +581,18 @@ namespace positron
 			{
 				// FBO viewport
 				GL.Viewport(0, 0, _CanvasWidth, _CanvasHeight);
-				GL.ClearColor (Color.Black);
-				GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Do clear
+                GL.ClearColor (Color.Black);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 				Matrix4 perspective = Matrix4.CreateOrthographicOffCenter(0.0f, _CanvasWidth, 0.0f, _CanvasHeight, -128, 128);
 				//Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView(1.0f, 1.0f, 0.01f, 10.0f);
 				GL.MatrixMode(MatrixMode.Projection);
 				GL.LoadMatrix(ref perspective);
 				GL.MatrixMode(MatrixMode.Modelview);
 				GL.LoadIdentity();
-
                 RenderDrawingWatch.Restart();
 				Program.MainGame.Draw(time);
                 _LastRenderDrawingTime = RenderDrawingWatch.Elapsed.TotalSeconds;
-                GL.Color4(Color.White);
-
+                GL.Color4(1.0, 1.0, 1.0, 1.0);
 			}
 			GL.PopAttrib();
 			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // unbind FBO

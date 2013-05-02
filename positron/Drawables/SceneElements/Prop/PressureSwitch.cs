@@ -135,7 +135,7 @@ namespace positron
 		{
 			lock (Body) {
 				object sender = fixtureB.Body.UserData;
-				if (sender is Player || sender is BasicBullet) {
+				if (sender is Player) {
 					if (_LastAffected)
 					{
 						_LastAffected = false;

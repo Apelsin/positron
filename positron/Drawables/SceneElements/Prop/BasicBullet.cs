@@ -34,6 +34,7 @@ namespace positron
 			{
                 Program.MainGame.AddUpdateEventHandler(this, (sender, e) =>
                 {
+                    new BulletCollisionParticle(RenderSet.Scene, PositionX, PositionY).CenterShift();
                     Derez();
 					return true;
                 });
@@ -55,5 +56,24 @@ namespace positron
 			Body.ApplyForce(-_RenderSet.Scene.World.Gravity * Body.Mass);
 		}
 	}
+    public class BulletCollisionParticle : SpriteBase
+    {
+        SpriteAnimation Hit;
+        public BulletCollisionParticle (Scene scene, double x, double y):
+            base(scene.Stage, x, y, Texture.Get("sprite_bullet_collision_particle"))
+        {
+            Hit = new SpriteAnimation(Texture, 10, false, "f1", "f2", "f3", "f4");
+            _AnimationNext = new Lazy<SpriteAnimation>(() => { 
+                Program.MainGame.AddUpdateEventHandler(this, (sender, e) =>
+                {
+                    RenderSet.Remove (this);
+                    this.Dispose();
+                    return true;
+                });
+                return null;
+            });
+            PlayAnimation(Hit);
+        }
+    }
 }
 

@@ -145,7 +145,7 @@ namespace positron
 				Vector2d origin_offset = 0.5 * (set_corner[i].Size - texture.DefaultRegion.Size);
 				//Console.WriteLine("Expected: {0}", origin);
 				set_corner[i].OriginOffset = origin_offset;
-				Console.WriteLine("Result: {0}", set_corner[i].OriginOffset);
+				//Console.WriteLine("Result: {0}", set_corner[i].OriginOffset);
 			}
 		}
 	}

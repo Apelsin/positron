@@ -119,10 +119,12 @@ namespace positron
 			var robot_1 = PsdLoader.LoadSpriteSheet("sprite_robot_1", "baddie", "sprite_robot_1.psd");
 
 			// Props
-			LoadTexture ("sprite_metal_ball",		"prop",				"sprite_metal_ball.png");
+			LoadTexture ("sprite_metal_ball",		    "prop",				"sprite_metal_ball.png");
+            PsdLoader.LoadSpriteSheet ("sprite_radio",  "prop",             "sprite_radio.psd");
 			
 			// Projectiles
 			LoadTexture ("sprite_first_bullet", 	"projectile",		"sprite_first_bullet.png");
+            PsdLoader.LoadSpriteSheet("sprite_bullet_collision_particle",   "projectile",   "sprite_bullet_collision_particle.psd");
 			
 			var bunker_floor = LoadTexture("sprite_bunker_floor",		"scene_element",   "sprite_bunker_floor.png");
 			bunker_floor.Regions = new TextureRegion[4];
@@ -143,6 +145,7 @@ namespace positron
 			// Character
 			PsdLoader.LoadSpriteSheet ("sprite_player", "character",	"sprite_protagonist.psd");
 			LoadTexture("sprite_protagonist_picture", 	"character",	"sprite_protagonist_picture.png");
+            LoadTexture ("sprite_radio_picture",        "character",    "sprite_radio_picture.png");
 
 			// Dialog box
 			LoadTexture ("sprite_dialog_fade_up",	"dialog_box",	"sprite_dialog_fade_up.png");
@@ -172,21 +175,17 @@ namespace positron
 			bg3.Regions = new TextureRegion[32];
 			bg3.Regions.BuildTiledRegions(4, 32, 32);
 
+            var bg4 = LoadTexture("sprite_tile_bg4_atlas",      "background",   "sprite_tile_bg4_atlas.png");
+            bg4.Regions = new TextureRegion[64];
+            bg4.Regions.BuildTiledRegions(8, 32, 32);
+
 			var bg_rubble = LoadTexture("sprite_dark_rubble_atlas",		"background",   "sprite_dark_rubble_atlas.png");
 			bg_rubble.Regions = new TextureRegion[32];
 			bg_rubble.Regions.BuildTiledRegions(4, 32, 32);
 
 			var bg_pipes = LoadTexture("sprite_bg_pipes", "background", "sprite_bg_pipes.png");
 			
-			
-			var infogfx_key_spacebar = LoadTexture ("sprite_infogfx_key_spacebar",	"user_interface",	"sprite_infogfx_key_spacebar.png");
-			var infogfx_key_w =	 LoadTexture ("sprite_infogfx_key_w",	"user_interface",	"sprite_infogfx_key_w.png");
-			var infogfx_key_a =	 LoadTexture ("sprite_infogfx_key_a",	"user_interface",	"sprite_infogfx_key_a.png");
-			var infogfx_key_s =	 LoadTexture ("sprite_infogfx_key_s",	"user_interface",	"sprite_infogfx_key_s.png");
-			var infogfx_key_d =	 LoadTexture ("sprite_infogfx_key_d",	"user_interface",	"sprite_infogfx_key_d.png");
-			var infogfx_key_e =	 LoadTexture ("sprite_infogfx_key_e",	"user_interface",	"sprite_infogfx_key_e.png");
-			var infogfx_key_f =	 LoadTexture ("sprite_infogfx_key_f",	"user_interface",	"sprite_infogfx_key_f.png");
-			
+            var infogfx_cabinet = PsdLoader.LoadSpriteSheet("sprite_infogfx_cabinet_buttons", "user_interface", "sprite_infogfx_cabinet_buttons.psd");
 			
 			// TEST PSDLOADER
 			PsdLoader.LoadSpriteSheet("sprite_dumbo", "sprite_dumbo.psd");
