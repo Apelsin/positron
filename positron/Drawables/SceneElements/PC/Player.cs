@@ -480,7 +480,7 @@ namespace positron
 		}
 		public void Jump()
 		{
-			if(!CrouchHeadroomHitTest())
+			if(Crouching && !CrouchHeadroomHitTest())
 				return;
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
 				lock(Program.MainUpdateLock)

@@ -21,6 +21,7 @@ namespace positron
 		private static int _CanvasWidth;
 		private static int _CanvasHeight;
 		private static bool _DrawBlueprints;
+		private static bool _ShowDebugVisuals;
 		#endregion
 
 		private static Dictionary<String, object> __dict__ = new Dictionary<String, object>();
@@ -63,6 +64,7 @@ namespace positron
 			_CanvasWidth = 1280 / 2;
 			_CanvasHeight = 720 / 2;
 			_DrawBlueprints = false;
+			_ShowDebugVisuals = false;
 		}
 		#region Alias Accessors
 		public static string ArtworkPath {
@@ -128,6 +130,10 @@ namespace positron
 			get { return _DrawBlueprints; }
 			set { _DrawBlueprints = value; }
 		}
+		public static bool ShowDebugVisuals {
+			get { return _ShowDebugVisuals; }
+			set { _ShowDebugVisuals = value; }
+		}
 		public static void Set(String key, object value)
 		{
 			__dict__[key] = value;
@@ -151,6 +157,7 @@ namespace positron
 			yield return new KeyValuePair<String, object>("_MinWorldTimeStep", _MaxWorldTimeStep);
 			yield return new KeyValuePair<String, object>("_AdaptiveTimeStep", _AdaptiveTimeStep);
 			yield return new KeyValuePair<String, object>("_DrawBlueprints", _DrawBlueprints);
+			yield return new KeyValuePair<String, object>("_ShowDebugVisuals", _ShowDebugVisuals);
 			foreach(KeyValuePair<String, object> e in __dict__)
 				yield return e;
 		}
