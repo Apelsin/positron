@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -22,7 +22,7 @@ namespace positron
 		protected int PerimeterOffsetY = 6;
 		protected int PerimeterX = 18;
 		protected int PerimeterY = 4;
-		protected int Perimeter2X = 92;
+		protected int Perimeter2X = 86;
 		protected int Perimeter2Y = 8;
 
 		protected double TileSize = 32;
@@ -51,14 +51,14 @@ namespace positron
 			int chute_right = 3;
 			
 			Gateway gw_chute = null;
-			FloorSwitch fs_chute = null;
+			PressureSwitch fs_chute = null;
 
 			for (int i = 0; i < PerimeterX; i++) {
 				if (i == PerimeterX - chute_right) {
 					double x = x0 + TileSize * i;
 
-					fs_chute = new FloorSwitch (Front, x - 2.0 * TileSize, y0 + TileSize + recess_switch, (sender, e) => {
-						bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+					fs_chute = new PressureSwitch (Front, x - 2.0 * TileSize, y0 + TileSize + recess_switch, (sender, e) => {
+						bool bstate = (SwitchState)e.Info != SwitchState.Open;
 						gw_chute.OnAction (e.Self, new ActionEventArgs (bstate, gw_chute)); }, 2.0);
 
 					gw_chute = new SmallGateway (Front, x, y0 + TileSize, false);
@@ -111,7 +111,7 @@ namespace positron
 			var pipe_texture = Texture.Get ("sprite_bg_pipes");
 			for (int i = 0; i < 5; i++) {
 				var bg_pipes =
-					new SpriteBase(Background,
+					new SpriteBase (Background,
 					               x0 + pipe_texture.Width * i - TileSize,
 					               y0 - pipe_texture.Height + TileSize - 6, pipe_texture);
 				bg_pipes.PositionZ = 0.5;
@@ -122,6 +122,8 @@ namespace positron
 			for (int i = 0; i < Perimeter2X; i++) {
 				BunkerFloor block = new BunkerFloor2 (this, x0 + TileSize * i, y1);
 				block.PositionY -= block.SizeY;
+				if(i > 53 && i < 60)
+					continue;
 				block = new BunkerFloor (this, x0 + TileSize * i, y1);
 			}
 			for (int i = 0; i <= Perimeter2Y; i++) {
@@ -133,40 +135,36 @@ namespace positron
 
 
 			// Lower area stuff
-			for(int i = 0; i < 8; i++)
-			{
+			for (int i = 0; i < 8; i++) {
 				new BunkerFloor (this, x0 + TileSize * i, y1 + TileSize);
 			}
-			for(int i = 2; i < 6; i++)
-			{
+			for (int i = 2; i < 6; i++) {
 				new BunkerFloor (this, x0 + TileSize * i, y1 + 2 * TileSize);
 			}
-			for(int i = 20; i < 38; i++)
-			{
+			for (int i = 20; i < 38; i++) {
 				new BunkerFloor (this, x0 + TileSize * i, y1 + TileSize);
 			}
-			for(int i = 22; i < 34; i++)
-			{
+			for (int i = 22; i < 34; i++) {
 				new BunkerFloor (this, x0 + TileSize * i, y1 + 2 * TileSize);
 			}
 			new BunkerFloor (this, x0 + TileSize * 31, y1 + 3.5 * TileSize);
-			for(int i = 28; i < 32; i++)
-			{
+			for (int i = 28; i < 32; i++) {
 				new BunkerFloor (this, x0 + TileSize * i, y1 + 3 * TileSize);
 			}
-			for(int i = 42; i < 50; i++)
-			{
-				for(int j = 2; j < Perimeter2Y; j++)
+			for (int i = 42; i < 50; i++) {
+				int j;
+				for (j = Perimeter2Y; j > 4; j--)
 					new BunkerFloor (this, x0 + TileSize * i, y1 + (j + 0.5) * TileSize);
+				var block = new BunkerFloor2 (this, x0 + TileSize * i, y1 + (j + 1.5) * TileSize);
+				block.PositionY -= block.SizeY;
 			}
-
-
-//			for (int i = 0; i < Perimeter2X; i++) {
-//				if (i ==  PerimeterX - chute_right) {
-//					continue;
-//				}
-//				var block = new FloorTile (Stage, x0 + TileSize * i, y1 + TileSize * Perimeter2Y);
-//			}
+			{
+				int j;
+				for (j = Perimeter2Y; j > 4; j--)
+					new BunkerFloor (this, x0 + TileSize * 55, y1 + (j + 0.5) * TileSize);
+				var block = new BunkerFloor2 (this, x0 + TileSize * 55, y1 + (j + 1.5) * TileSize);
+				block.PositionY -= block.SizeY;
+			}
 
 			// Call the base class initializer
 			base.InitializeScene();

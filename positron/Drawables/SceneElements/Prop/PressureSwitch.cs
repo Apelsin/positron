@@ -12,14 +12,15 @@ using OpenTK;
 
 namespace positron
 {
-	public class FloorSwitch : SpriteObject, IActuator, IStateShare<FloorSwitch.SwitchState>
+    public enum SwitchState
+    {
+        Open = 0,
+        Latched = 1,
+        Closed = 2,
+    }
+	public class PressureSwitch : SpriteObject, IActuator, IStateShare<SwitchState>
 	{
-		public enum SwitchState
-		{
-			Open = 0,
-			Latched = 1,
-			Closed = 2,
-		}
+		
 		public event ActionEventHandler Action;
 		protected SharedState<SwitchState> _State;
 		protected SharedState<double> _LatchExpiration;
@@ -36,19 +37,19 @@ namespace positron
 		protected SpriteAnimation TurnOn;
 		protected SpriteAnimation TurnOff;
 
-		public FloorSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, double latch_time = 2.0):
+		public PressureSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, double latch_time = 2.0):
 			this(render_set, x, y, state_changed, new SharedState<SwitchState>(SwitchState.Open), new SharedState<double>(latch_time), new Stopwatch(), latch_time)
 		{
 		}
-		public FloorSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, FloorSwitch sync_switch):
+		public PressureSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, PressureSwitch sync_switch):
 			this(render_set, x, y, state_changed, sync_switch._State, sync_switch._LatchExpiration, sync_switch._LatchTimer, sync_switch.LatchTime)
 		{
 		}
-		public FloorSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, FloorSwitch sync_switch, double latch_time):
+		public PressureSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, PressureSwitch sync_switch, double latch_time):
 			this(render_set, x, y, state_changed, sync_switch._State, sync_switch._LatchExpiration, sync_switch._LatchTimer, latch_time)
 		{
 		}
-		protected FloorSwitch (RenderSet render_set, double x, double y,
+		protected PressureSwitch (RenderSet render_set, double x, double y,
 		                       ActionEventHandler state_changed,
 		                       SharedState<SwitchState> state,
 		                       SharedState<double> latch_expiration,
