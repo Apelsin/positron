@@ -24,7 +24,7 @@ namespace positron
 		}
 		protected override void InstantiateConnections()
 		{
-			_DoorToPreviousScene = new Door(Rear, 512 - 68, 0);
+			_DoorToPreviousScene = new Door(Rear, 0, 0);
 			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 8 * TileSize, 3 * TileSize);
 		}
 		protected override void InitializeScene ()
@@ -82,21 +82,21 @@ namespace positron
 				new FloorTile (Rear, gw2.CornerX, gw2.CornerY + (i) * TileSize + 8);
 			}
 
-			var fs10 = new FloorSwitch (Front, gw1.CornerX + TileSize, yp + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs10 = new PressureSwitch (Front, gw1.CornerX + TileSize, yp + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 			});
-			var fs11 = new FloorSwitch (Front, gw1.CornerX - TileSize, yp + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs11 = new PressureSwitch (Front, gw1.CornerX - TileSize, yp + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 			}, fs10);
 
-			var fs20 = new FloorSwitch (Front, gw2.CornerX - TileSize, yp + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs20 = new PressureSwitch (Front, gw2.CornerX - TileSize, yp + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 			});
-			var fs21 = new FloorSwitch (Front, gw2.CornerX + TileSize, yp + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs21 = new PressureSwitch (Front, gw2.CornerX + TileSize, yp + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 			}, fs20);
 
@@ -131,12 +131,12 @@ namespace positron
 			_DoorToNextScene.PositionX = last_platform_1.PositionX;
 			_DoorToNextScene.CornerY = yp += last_platform_1.SizeY;
 
-			// Update next scene's door position
-			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
+			// Update next scene's door position relative to its -initial- position (set with constructor/instantiation)
+            _DoorToNextScene.Destination.Corner += _DoorToNextScene.Corner;
 
 
-			var fs30 = new FloorSwitch (Front, ft_room_r.CornerX + TileSize, ft_room_r.CornerY + TileSize + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs30 = new PressureSwitch (Front, ft_room_r.CornerX + TileSize, ft_room_r.CornerY + TileSize + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				last_platform_0.OnAction (e.Self, new ActionEventArgs (bstate, last_platform_0));
 			}, 5.0);
 

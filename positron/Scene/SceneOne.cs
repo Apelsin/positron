@@ -95,25 +95,25 @@ namespace positron
 			var gw1 = new Gateway (Front, xp + TileSize * 4, yp + recess_gw, false);
 			var gw2 = new Gateway (Front, xp + TileSize * 10, yp + recess_gw, false);
 
-			var fs00 = new FloorSwitch (Front, xp + TileSize * 3, yp + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs00 = new PressureSwitch (Front, xp + TileSize * 3, yp + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			});
-			var fs01 = new FloorSwitch (Front, xp + TileSize * 5, yp + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs01 = new PressureSwitch (Front, xp + TileSize * 5, yp + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs00);
 
-			var fs10 = new FloorSwitch (Front, xp + TileSize * 7, yp + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs10 = new PressureSwitch (Front, xp + TileSize * 7, yp + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, 0.2);
 
-			var fs11 = new FloorSwitch (Front, xp + TileSize * 9 + 14, yp + recess_switch + TileSize * 3, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs11 = new PressureSwitch (Front, xp + TileSize * 9 + 14, yp + recess_switch + TileSize * 3, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs10, 3.0);
@@ -121,8 +121,8 @@ namespace positron
 			var space_infogfx = new SpriteBase (Rear, xp + fs11.PositionX - 128, yp + fs10.PositionY, Texture.Get ("sprite_infogfx_key_spacebar"));
 
 			fs11.Theta = Math.PI * 0.5;
-			var fs12 = new FloorSwitch (Front, xp + TileSize * 12, yp + recess_switch, (sender, e) => {
-				bool bstate = (FloorSwitch.SwitchState)e.Info != FloorSwitch.SwitchState.Open;
+			var fs12 = new PressureSwitch (Front, xp + TileSize * 12, yp + recess_switch, (sender, e) => {
+				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs11);

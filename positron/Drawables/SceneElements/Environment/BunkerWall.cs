@@ -16,7 +16,7 @@ namespace positron
 			set { _Direction = value; _TileX = _Direction == 0 ? 1.0 : -1.0; }
 		}
 		public BunkerWall (Scene scene, double x, double y):
-			base(scene.Stage, x, y, Texture.Get("sprite_bunker_wall"))
+			base(scene.Front, x, y, Texture.Get("sprite_bunker_wall"))
 		{
 			_Variant = Variance.Next(Texture.Regions.Length);
 			PlayAnimation(new SpriteAnimation(Texture, _Variant));

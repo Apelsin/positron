@@ -12,14 +12,15 @@ using OpenTK;
 
 namespace positron
 {
-	public class FloorSwitch : SpriteObject, IActuator, IStateShare<FloorSwitch.SwitchState>
+    public enum SwitchState
+    {
+        Open = 0,
+        Latched = 1,
+        Closed = 2,
+    }
+	public class PressureSwitch : SpriteObject, IActuator, IStateShare<SwitchState>
 	{
-		public enum SwitchState
-		{
-			Open = 0,
-			Latched = 1,
-			Closed = 2,
-		}
+		
 		public event ActionEventHandler Action;
 		protected SharedState<SwitchState> _State;
 		protected SharedState<double> _LatchExpiration;
@@ -29,31 +30,42 @@ namespace positron
 
 		//protected object _LastSender;
 		protected Stopwatch _LatchTimer;
+
 		public double LatchTime { get { return _LatchTime; } set { _LatchTime = value; } }
 		public SharedState<double> LatchExpiration { get { return _LatchExpiration; } }
 		public SharedState<SwitchState> State { get { return _State; } }
+        public Stopwatch LatchTimer { get { return _LatchTimer; } }
 
 		protected SpriteAnimation TurnOn;
 		protected SpriteAnimation TurnOff;
 
-		public FloorSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, double latch_time = 2.0):
+		public PressureSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, double latch_time = 2.0):
 			this(render_set, x, y, state_changed, new SharedState<SwitchState>(SwitchState.Open), new SharedState<double>(latch_time), new Stopwatch(), latch_time)
 		{
 		}
-		public FloorSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, FloorSwitch sync_switch):
+		public PressureSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, PressureSwitch sync_switch):
 			this(render_set, x, y, state_changed, sync_switch._State, sync_switch._LatchExpiration, sync_switch._LatchTimer, sync_switch.LatchTime)
 		{
 		}
-		public FloorSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, FloorSwitch sync_switch, double latch_time):
+		public PressureSwitch (RenderSet render_set, double x, double y, ActionEventHandler state_changed, PressureSwitch sync_switch, double latch_time):
 			this(render_set, x, y, state_changed, sync_switch._State, sync_switch._LatchExpiration, sync_switch._LatchTimer, latch_time)
 		{
 		}
-		protected FloorSwitch (RenderSet render_set, double x, double y,
+        protected PressureSwitch(RenderSet render_set, double x, double y,
+                               ActionEventHandler state_changed,
+                               SharedState<SwitchState> state,
+                               SharedState<double> latch_expiration,
+                               Stopwatch latch_timer, double latch_time) :
+            this(render_set, x, y, state_changed, state, latch_expiration, latch_timer, latch_time, Texture.Get("sprite_floor_switch"))
+        {
+        }
+		protected PressureSwitch (RenderSet render_set, double x, double y,
 		                       ActionEventHandler state_changed,
 		                       SharedState<SwitchState> state,
 		                       SharedState<double> latch_expiration,
-		                       Stopwatch latch_timer, double latch_time):
-			base(render_set, x, y, Texture.Get("sprite_floor_switch"))
+		                       Stopwatch latch_timer, double latch_time,
+                               Texture texture):
+			base(render_set, x, y, texture)
 		{
 			TurnOn = new SpriteAnimation(Texture, 50, new int [] {0, 1, 2, 3});
 			TurnOff = new SpriteAnimation(Texture, 50, new int [] {3, 2, 1, 0});
@@ -99,7 +111,7 @@ namespace positron
 			InitBlueprints ();
 		}
 
-		protected bool HandleOnCollision (Fixture fixtureA, Fixture fixtureB, Contact contact)
+		protected virtual bool HandleOnCollision (Fixture fixtureA, Fixture fixtureB, Contact contact)
 		{
 			lock (Body) {
 				object sender = fixtureB.Body.UserData;
@@ -119,7 +131,7 @@ namespace positron
 			return true;
 		}
 
-		protected void HandleOnSeparation (Fixture fixtureA, Fixture fixtureB)
+        protected virtual void HandleOnSeparation(Fixture fixtureA, Fixture fixtureB)
 		{
 			lock (Body) {
 				object sender = fixtureB.Body.UserData;
