@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Drawables\HUD\HUDQuad.cs" />
     <Compile Include="Drawables\IUpdateSync.cs" />
+    <Compile Include="Drawables\SceneElements\Prop\ProjectileSwitch.cs" />
     <Compile Include="IRenderable.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MainWindow.cs" />

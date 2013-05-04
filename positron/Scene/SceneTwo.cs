@@ -24,7 +24,7 @@ namespace positron
 		}
 		protected override void InstantiateConnections()
 		{
-			_DoorToPreviousScene = new Door(Rear, 512 - 68, 0);
+			_DoorToPreviousScene = new Door(Rear, 0, 0);
 			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 8 * TileSize, 3 * TileSize);
 		}
 		protected override void InitializeScene ()
@@ -131,8 +131,8 @@ namespace positron
 			_DoorToNextScene.PositionX = last_platform_1.PositionX;
 			_DoorToNextScene.CornerY = yp += last_platform_1.SizeY;
 
-			// Update next scene's door position
-			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
+			// Update next scene's door position relative to its -initial- position (set with constructor/instantiation)
+            _DoorToNextScene.Destination.Corner += _DoorToNextScene.Corner;
 
 
 			var fs30 = new PressureSwitch (Front, ft_room_r.CornerX + TileSize, ft_room_r.CornerY + TileSize + recess_switch, (sender, e) => {

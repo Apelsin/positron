@@ -39,7 +39,9 @@ namespace positron
 		}
 		protected override void InstantiateConnections()
 		{
-			_DoorToPreviousScene = new Door(Rear, 0, 0);
+
+            _DoorToPreviousScene = new Door(Rear, 32 * TileSize, -8 * TileSize);
+			//_DoorToPreviousScene = new Door(Rear, 0, 0);
 		}
         protected override void InitializeScene ()
 		{
@@ -49,9 +51,9 @@ namespace positron
 
 			double recess_switch = -4.0;
 			int chute_right = 3;
-			
-			Gateway gw_chute = null;
-			PressureSwitch fs_chute = null;
+
+            Gateway gw_chute = null, gw_lower1 = null;
+            PressureSwitch fs_chute, bs_lower1, bs_lower2;
 
 			for (int i = 0; i < PerimeterX; i++) {
 				if (i == PerimeterX - chute_right) {
@@ -160,11 +162,26 @@ namespace positron
 			}
 			{
 				int j;
-				for (j = Perimeter2Y; j > 4; j--)
+				for (j = Perimeter2Y; j > 3; j--)
 					new BunkerFloor (this, x0 + TileSize * 55, y1 + (j + 0.5) * TileSize);
 				var block = new BunkerFloor2 (this, x0 + TileSize * 55, y1 + (j + 1.5) * TileSize);
 				block.PositionY -= block.SizeY;
+                gw_lower1 = new SmallGateway(Front, x0 + TileSize * 55.5, y1, false);
+                bs_lower1 = new ProjectileSwitch(Front, x0 + TileSize * 55, y1 + (j + 0.5) * TileSize, (sender, e) =>
+                {
+                    bool bstate = (SwitchState)e.Info != SwitchState.Open;
+                    gw_lower1.OnAction(e.Self, new ActionEventArgs(bstate, gw_lower1));
+                });
+                bs_lower2 = new ProjectileSwitch(Front, x0 + TileSize * 56, y1 + (j - 0.5) * TileSize, (sender, e) =>
+                {
+                    //bool bstate = (SwitchState)e.Info != SwitchState.Open;
+                    //gw_lower1.OnAction(e.Self, new ActionEventArgs(bstate, gw_lower1));
+                });
+                bs_lower1.CenterShift();
+                bs_lower2.CenterShift();
+                bs_lower2.Theta += MathHelper.Pi;
 			}
+            
 
 			// Call the base class initializer
 			base.InitializeScene();
