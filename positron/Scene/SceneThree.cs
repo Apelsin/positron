@@ -39,9 +39,8 @@ namespace positron
 		}
 		protected override void InstantiateConnections()
 		{
-
-            //_DoorToPreviousScene = new Door(Rear, 48 * TileSize, -8 * TileSize);
-			_DoorToPreviousScene = new Door(Rear, 0, 0);
+            _DoorToPreviousScene = new Door(Rear, 50 * TileSize, -8 * TileSize);
+			//_DoorToPreviousScene = new Door(Rear, 0, 0);
 		}
         protected override void InitializeScene ()
         {
@@ -53,7 +52,7 @@ namespace positron
             int chute_right = 3;
 
             Gateway gw_chute = null, gw_lower1 = null;
-            PressureSwitch fs_chute, bs_lower1, bs_lower2;
+            PressureSwitch fs_chute, bs_lower1 = null, bs_lower2 = null;
 
             for (int i = 0; i < PerimeterX; i++) {
                 if (i == PerimeterX - chute_right) {
@@ -174,19 +173,23 @@ namespace positron
                 bs_lower1 = new ProjectileSwitch (Front, x0 + TileSize * 55, y1 + (j + 0.5) * TileSize, (sender, e) =>
                 {
                     bool bstate = (SwitchState)e.Info != SwitchState.Open;
-                    gw_lower1.OnAction (e.Self, new ActionEventArgs (bstate, gw_lower1));
+                    bool bstate_bs_lower_2 = bs_lower2.State != SwitchState.Open;
+                    gw_lower1.OnAction (e.Self, new ActionEventArgs (bstate || bstate_bs_lower_2, gw_lower1));
                 }, 5.0);
 
                 var ep1 = new ExtenderPlatform (Rear, x0 + TileSize * 57, y1 + 0.5 * TileSize, false);
-                var ep2 = new ExtenderPlatform (Rear, x0 + TileSize * 58, y1 + 2.0 * TileSize, ep1);
-                var ep3 = new ExtenderPlatform (Rear, x0 + TileSize * 60, y1 + 3.5 * TileSize, ep2);
-                var ep4 = new ExtenderPlatform (Rear, x0 + TileSize * 62, y1 + 2.5 * TileSize, ep3);
-                var ep5 = new ExtenderPlatform (Rear, x0 + TileSize * 63, y1 + 1.5 * TileSize, ep4);
+                new ExtenderPlatform (Rear, x0 + TileSize * 58, y1 + 2.0 * TileSize, ep1);
+                new ExtenderPlatform (Rear, x0 + TileSize * 60, y1 + 3.5 * TileSize, ep1);
+                new ExtenderPlatform (Rear, x0 + TileSize * 62, y1 + 2.5 * TileSize, ep1);
+                new ExtenderPlatform (Rear, x0 + TileSize * 63, y1 + 1.5 * TileSize, ep1);
+                new ExtenderPlatform (Rear, x0 + TileSize * 65, y1 + 1.5 * TileSize, ep1);
 
                 bs_lower2 = new ProjectileSwitch (Front, x0 + TileSize * 56, y1 + (j - 0.5) * TileSize, (sender, e) =>
                 {
                     bool bstate = (SwitchState)e.Info != SwitchState.Open;
                     ep1.OnAction (e.Self, new ActionEventArgs (bstate, ep1));
+                    bool bstate_bs_lower_1 = bs_lower1.State != SwitchState.Open;
+                    gw_lower1.OnAction (e.Self, new ActionEventArgs (bstate || bstate_bs_lower_1, gw_lower1));
                 }, 5.0);
                 bs_lower1.CenterShift ();
                 bs_lower2.CenterShift ();
@@ -200,21 +203,22 @@ namespace positron
             }
             new BunkerFloor (this, x0 + TileSize * 62, y1 + 1 * TileSize);
 
-
+            yp = y1 + 2.5 * TileSize;
 
 			//new BunkerFloor (this, x0 + TileSize * 65, y1 + 1 * TileSize);
 			//new BunkerFloor (this, x0 + TileSize * 66, y1 + 1 * TileSize);
-			new BunkerFloor (this, x0 + TileSize * 66, y1 + 2 * TileSize);
+            new BunkerFloor (this, x0 + TileSize * 66, yp);
 			//new BunkerFloor (this, x0 + TileSize * 67, y1 + 1 * TileSize);
-			new BunkerFloor (this, x0 + TileSize * 67, y1 + 2 * TileSize);
-			new BunkerFloor (this, x0 + TileSize * 67, y1 + 3 * TileSize);
+            new BunkerFloor (this, x0 + TileSize * 67, yp);
+            new BunkerFloor (this, x0 + TileSize * 67, yp + TileSize);
 
+            yp += 0.5 * TileSize;
 
-			var ep6 = new ExtenderPlatform (Rear, x0 + TileSize * 67, y1 + 2.5 * TileSize, false);
-			var ep7 = new ExtenderPlatform (Rear, x0 + TileSize * 68, y1 + 2.5 * TileSize, ep6);
-			var ep8 = new ExtenderPlatform (Rear, x0 + TileSize * 69, y1 + 2.5 * TileSize, ep7);
-			var ep9 = new ExtenderPlatform (Rear, x0 + TileSize * 70, y1 + 2.5 * TileSize, ep8);
-			var ep10 = new ExtenderPlatform (Rear, x0 + TileSize * 71, y1 + 2.5 * TileSize, ep9);
+            var ep6 = new ExtenderPlatform (Rear, x0 + TileSize * 67, yp, false);
+            var ep7 = new ExtenderPlatform (Rear, x0 + TileSize * 68, yp, ep6);
+            var ep8 = new ExtenderPlatform (Rear, x0 + TileSize * 69, yp, ep7);
+			var ep9 = new ExtenderPlatform (Rear, x0 + TileSize * 70, yp, ep8);
+			var ep10 = new ExtenderPlatform (Rear, x0 + TileSize * 71, yp, ep9);
 
 			new BunkerFloor (this, x0 + TileSize * 72, y1 + 1 * TileSize);
 			new BunkerFloor (this, x0 + TileSize * 72, y1 + 2 * TileSize);
@@ -228,6 +232,8 @@ namespace positron
 			}, 5.0);
 			bs_lower3.CenterShift ();
 			//bs_lower3.Theta += MathHelper.Pi;
+
+            _DoorToNextScene = new Door(Rear, x0 + TileSize * 76, y1 + TileSize, (Scene)Program.MainGame.Scenes["SceneFour"]);
 
 			// Call the base class initializer
 			base.InitializeScene();
