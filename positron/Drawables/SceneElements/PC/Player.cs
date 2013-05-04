@@ -81,7 +81,10 @@ namespace positron
 			AnimationAimGunFwdCrouch,
 			AnimationAimGunFwdJump;
 
-		bool Crouching  { get { return _AnimationCurrent == AnimationCrouch || _AnimationCurrent == AnimationCrawl; } }
+		bool Crouching  { get { return
+				_AnimationCurrent == AnimationCrouch ||
+					_AnimationCurrent == AnimationCrawl ||
+						_AnimationCurrent == AnimationAimGunFwdCrouch; } }
 
 		SpriteAnimation AnimationStationary { get {
 				return _WouldCrouch ? AnimationCrouch :
@@ -320,7 +323,7 @@ namespace positron
 
 		public bool KeyUp (object sender, KeyboardKeyEventArgs e)
 		{
-			if (e.Key == Key.F) {
+			if (e.Key == Key.F && _WieldingGun) {
 				UpdateEventHandler late;
 				late = (u_sender, u_e) =>
 				{
@@ -328,6 +331,7 @@ namespace positron
 					Vector2d bullet_velo =
 						new Vector2d(TileX * Math.Cos(_AimAngle), Math.Sin (_AimAngle));
 					//bullet_velo.Normalize();
+					bullet_velo.Y *= _AnimationCurrent == AnimationAimGunFwdCrouch ? 0.0 : 1.0;
 					bullet_velo *= 1000;
 					Vector2d shot_offset = new Vector2d ((SizeX + 3) * TileX, SizeY * 0.23);
 
@@ -374,7 +378,9 @@ namespace positron
 					PlayAnimation (AnimationMove);
 				} else if (v__x_mag < 0.01) {
  					if (_WieldingGun) {
-						if (e.KeysPressedWhen.Contains (Key.W))
+						if(Crouching)
+							PlayAnimation (AnimationAimGunFwdCrouch);
+						else if (e.KeysPressedWhen.Contains (Key.W))
 							PlayAnimation (AnimationAimGunFwdUp);
 						else if (e.KeysPressedWhen.Contains (Key.S))
 							PlayAnimation (AnimationAimGunFwdDown);

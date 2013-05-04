@@ -40,7 +40,7 @@ namespace positron
 		protected override void InstantiateConnections()
 		{
 
-            _DoorToPreviousScene = new Door(Rear, 32 * TileSize, -8 * TileSize);
+            _DoorToPreviousScene = new Door(Rear, 48 * TileSize, -8 * TileSize);
 			//_DoorToPreviousScene = new Door(Rear, 0, 0);
 		}
         protected override void InitializeScene ()
@@ -124,15 +124,20 @@ namespace positron
 			for (int i = 0; i < Perimeter2X; i++) {
 				BunkerFloor block = new BunkerFloor2 (this, x0 + TileSize * i, y1);
 				block.PositionY -= block.SizeY;
+				if(i > PerimeterX)
+				{
+					var roof = new BunkerWall(this, x0 + TileSize * i, y1 + TileSize * (Perimeter2Y + 1));
+					roof.Theta = -MathHelper.PiOver2;
+				}
 				if(i > 53 && i < 60)
 					continue;
 				block = new BunkerFloor (this, x0 + TileSize * i, y1);
+
 			}
 			for (int i = 0; i <= Perimeter2Y; i++) {
 				var block = new BunkerWall (this, x0 + TileSize * Perimeter2X, y1 + TileSize * i);
 				block.TileX = -1.0;
 				block = new BunkerWall (this, x0 - 0.5 * TileSize, y1 + TileSize * (Perimeter2Y - i));
-				
 			}
 
 
@@ -172,15 +177,23 @@ namespace positron
                     bool bstate = (SwitchState)e.Info != SwitchState.Open;
                     gw_lower1.OnAction(e.Self, new ActionEventArgs(bstate, gw_lower1));
                 });
+
+				var ep1 = new ExtenderPlatform(Rear, x0 + TileSize * 57, y1 + 0.5 * TileSize, false);
+				var ep2 = new ExtenderPlatform(Rear, x0 + TileSize * 58, y1 + 2.0 * TileSize, ep1);
+				var ep3 = new ExtenderPlatform(Rear, x0 + TileSize * 60, y1 + 3.5 * TileSize, ep2);
+
                 bs_lower2 = new ProjectileSwitch(Front, x0 + TileSize * 56, y1 + (j - 0.5) * TileSize, (sender, e) =>
                 {
-                    //bool bstate = (SwitchState)e.Info != SwitchState.Open;
-                    //gw_lower1.OnAction(e.Self, new ActionEventArgs(bstate, gw_lower1));
+                    bool bstate = (SwitchState)e.Info != SwitchState.Open;
+					ep1.OnAction(e.Self, new ActionEventArgs(bstate, ep1));
                 });
                 bs_lower1.CenterShift();
                 bs_lower2.CenterShift();
                 bs_lower2.Theta += MathHelper.Pi;
 			}
+
+			for (int j = 1; j < 5; j++)
+				new BunkerFloor (this, x0 + TileSize * 61, y1 + j * TileSize);
             
 
 			// Call the base class initializer
