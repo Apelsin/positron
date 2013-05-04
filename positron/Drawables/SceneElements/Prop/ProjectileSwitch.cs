@@ -66,10 +66,11 @@ namespace positron
 			lock (Body) {
 				object sender = fixtureB.Body.UserData;
 				if (sender is BasicBullet) {
-					if(!_LastAffected)
+					//if(!_LastAffected)
 					{
-						_LastAffected = true;
-						OnAction (sender, SwitchState.Closed);
+						//_LastAffected = true;
+                        OnAction (sender, SwitchState.Closed);
+						OnAction (sender, SwitchState.Latched); // HACK
 					}
 				}
 			}
