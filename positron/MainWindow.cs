@@ -211,6 +211,10 @@ namespace positron
 				{
 					Configuration.DrawBlueprints ^= true;
 				}
+				else if(e.Key == Key.V)
+				{
+					Configuration.ShowDebugVisuals ^= true;
+				}
 				IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
 				bool key_press = true;
 				lock(Program.MainUpdateLock)

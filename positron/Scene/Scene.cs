@@ -100,6 +100,11 @@ namespace positron
 		/// </summary>
 		public RenderSet HUDBlueprint;
 		/// <summary>
+		/// Furthermore, there is also this renderset used for drawing
+		/// non-blueprint debug visuals
+		/// </summary>
+		public RenderSet HUDDebug;
+		/// <summary>
 		/// Time steps are delayed in adaptive time step mode
 		/// </summary>
 		protected float[] AdaptiveTimeSteps = new float[12];
@@ -156,10 +161,11 @@ namespace positron
 			WorldBlueprint = new RenderSet(this);
 			HUD = new RenderSet(this);
 			HUDBlueprint = new RenderSet(this);
+			HUDDebug = new RenderSet(this);
 
 			// This should contain everything AllRenderSetsInOrder would contain
 			// This is an optimization over using an enumerable
-			All = new RenderSet(this, Background, Rear, Stage, Tests, Front, HUD, HUDBlueprint);
+			All = new RenderSet(this, Background, Rear, Stage, Tests, Front, HUD, HUDBlueprint, HUDDebug);
 
 			SceneEntry += (sender, e) => 
 			{
@@ -201,13 +207,13 @@ namespace positron
         {
             var p = new Vector3d(5.0, 5.0, 0.0);
             var s = new Vector3d(5.0, 12, 0.0);
-			FrameTimeMeter = new HUDQuad(HUDBlueprint, p, s);
+			FrameTimeMeter = new HUDQuad(HUDDebug, p, s);
             FrameTimeMeter.Color = Color.DarkSlateBlue;
-			UpdateTimeMeter = new HUDQuad(HUDBlueprint, p, s);
+			UpdateTimeMeter = new HUDQuad(HUDDebug, p, s);
             UpdateTimeMeter.Color = Color.DarkCyan;
-			RenderTimeMeter = new HUDQuad(HUDBlueprint, p, s);
+			RenderTimeMeter = new HUDQuad(HUDDebug, p, s);
             RenderTimeMeter.Color = Color.DarkRed;
-			RenderDrawingMeter = new HUDQuad(HUDBlueprint, p, s);
+			RenderDrawingMeter = new HUDQuad(HUDDebug, p, s);
             RenderDrawingMeter.Color = Color.Red;
         }
         protected void UpdateHUDStats()
@@ -274,6 +280,8 @@ namespace positron
 				HUD.Render (time);
 				if (Configuration.DrawBlueprints)
 					HUDBlueprint.Render (time);
+				if(Configuration.ShowDebugVisuals)
+					HUDDebug.Render (time);
 			}
 		}
 		protected void CalculatePan (float time)
@@ -305,6 +313,7 @@ namespace positron
 			yield return WorldBlueprint;
 			yield return HUD;
 			yield return HUDBlueprint;
+			yield return HUDDebug;
 		}
 		public IEnumerable<RenderSet> UpdateRenderSetsInOrder()
 		{

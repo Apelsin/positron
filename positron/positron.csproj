@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Drawables\HUD\HUDQuad.cs" />
     <Compile Include="Drawables\IUpdateSync.cs" />
+    <Compile Include="Drawables\SceneElements\Prop\ProjectileSwitch.cs" />
     <Compile Include="IRenderable.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MainWindow.cs" />
@@ -108,12 +109,12 @@
     <Compile Include="Drawables\SceneElements\Environment\BunkerWall.cs" />
     <Compile Include="Drawables\SceneElements\Environment\FloorTile.cs" />
     <Compile Include="Drawables\SceneElements\Misc\PsdSpriteTest.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\FloorSwitch.cs" />
     <Compile Include="Drawables\SceneElements\Prop\ExtenderPlatform.cs" />
     <Compile Include="Scene\SceneFour.cs">
       <DependentUpon>SceneTwo.cs</DependentUpon>
     </Compile>
     <Compile Include="Drawables\SceneElements\Prop\SmallGateway.cs" />
+    <Compile Include="Drawables\SceneElements\Prop\PressureSwitch.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
@@ -132,14 +133,8 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Asset Management\" />
-    <Folder Include="Drawables\SceneElements\PC\" />
     <Folder Include="Drawables\SceneElements\NPC\" />
-    <Folder Include="Drawables\SceneElements\Baddie\" />
-    <Folder Include="Drawables\SceneElements\Environment\" />
-    <Folder Include="Drawables\SceneElements\Prop\" />
-    <Folder Include="Drawables\SceneElements\Misc\" />
   </ItemGroup>
+  <ItemGroup />
 </Project>
