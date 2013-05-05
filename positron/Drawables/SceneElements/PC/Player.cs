@@ -331,13 +331,18 @@ namespace positron
 					Vector2d bullet_velo =
 						new Vector2d(TileX * Math.Cos(_AimAngle), Math.Sin (_AimAngle));
 					//bullet_velo.Normalize();
+
 					bullet_velo.Y *= _AnimationCurrent == AnimationAimGunFwdCrouch ? 0.0 : 1.0;
 					bullet_velo *= 1000;
-					Vector2d shot_offset = new Vector2d ((SizeX + 3) * TileX, SizeY * 0.23);
+
+                    double shot_offset_x = (SizeX + 3) * TileX;
+                    double shot_offset_y = SizeY * (Crouching ? -0.1 :
+                        _AnimationCurrent == AnimationAimGunFwdDown ? -0.4 :
+                        _AnimationCurrent == AnimationAimGunFwdUp ? 0.8 : 0.25);
 
 					var bullet = new BasicBullet (this._RenderSet.Scene,
-					                             this.PositionX + shot_offset.X,
-					                             this.PositionY + shot_offset.Y,
+					                             this.PositionX + shot_offset_x,
+                                                  this.PositionY + shot_offset_y,
 					                              bullet_velo.X, bullet_velo.Y);
 					GunStowTimer.Restart ();
 					return true;
