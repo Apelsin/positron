@@ -225,15 +225,16 @@ namespace positron
 			new BunkerFloor (this, x0 + TileSize * 72, y1 + 3 * TileSize);
 
 
-			var bs_lower3 = new ProjectileSwitch (Front, x0 + TileSize * 72, y1 + 1.5 * TileSize, (sender, e) =>
+			var bs_lower3 = new ProjectileSwitch (Front, x0 + TileSize * 72, yp - 0.5, (sender, e) =>
 			{
 				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				ep6.OnAction (e.Self, new ActionEventArgs (bstate, ep6));
 			}, 5.0);
 			bs_lower3.CenterShift ();
-			//bs_lower3.Theta += MathHelper.Pi;
 
-            _DoorToNextScene = new Door(Rear, x0 + TileSize * 76, y1 + TileSize, (Scene)Program.MainGame.Scenes["SceneFour"]);
+			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneFour"];
+            _DoorToNextScene = new Door(Rear, x0 + TileSize * 76, y1 + TileSize, next_scene.DoorToPreviousScene);
+			_DoorToNextScene.Destination.Position += _DoorToNextScene.Position;
 
 			// Call the base class initializer
 			base.InitializeScene();
