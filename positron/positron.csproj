@@ -113,6 +113,7 @@
     <Compile Include="Drawables\SceneElements\Prop\SmallGateway.cs" />
     <Compile Include="Drawables\SceneElements\Prop\PressureSwitch.cs" />
     <Compile Include="Scene\SceneFour.cs" />
+    <Compile Include="Scene\SceneFive.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
