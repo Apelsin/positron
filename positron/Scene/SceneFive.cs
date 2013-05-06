@@ -40,7 +40,7 @@ namespace positron
 			
             // Testing:
             PerimeterOffsetX = 102 + 3 - PerimeterX;
-            PerimeterOffsetY = -6 + 3 - PerimeterY;
+            PerimeterOffsetY = -7 + 3 - PerimeterY;
 			
 			
 			// X and Y positioner variables

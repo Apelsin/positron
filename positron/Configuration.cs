@@ -70,7 +70,7 @@ namespace positron
 			Console.WriteLine ("Using assets path {0}", assets_path);
 			Set("ArtworkPath", Path.Combine(assets_path, "Artwork"));
             Set("AudioPath", Path.Combine(assets_path, "Audio"));
-			Set ("SceneBeginning", "SceneFive");
+			Set ("SceneBeginning", "SceneIntro");
 			_MetersInPixels = 96.0;
 			_ForceDueToGravity = -9.8;
 			_KeyPressTimeTolerance = 0.1;

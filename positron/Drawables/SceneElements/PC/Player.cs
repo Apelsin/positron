@@ -328,7 +328,7 @@ namespace positron
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
         {
 			
-            if (e.Key == Configuration.KeyUp && !_WieldingGun) {
+            if (e.Key == Configuration.KeyDoAction && !_WieldingGun) {
                 DoActionHere ();
 //            }
 //            else if (e.Key == Configuration.KeyJump) {

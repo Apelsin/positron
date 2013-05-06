@@ -46,7 +46,7 @@ namespace positron
 				if(_Destination != null)
 				{
 					// TODO: make this work
-					//player.Position = _Destination._Position + player.Position - Position;
+					player.Position = _Destination.Position;
 				}
 				Program.MainGame.ChangeScene(_Destination == null ? _NextScene == null ?  null : _NextScene : _Destination.RenderSet.Scene);
 			}
