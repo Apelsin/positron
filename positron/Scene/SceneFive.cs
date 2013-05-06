@@ -16,9 +16,9 @@ using FarseerPhysics.Factories;
 
 namespace positron
 {
-	public class SceneFour : SceneBasicBox
+	public class SceneFive : SceneBasicBox
 	{
-		protected SceneFour ():
+		protected SceneFive ():
 			base()
 		{
 		}
@@ -47,7 +47,7 @@ namespace positron
 			yp += TileSize;
 			
 			// Set up previous door:
-			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneThree"];
+			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneFour"];
 			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 			
 			// Setup background tiles
@@ -124,7 +124,7 @@ namespace positron
 			
 			// Set up next door:
 			/*(
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneThree"];
+			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneFour"];
 			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
 			_DoorToNextScene.PositionX = last_platform_1.PositionX;
 			_DoorToNextScene.CornerY = yp += last_platform_1.SizeY;
