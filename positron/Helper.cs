@@ -107,6 +107,23 @@ namespace positron
 		{
 			return Microsoft.Xna.Framework.Vector2.Distance(contact.Manifold.LocalNormal, v2);
 		}
+        public static void GetEnclosingAABB (this Body body, out AABB aabb_enclosing)
+        {
+            AABB aabb_fixture;
+            Microsoft.Xna.Framework.Vector2 lo = new Microsoft.Xna.Framework.Vector2(float.PositiveInfinity);
+            Microsoft.Xna.Framework.Vector2 hi = new Microsoft.Xna.Framework.Vector2(float.NegativeInfinity);
+            for (int i = 0; i < body.FixtureList.Count; i++) {
+                if(body.FixtureList[i].CollisionCategories == Category.None)
+                    continue;
+                body.FixtureList[i].GetAABB (out aabb_fixture, 0); // Should just be first proxy (0)
+                lo.X = Math.Min (lo.X, aabb_fixture.LowerBound.X);
+                lo.Y = Math.Min (lo.Y, aabb_fixture.LowerBound.Y);
+                hi.X = Math.Max (hi.X, aabb_fixture.UpperBound.X);
+                hi.Y = Math.Max (hi.Y, aabb_fixture.UpperBound.Y);
+            }
+
+            aabb_enclosing = new AABB(lo, hi);
+        }
 	}
 }
 

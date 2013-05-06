@@ -39,8 +39,8 @@ namespace positron
 		public event HealthChangedEventHandler HealthChanged;
 		#endregion
 
-		protected Fixture FixtureUpper;
-		protected Fixture FixtureLower;
+		public Fixture FixtureUpper;
+        public Fixture FixtureLower;
 
 		protected List<Fixture> FixtureLowerColliders = new List<Fixture>();
 
@@ -54,6 +54,8 @@ namespace positron
 		protected bool _WouldCrouch = false;
 
 		protected double _AimAngle = 0.0;
+
+        protected double VelocityMovementThreshold = 0.01;
 
 		protected Vector3d _DampVeloNormal = new Vector3d();
 		protected Stopwatch JumpTimer = new Stopwatch();
@@ -81,10 +83,19 @@ namespace positron
 			AnimationAimGunFwdCrouch,
 			AnimationAimGunFwdJump;
 
-		bool Crouching  { get { return
-				_AnimationCurrent == AnimationCrouch ||
+		bool Crouching  { get {
+                return _AnimationCurrent == AnimationCrouch ||
 					_AnimationCurrent == AnimationCrawl ||
 						_AnimationCurrent == AnimationAimGunFwdCrouch; } }
+
+        bool Jumping  { get {
+                return  _AnimationCurrent == AnimationPreJump ||
+                    _AnimationCurrent == AnimationJumping ||
+                        _AnimationCurrent == AnimationAimGunFwdJump; } }
+
+        bool Traveling { get {
+                return _AnimationCurrent == AnimationWalk ||
+                    _AnimationCurrent == AnimationCrawl; } }
 
 		SpriteAnimation AnimationStationary { get {
 				return _WouldCrouch ? AnimationCrouch :
@@ -97,6 +108,7 @@ namespace positron
 
 		protected ManualResetEvent JumpRayMRE = new ManualResetEvent(false);
 		protected float[] JumpRayXDirections = new float[] { 0.0f, 0.2f, -0.2f, 0.45f, -0.45f };
+        protected float[] HeadRoomTestPointXDirections = new float[] { 0.15f, -0.15f, 0.4f, -0.4f };
 		protected bool GoneDown = true;
 		public float MovementDamping {
 			get { return _MovementDamping; }
@@ -234,57 +246,63 @@ namespace positron
 
 			InitBlueprints();
 		}
+        protected float PlatformCollisionRaycast (Fixture fixture, Microsoft.Xna.Framework.Vector2 point, Microsoft.Xna.Framework.Vector2 normal, float fraction)
+        {
+            // TODO: Have these values be not hard-coded
+            lock(Program.MainUpdateLock)
+            {
+                if(fixture == FixtureUpper || fixture == FixtureLower)
+                    return 1.0f;
+                //if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
+                {
+                    if(Jumping && Body.LinearVelocity.Y < 0.01)
+                    {
+                        PlayAnimation(AnimationEndJump);
+                        _AnimationNext = new Lazy<SpriteAnimation>(() => { return AnimationStationary; });
+                        
+                        // TODO: See the other comment regarding disabling the
+                        // lower body fixture; this is for collision rather than
+                        // separation
+                        
+                        // TODO: Hack apart Farseer Physics to make it suck less
+                        //var manifold = new Manifold();
+                        //manifold.LocalPoint = point;
+                        //manifold.LocalNormal = normal;
+                        
+                        AABB fixture_upper_aabb, fixture_lower_aabb;
+                        
+                        FixtureLower.CollisionCategories = Category.Cat1;
+                        
+                        FixtureUpper.GetAABB(out fixture_upper_aabb, 0);
+                        FixtureLower.GetAABB(out fixture_lower_aabb, 0);
+                        
+                        if(FixtureLower.OnCollision != null)
+                            FixtureLower.OnCollision(FixtureLower, fixture, null);
+                        if(fixture.OnCollision != null)
+                            fixture.OnCollision(fixture, FixtureLower, null);
+                        
+                        PositionWorldY += fixture_upper_aabb.LowerBound.Y - fixture_lower_aabb.LowerBound.Y;
+                    }
+                }
+            }
+            return 0;
+        }
 		protected bool HandleOnCollision (Fixture fixture_a, Fixture fixture_b, Contact contact)
-		{
- 			if(fixture_a == FixtureLower)
-				FixtureLowerColliders.Add(fixture_b);
-			RayCastCallback callback = (fixture, point, normal, fraction) => {
-				// TODO: Have these values be not hard-coded
-				lock(Program.MainUpdateLock)
-				{
-					if(fixture == FixtureUpper || fixture == FixtureLower)
-						return 1.0f;
-					if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
-					{
-						if(_AnimationCurrent == AnimationPreJump ||
-						   _AnimationCurrent == AnimationJumping)
-						{
-							PlayAnimation(AnimationEndJump);
-							_AnimationNext = new Lazy<SpriteAnimation>(() => { return AnimationStationary; });
-
-							// TODO: See the other comment regarding disabling the
-							// lower body fixture; this is for collision rather than
-							// separation
-
-							// TODO: Hack apart Farseer Physics to make it suck less
-							//var manifold = new Manifold();
-							//manifold.LocalPoint = point;
-							//manifold.LocalNormal = normal;
-
-							AABB fixture_upper_aabb, fixture_lower_aabb;
-
-							FixtureLower.CollisionCategories = Category.Cat1;
-
-							FixtureUpper.GetAABB(out fixture_upper_aabb, 0);
-							FixtureLower.GetAABB(out fixture_lower_aabb, 0);
-
-							if(FixtureLower.OnCollision != null)
-								FixtureLower.OnCollision(FixtureLower, fixture, null);
-							if(fixture.OnCollision != null)
-								fixture.OnCollision(fixture, FixtureLower, null);
-							
-							PositionWorldY += fixture_upper_aabb.LowerBound.Y - fixture_lower_aabb.LowerBound.Y;
-						}
-					}
-				}
-				return 0;
-			};
-			lock(Program.MainUpdateLock) // Paranoid
-				BodyPlatformRayCast(callback);
+        {
+            if (fixture_a == FixtureLower)
+                FixtureLowerColliders.Add (fixture_b);
+            else if (fixture_a == FixtureUpper && !Crouching && !Jumping && !CrouchHeadroomHitTest ()) {
+                PlayAnimation (Traveling ? AnimationCrawl : AnimationCrouch);
+            }
+            lock(Program.MainUpdateLock) // Paranoid
+                BodyPlatformRayCast(PlatformCollisionRaycast);
 			return true;
 		}
 		protected void HandleOnSeparation (Fixture fixture_a, Fixture fixture_b)
-		{
+        {
+//            if (fixture_b.Body.UserData != null && IgnoreCollisionWith(fixture_b.Body.UserData)) {
+//                return;
+//            }
 			if(fixture_a == FixtureLower)
 				FixtureLowerColliders.Remove(fixture_b);
 		}
@@ -308,11 +326,13 @@ namespace positron
 			}
 		}
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
-		{
-			if (e.Key == Key.Space) {
-				Jump ();
-			} else if (e.Key == Key.W && !_WieldingGun) {
-				DoActionHere ();
+        {
+			
+            if (e.Key == Key.W && !_WieldingGun) {
+                DoActionHere ();
+//            }
+//            else if (e.Key == Key.Space) {
+//                Jump ();
 			} else if (e.Key == Key.F) {
 				_WieldingGun = true;
 			} else if (e.Key == Key.S) {
@@ -320,7 +340,6 @@ namespace positron
 			}
 			return true;
 		}
-
 		public bool KeyUp (object sender, KeyboardKeyEventArgs e)
 		{
 			if (e.Key == Key.F && _WieldingGun) {
@@ -375,13 +394,11 @@ namespace positron
 			}
 
 			float v__x_mag = Math.Abs (v.X);
-			if (_AnimationCurrent != AnimationJumping &&
-				_AnimationCurrent != AnimationPreJump &&
-				_AnimationCurrent != AnimationEndJump) {
-				if (v__x_mag > 0.1) {
+			if (!Jumping) {
+               if (v__x_mag > VelocityMovementThreshold) {
 					_TileX = v.X > 0.0 ? 1.0 : -1.0;
 					PlayAnimation (AnimationMove);
-				} else if (v__x_mag < 0.01) {
+				} else {
  					if (_WieldingGun) {
 						if(Crouching)
 							PlayAnimation (AnimationAimGunFwdCrouch);
@@ -395,10 +412,12 @@ namespace positron
 					else
 						PlayAnimation (AnimationStationary);
 				}
-				else
-					PlayAnimation (AnimationStationary);
+				//else
+				//	PlayAnimation (AnimationStationary);
 				_AnimationNext = null;
 			}
+            else if(_WieldingGun)
+                PlayAnimation(AnimationAimGunFwdJump);
 
 			//Console.WriteLine("On Platform == {0}", OnPlatform);
 
@@ -427,7 +446,7 @@ namespace positron
 			// TODO: make the foot reach distance (in pixels) a member variable
 			AABB aabb;
 			lock (Body) { // Paraoid...
-				if(FixtureLower.CollisionCategories == Category.None && _AnimationCurrent == AnimationJumping)
+				if(FixtureLower.CollisionCategories == Category.None && Jumping)
 					FixtureUpper.GetAABB (out aabb, 0);
 				else
 					FixtureLower.GetAABB (out aabb, 0); // Probably disabled lower fixture during jump
@@ -470,19 +489,19 @@ namespace positron
 			float py = (float)PositionY * pixel;
 			
 			float x_start = 0.0f;
-			float spread = 3.0f * pixel;
-			float y_start = aabb.UpperBound.Y - spread;
-			//float y_end = aabb.UpperBound.Y + spread;
+			float y_start = aabb.UpperBound.Y + 3.0f * pixel;
 
-			for (int j = 0; j < 4; j++) {
-				for (int i = 0; i < JumpRayXDirections.Length; i++) {
-					float dx = (float)(_Scale.X * w * JumpRayXDirections [i]);
-					var start = new Microsoft.Xna.Framework.Vector2 (px + x_start + dx, py + y_start + 5 * pixel * j);
+			for (int j = 3; j >= 0; j--) {
+                for (int i = 0; i < HeadRoomTestPointXDirections.Length; i++) {
+                    float dx = (float)(_Scale.X * w * HeadRoomTestPointXDirections [i]);
+					var start = new Microsoft.Xna.Framework.Vector2 (px + x_start + dx, py + y_start + 6 * pixel * j);
 					//var end = new Microsoft.Xna.Framework.Vector2 (start.X, py + y_end);
 					List<Fixture> hit_fixtures = _RenderSet.Scene.TestPointAll (start);
 					foreach(Fixture fixture in hit_fixtures)
 					{
-						if (fixture != FixtureUpper && fixture != FixtureLower && fixture.CollisionCategories == Category.Cat1)
+                        if (!IgnoreCollisionWith(fixture.Body.UserData) &&
+                            fixture != FixtureUpper && fixture != FixtureLower &&
+                            fixture.CollisionCategories == Category.Cat1)
 							return false;
 					}
 				}
@@ -491,7 +510,7 @@ namespace positron
 		}
 		public void Jump()
 		{
-			if(Crouching && !CrouchHeadroomHitTest())
+			if(Jumping || (Crouching && !CrouchHeadroomHitTest()))
 				return;
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
 				lock(Program.MainUpdateLock)
@@ -500,8 +519,9 @@ namespace positron
 					if(fixture == FixtureUpper || fixture == FixtureLower)
 						return 1.0f;
 
-					if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
-					{
+					//if(JumpTimer.Elapsed.TotalMilliseconds > 50 && GoneDown)
+					if(!Jumping)
+                    {
 	                    JumpTimer.Restart();
 						float jump_imp_y = 3.0f;
 						Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(Body.LinearVelocity.X, jump_imp_y);
@@ -510,6 +530,7 @@ namespace positron
 						_AnimationNext = new Lazy<SpriteAnimation>(() => { return AnimationJumping; });
 
 						FixtureLower.CollisionCategories = Category.None;
+                        FixtureUpper.CollisionCategories = Category.Cat1;
 					}
 
 					if(FixtureLower.CollisionCategories == Category.None)
@@ -537,18 +558,25 @@ namespace positron
 				BodyPlatformRayCast(callback);
 		}
 		public override void Update (double time)
-		{
-			if (GunStowTimer.Elapsed.TotalSeconds > 0.2) {
-				GunStowTimer.Reset ();
-				WieldingGun = false;
-			}
-			if (Crouching) {
-				FixtureUpper.CollisionCategories = Category.None;
-			}
-			else
-				FixtureUpper.CollisionCategories =  Category.Cat1;
-			base.Update(time);
-			GoneDown = GoneDown || Body.LinearVelocity.Y < 0.0f;
+        {
+            if (GunStowTimer.Elapsed.TotalSeconds > 0.2) {
+                GunStowTimer.Reset ();
+                WieldingGun = false;
+            }
+            if (Crouching) {
+                FixtureUpper.CollisionCategories = Category.None;
+                FixtureLower.CollisionCategories = Category.Cat1;
+            } else {
+                FixtureUpper.CollisionCategories = Category.Cat1;
+            }
+            base.Update (time);
+            bool going_down = Body.LinearVelocity.Y < 0.01f;
+            if (going_down && !GoneDown) { // Inflection
+                // This is here because sometimes collision event isn't raised
+                lock(Program.MainUpdateLock) // Paranoid
+                    BodyPlatformRayCast(PlatformCollisionRaycast);
+            }
+			GoneDown = going_down;
 			//((BooleanIndicator)Program.MainGame.TestIndicators[0]).State = GoneDown;
 		}
 		public override void Dispose()
@@ -556,6 +584,10 @@ namespace positron
 			HealthChanged = null;
 			base.Dispose();
 		}
+        protected static bool IgnoreCollisionWith(object o)
+        {
+            return o is ExtenderPlatform;
+        }
 		#endregion
 	}
 }

@@ -32,8 +32,12 @@ namespace positron
 		public Door (RenderSet render_set, double x, double y):
 			base(render_set, x, y, Texture.Get("sprite_doorway"))
 		{
-			_SpriteBody.CollisionCategories = FarseerPhysics.Dynamics.Category.None;
 		}
+        protected override void InitPhysics()
+        {
+            base.InitPhysics();
+            _SpriteBody.CollisionCategories = FarseerPhysics.Dynamics.Category.None;
+        }
 		public void OnAction (object sender, ActionEventArgs e)
 		{
 			e.Self = this;

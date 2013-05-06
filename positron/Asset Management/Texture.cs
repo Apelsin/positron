@@ -119,10 +119,12 @@ namespace positron
 			var robot_1 = PsdLoader.LoadSpriteSheet("sprite_robot_1", "baddie", "sprite_robot_1.psd");
 
 			// Props
-			LoadTexture ("sprite_metal_ball",		"prop",				"sprite_metal_ball.png");
+			LoadTexture ("sprite_metal_ball",		    "prop",				"sprite_metal_ball.png");
+            PsdLoader.LoadSpriteSheet ("sprite_radio",  "prop",             "sprite_radio.psd");
 			
 			// Projectiles
 			LoadTexture ("sprite_first_bullet", 	"projectile",		"sprite_first_bullet.png");
+            PsdLoader.LoadSpriteSheet("sprite_bullet_collision_particle",   "projectile",   "sprite_bullet_collision_particle.psd");
 			
 			var bunker_floor = LoadTexture("sprite_bunker_floor",		"scene_element",   "sprite_bunker_floor.png");
 			bunker_floor.Regions = new TextureRegion[4];
@@ -171,6 +173,10 @@ namespace positron
 			var bg3 = LoadTexture("sprite_tile_bg3_atlas",		"background",   "sprite_tile_bg3_atlas.png");
 			bg3.Regions = new TextureRegion[32];
 			bg3.Regions.BuildTiledRegions(4, 32, 32);
+
+            var bg4 = LoadTexture("sprite_tile_bg4_atlas",      "background",   "sprite_tile_bg4_atlas.png");
+            bg4.Regions = new TextureRegion[64];
+            bg4.Regions.BuildTiledRegions(8, 32, 32);
 
 			var bg_rubble = LoadTexture("sprite_dark_rubble_atlas",		"background",   "sprite_dark_rubble_atlas.png");
 			bg_rubble.Regions = new TextureRegion[32];

@@ -16,9 +16,9 @@ using FarseerPhysics.Factories;
 
 namespace positron
 {
-	public class SceneFour : SceneBasicBox
+	public class SceneFive : SceneBasicBox
 	{
-		protected SceneFour ():
+        protected SceneFive ():
 			base()
 		{
 		}
@@ -30,10 +30,12 @@ namespace positron
 		protected override void InitializeScene ()
 		{
 			// Assign base class variables here, before calling the base class initializer
-			PerimeterOffsetX = 84;
-			PerimeterOffsetY = -3;
+			
 			PerimeterX = 32;
-			PerimeterY = 12;
+			PerimeterY = 96;
+
+            PerimeterOffsetX = 3 - PerimeterX;
+            PerimeterOffsetY = 3 - PerimeterY;
 			
 			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;
@@ -42,101 +44,65 @@ namespace positron
 			// X and Y positioner variables
 			double xp = TileSize * PerimeterOffsetX;
 			double yp = TileSize * PerimeterOffsetY;
-			
-			xp += TileSize * PerimeterX * 0.5;
-			yp += TileSize;
+
+            xp += TileSize * (PerimeterX - 1);
+            yp += TileSize * (PerimeterY - 4);
+
+            {
+                int i, j;
+
+                new BunkerFloor(this, xp, yp);
+                new BunkerFloor(this, xp, yp + TileSize);
+                new BunkerFloor(this, xp, yp + 2 * TileSize);
+
+                for(i = 0; i < 10; i++)
+                    new BunkerFloor(this, xp -= TileSize, yp);
+
+                new RadioProp(Stage, xp, yp + TileSize);
+                xp -= TileSize * 2;
+
+                for(j = 3; j > -3; j--)
+                    new BunkerWall(this, xp, yp + TileSize * j);
+                yp += TileSize * (j - 0.5);
+                var ep1 = new ExtenderPlatform(this.Rear, xp, yp, true);
+                for(i += 3; i > 1; i--)
+                {
+                    new ExtenderPlatform(this.Rear, xp += TileSize, yp, ep1);
+                }
+                yp += TileSize;
+                var bs1 = new ProjectileSwitch(this.Front, xp + TileSize, yp + 2 * TileSize, (sender, e) => {
+                    Program.MainGame.AddUpdateEventHandler(this, (ueh_sender, ueh_e) => { // GL context
+                        var bs2 = new ProjectileSwitch(this.Front, xp - 11 * TileSize, yp + 2 * TileSize, (sender1, e1)=>{
+                            Program.MainGame.AddUpdateEventHandler(this, (ueh2_sender, ueh2_e) => { // GL context
+                                var ps1 = new PressureSwitch(this.Front, xp - 5 * TileSize, yp + 4, (sender2, e2) => {
+                                    bool bstate = (SwitchState)e2.Info == SwitchState.Open;
+                                    ep1.OnAction (e2.Self, new ActionEventArgs (bstate, ep1));
+                                }, 1.0);
+                                return true;
+                            });
+                        }, 1.0).CenterShift();
+                        bs2.PositionX -= 0.5 * bs2.SizeX;
+                        bs2.Theta = MathHelper.Pi;
+                        return true;
+                    });
+                }, 1.0).CenterShift();
+
+
+            }
 			
 			// Set up previous door:
-			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneThree"];
+			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneFour"];
 			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 			
 			// Setup background tiles
-			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg2_atlas"));
+			var BackgroundTiles = new TileMap (Background, 54, 110, Texture.Get ("sprite_tile_bg2_atlas"));
 			BackgroundTiles.PositionX = (PerimeterOffsetX - 9) * TileSize;
 			BackgroundTiles.PositionY = (PerimeterOffsetY - 4) * TileSize;
 			BackgroundTiles.PositionZ = 1.0;
 			BackgroundTiles.RandomMap ();
 			BackgroundTiles.Build ();
 			
-			// Control key indicators (info graphics)
-			var f_infogfx = new SpriteBase(Rear, xp - 2 * TileSize, yp, Texture.Get("sprite_infogfx_key_f"));
 			
-			double recess_switch = -4.0;
-			double recess_gw = -2.0;
-			
-			for (int i = 0; i < 5; i++) {
-				var spidey = new Spidey (Stage, xp - (5 + 0.25 * i) * TileSize, yp);
-				spidey.Body.BodyType = BodyType.Dynamic;
-			}
-			
-			// Gateways
-			var gw1 = new Gateway (Front, xp - TileSize * 3, yp + recess_gw, false);
-			var gw2 = new Gateway (Front, xp + TileSize * 3, yp + recess_gw, false);
-			
-			// Walls above gateways
-			for (int i = 2; i < PerimeterY - 1; i++) {
-				new FloorTile (Rear, gw1.CornerX, gw1.CornerY + (i) * TileSize + 8);
-				new FloorTile (Rear, gw2.CornerX, gw2.CornerY + (i) * TileSize + 8);
-			}
-			
-			var fs10 = new PressureSwitch (Front, gw1.CornerX + TileSize, yp + recess_switch, (sender, e) => {
-				bool bstate = (SwitchState)e.Info != SwitchState.Open;
-				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
-			});
-			var fs11 = new PressureSwitch (Front, gw1.CornerX - TileSize, yp + recess_switch, (sender, e) => {
-				bool bstate = (SwitchState)e.Info != SwitchState.Open;
-				gw1.OnAction (e.Self, new ActionEventArgs (bstate, gw1));
-			}, fs10);
-			
-			var fs20 = new PressureSwitch (Front, gw2.CornerX - TileSize, yp + recess_switch, (sender, e) => {
-				bool bstate = (SwitchState)e.Info != SwitchState.Open;
-				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
-			});
-			var fs21 = new PressureSwitch (Front, gw2.CornerX + TileSize, yp + recess_switch, (sender, e) => {
-				bool bstate = (SwitchState)e.Info != SwitchState.Open;
-				gw2.OnAction (e.Self, new ActionEventArgs (bstate, gw2));
-			}, fs20);
-			
-			xp = fs21.CornerX + 2 * TileSize;
-			
-			var ft_room_r = new FloorTile (Stage, xp, yp);
-			for (int i = 1; i < 8; i++)
-				new FloorTile (Stage, xp + i * TileSize, yp);
-			
-			yp += TileSize;
-			xp += TileSize;
-			
-			for (int i = 0; i < 4; i++)
-				new FloorTile (Stage, xp + (i + 1) * TileSize, yp);
-			//yp += 2 * TileSize;
-			xp += 4 * TileSize;
-			
-			ExtenderPlatform last_platform_0 = null;
-			ExtenderPlatform last_platform_1 = null;
-			for (int i = 0; i < 3; i++) {
-				last_platform_0 = new ExtenderPlatform (Stage, xp += TileSize, yp += TileSize, last_platform_0);
-			}
-			xp -= 2 * TileSize;
-			yp += TileSize;
-			for (int i = 0; i < 6; i++) {
-				last_platform_1 = new ExtenderPlatform (Stage, xp -= TileSize, yp, true);
-			}
-			
-			// Set up next door:
-			/*(
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneThree"];
-			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
-			_DoorToNextScene.PositionX = last_platform_1.PositionX;
-			_DoorToNextScene.CornerY = yp += last_platform_1.SizeY;
-
-			// Update next scene's door position
-			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
-			*/
-			
-			var fs30 = new PressureSwitch (Front, ft_room_r.CornerX + TileSize, ft_room_r.CornerY + TileSize + recess_switch, (sender, e) => {
-				bool bstate = (SwitchState)e.Info != SwitchState.Open;
-				last_platform_0.OnAction (e.Self, new ActionEventArgs (bstate, last_platform_0));
-			}, 5.0);
 			
 			// Call the base class initializer
 			base.InitializeScene ();

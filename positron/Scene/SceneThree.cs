@@ -39,8 +39,8 @@ namespace positron
 		}
 		protected override void InstantiateConnections()
 		{
-            _DoorToPreviousScene = new Door(Rear, 50 * TileSize, -8 * TileSize);
-			//_DoorToPreviousScene = new Door(Rear, 0, 0);
+            //_DoorToPreviousScene = new Door(Rear, 72 * TileSize, -8 * TileSize);
+			_DoorToPreviousScene = new Door(Rear, 0, 0);
 		}
         protected override void InitializeScene ()
         {
@@ -193,7 +193,7 @@ namespace positron
                 }, 5.0);
                 bs_lower1.CenterShift ();
                 bs_lower2.CenterShift ();
-                bs_lower2.Theta += MathHelper.Pi;
+                bs_lower2.Theta = MathHelper.Pi;
             }
 
             for (int j = 1; j < 5; j++) {
@@ -214,27 +214,32 @@ namespace positron
 
             yp += 0.5 * TileSize;
 
-            var ep6 = new ExtenderPlatform (Rear, x0 + TileSize * 67, yp, false);
-            var ep7 = new ExtenderPlatform (Rear, x0 + TileSize * 68, yp, ep6);
-            var ep8 = new ExtenderPlatform (Rear, x0 + TileSize * 69, yp, ep7);
-			var ep9 = new ExtenderPlatform (Rear, x0 + TileSize * 70, yp, ep8);
-			var ep10 = new ExtenderPlatform (Rear, x0 + TileSize * 71, yp, ep9);
+            ExtenderPlatform ep_walkway1_first = new ExtenderPlatform (Rear, x0 + TileSize * 67, yp, false);
+            ExtenderPlatform ep_walkway1_last = null;
+            for(int i = 1; i < 6; i++)
+                ep_walkway1_last = new ExtenderPlatform (Rear, ep_walkway1_first.CornerX + TileSize * i, ep_walkway1_first.CornerY, ep_walkway1_first);
 
-			new BunkerFloor (this, x0 + TileSize * 72, y1 + 1 * TileSize);
-			new BunkerFloor (this, x0 + TileSize * 72, y1 + 2 * TileSize);
-			new BunkerFloor (this, x0 + TileSize * 72, y1 + 3 * TileSize);
+            new BunkerFloor (this, ep_walkway1_last.CornerX + TileSize, y1 + 1 * TileSize);
+            new BunkerFloor (this, ep_walkway1_last.CornerX + TileSize, y1 + 2 * TileSize);
+            new BunkerFloor (this, ep_walkway1_last.CornerX + TileSize, y1 + 3 * TileSize);
+
+            new BunkerFloor (this, ep_walkway1_last.CornerX + 2 * TileSize, y1 + 1 * TileSize);
+            new BunkerFloor (this, ep_walkway1_last.CornerX + 2 * TileSize, y1 + 2 * TileSize);
+
+            new BunkerFloor (this, ep_walkway1_last.CornerX + 3 * TileSize, y1 + 1 * TileSize);
 
 
-			var bs_lower3 = new ProjectileSwitch (Front, x0 + TileSize * 72, yp - 0.5, (sender, e) =>
+            var bs_lower3 = new ProjectileSwitch (Front, ep_walkway1_last.CornerX, y1 + 1.0 * TileSize, (sender, e) =>
 			{
 				bool bstate = (SwitchState)e.Info != SwitchState.Open;
-				ep6.OnAction (e.Self, new ActionEventArgs (bstate, ep6));
-			}, 5.0);
+                ep_walkway1_first.OnAction (e.Self, new ActionEventArgs (bstate, ep_walkway1_first));
+			}, 2.0);
 			bs_lower3.CenterShift ();
+            bs_lower3.Theta = -MathHelper.PiOver2;
 
 			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneFour"];
             _DoorToNextScene = new Door(Rear, x0 + TileSize * 76, y1 + TileSize, next_scene.DoorToPreviousScene);
-			_DoorToNextScene.Destination.Position += _DoorToNextScene.Position;
+            _DoorToNextScene.Destination.Corner += _DoorToNextScene.Corner;
 
 			// Call the base class initializer
 			base.InitializeScene();

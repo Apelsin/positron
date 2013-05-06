@@ -33,7 +33,11 @@ namespace positron
                                Stopwatch latch_timer, double latch_time) :
             base(render_set, x, y, state_changed, state, latch_expiration, latch_timer, latch_time, Texture.Get("sprite_projectile_switch"))
         {
-            Theta += MathHelper.PiOver2;
+            Theta = 0.0;
+        }
+        public override double Theta {
+            get { return base.Theta - MathHelper.PiOver2; }
+            set { base.Theta = value + MathHelper.PiOver2; }
         }
 		protected override void InitPhysics ()
 		{
