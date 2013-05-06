@@ -53,7 +53,7 @@ namespace positron
 			*/
 			Console.WriteLine ("Using artwork path {0}", artwork_path);
 			Set("ArtworkPath", artwork_path);
-			Set ("SceneBeginning", "SceneFive");
+			Set ("SceneBeginning", "SceneIntro");
 			_MetersInPixels = 96.0;
 			_ForceDueToGravity = -9.8;
 			_KeyPressTimeTolerance = 0.1;
@@ -153,7 +153,7 @@ namespace positron
 			yield return new KeyValuePair<String, object>("_ForceDueToGravity", _ForceDueToGravity);
 			yield return new KeyValuePair<String, object>("_KeyPressTimeTolerance", _KeyPressTimeTolerance);
 			yield return new KeyValuePair<String, object>("_FrameRateCap", _FrameRateCap);
-			yield return new KeyValuePair<String, object>("_FrameRateCap", _ThreadSleepTimeStep);
+			yield return new KeyValuePair<String, object>("_ThreadSleepTimeStep", _ThreadSleepTimeStep);
 			yield return new KeyValuePair<String, object>("_MinWorldTimeStep", _MaxWorldTimeStep);
 			yield return new KeyValuePair<String, object>("_AdaptiveTimeStep", _AdaptiveTimeStep);
 			yield return new KeyValuePair<String, object>("_DrawBlueprints", _DrawBlueprints);
