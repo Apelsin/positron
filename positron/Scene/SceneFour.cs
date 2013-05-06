@@ -175,7 +175,6 @@ namespace positron
 				last_platform_0 = new ExtenderPlatform (Stage, xp + TileSize * (5 + i), yp + TileSize * (4.5 + i), last_platform_0);
 			}
 
-
 			xp -= 2 * TileSize;
 			yp += TileSize;
 			for (int i = 0; i < 9; i++) {
@@ -185,7 +184,7 @@ namespace positron
 			var fs30 = new PressureSwitch (Front, ft_room_r.CornerX, ft_room_r.CornerY + TileSize + recess_switch, (sender, e) => {
 				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				last_platform_1.OnAction (e.Self, new ActionEventArgs (bstate, last_platform_1));
-			}, 4.0);
+			}, 6.0);
 
 			var bs_lower2 = new ProjectileSwitch (Front, ep2x + TileSize * (23.55), ep2y + TileSize * (7 + 0.5) , (sender, e) =>
 			                                      {

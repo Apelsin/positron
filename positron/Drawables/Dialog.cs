@@ -189,7 +189,7 @@ namespace positron
 		}
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{
-			if (e.Key == Configuration.KeyDoAction) {
+            if (e.Key == Configuration.KeyDoAction || e.Key == Configuration.KeyUseEquippedItem || e.Key == Configuration.KeyJump) {
 				Next();
 				return false;
 			}

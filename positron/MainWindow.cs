@@ -212,18 +212,19 @@ namespace positron
 				{
 					Configuration.ShowDebugVisuals ^= true;
 				}
-				IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
-				bool key_press = true;
 				lock(Program.MainUpdateLock)
 				{
+                    IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
+                    bool key_press = true;
 					for(int i = 0; i < accepters.Length; i++)
 						key_press = key_press && accepters[i].KeyDown(this, e);
-				}
-				if(key_press)
-				{
-					lock(Program.MainUserInputLock)
-						KeysPressed.Add (e.Key, DateTime.Now);
-				}
+                    if(key_press)
+                    {
+                        lock(Program.MainUserInputLock)
+                            KeysPressed.Add (e.Key, DateTime.Now);
+                    }
+                }
+				
 			};
 			Keyboard.KeyUp += delegate(object sender, KeyboardKeyEventArgs e)
 			{
@@ -369,6 +370,7 @@ namespace positron
 
 			// Delete textures from graphics memory space
 			Texture.Teardown();
+            Sound.Teardown();
 
 			// Clean up what we allocated before exiting
 			if (CanvasTexture != 0)
@@ -548,6 +550,7 @@ namespace positron
     				SwapBuffers();
                     _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
                 }
+                Sound.KillTheNoise(); // I don't know where a better place for this could be...
 			}
 			Context.MakeCurrent(null);
 		}
@@ -589,6 +592,7 @@ namespace positron
                 RenderDrawingWatch.Restart();
 				Program.MainGame.Draw(time);
                 _LastRenderDrawingTime = RenderDrawingWatch.Elapsed.TotalSeconds;
+                GL.Color4(1.0, 1.0, 1.0, 1.0);
 			}
 			GL.PopAttrib();
 			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // unbind FBO

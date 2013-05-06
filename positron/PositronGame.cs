@@ -39,6 +39,7 @@ namespace positron
 		protected Hashtable _Scenes = new Hashtable();
 		protected Scene _CurrentScene;
 		protected World _WorldMain;
+
 		public float TimeStepCoefficient = 1.0f;
 		protected OrderedDictionary InputAccepterGroups;
 
@@ -86,6 +87,7 @@ namespace positron
 		{
 			// Load textures into graphics memory space
 			Texture.InitialSetup();
+            Sound.InitialSetup();
 			DialogSpeaker.InitialSetup();
 		}
 		public void Setup ()

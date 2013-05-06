@@ -23,7 +23,7 @@ namespace positron
 				_ElementFocusedIndex = (_ElementFocusedIndex + 1) % Count;
 				this.ForEach(element => element.OnRefresh(this, new EventArgs()));
 			}
-			else if (e.Key == Configuration.KeyDoAction) {
+            else if (e.Key == Configuration.KeyDoAction || e.Key == Configuration.KeyUseEquippedItem || e.Key == Configuration.KeyJump) {
 				ActuateFocused();
 				this.ForEach(element => element.OnRefresh(this, new EventArgs()));
 			}

@@ -44,14 +44,14 @@ namespace positron
 		static Configuration ()
 		{
 			// Development path
-			string artwork_path = Path.Combine ("..", "..", "Assets", "Artwork");
-			if (!Directory.Exists (artwork_path)) {
+			string assets_path = Path.Combine ("..", "..", "Assets");
+			if (!Directory.Exists (assets_path)) {
 				// Release path
-				artwork_path = Path.Combine ("..", "Assets", "Artwork");
+				assets_path = Path.Combine ("..", "Assets");
 			}
-			if (!Directory.Exists (artwork_path)) {
+			if (!Directory.Exists (assets_path)) {
 				// Alternative PWD path
-				artwork_path = Path.Combine ("Assets", "Artwork");
+                assets_path = "Assets";
 			}
 
 			// Absolute executable path
@@ -67,9 +67,10 @@ namespace positron
 				//Console.WriteLine("Using artwork path {0}", artwork_path);
 			}
 			*/
-			Console.WriteLine ("Using artwork path {0}", artwork_path);
-			Set("ArtworkPath", artwork_path);
-			Set ("SceneBeginning", "SceneIntro");
+			Console.WriteLine ("Using assets path {0}", assets_path);
+			Set("ArtworkPath", Path.Combine(assets_path, "Artwork"));
+            Set("AudioPath", Path.Combine(assets_path, "Audio"));
+			Set ("SceneBeginning", "SceneFive");
 			_MetersInPixels = 96.0;
 			_ForceDueToGravity = -9.8;
 			_KeyPressTimeTolerance = 0.1;
@@ -89,7 +90,7 @@ namespace positron
             _KeyUseEquippedItem = Key.G;
             _KeyDoAction = Key.H;
             _KeyCrouch = Key.C;
-            _KeyReset = Key.Escape;
+            _KeyReset = Key.Number1;
             _KeyToggleFullScreen = Key.BackSlash;
             _KeyToggleShowDebugVisuals = Key.V;
             _KeyToggleDrawBlueprints = Key.B;
@@ -98,6 +99,9 @@ namespace positron
 		public static string ArtworkPath {
 			get { return (string)__dict__["ArtworkPath"]; }
 		}
+        public static string AudioPath {
+            get { return (string)__dict__["AudioPath"]; }
+        }
 		/// <summary>
 		/// Meters in pixels scalar for FarseerPhysics to use
 		/// Protip: don't muck with this

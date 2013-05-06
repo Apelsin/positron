@@ -19,11 +19,13 @@ namespace positron
 			protected SpriteFrame[] _Frames;
 			protected bool _Looping = false;
 			protected bool _PingPong = false;
+            protected Sound _Sound;
 
 			public SpriteFrame[] Frames { get { return _Frames; } }
 			public int FrameCount { get { return _Frames == null ? 0 : _Frames.Length; } }
 			public bool Looping { get { return _Looping; } set { _Looping = value; } }
 			public bool PingPong { get { return _PingPong; } set { _PingPong = value; } }
+            public Sound Sound { get { return _Sound; } set { _Sound = value; } }
 
 
 			public SpriteAnimation(Texture texture, int frame_time, bool looping, bool ping_pong, params int[] region_incices):
@@ -224,6 +226,9 @@ namespace positron
 		protected Lazy<SpriteAnimation> _AnimationNext;
 
 		protected SpriteFrame _FrameStatic;
+
+        protected bool _FirstUpdate = false;
+
         /// <summary>
         /// The blueprint vertex buffer object
         /// </summary>
@@ -370,7 +375,15 @@ namespace positron
 			// SpriteFrame handles Build() for frames
 		}
 		public virtual void Update (double time)
-		{
+        {
+            if (_FirstUpdate) {
+                _FirstUpdate = false;
+                if(_AnimationCurrent != null)
+                {
+                    if(_AnimationCurrent.Sound != null)
+                        _AnimationCurrent.Sound.Play();
+                }
+            }
 			if (_AnimationCurrent != null) {
 				if (_AnimationFrameIndex < _AnimationCurrent.FrameCount) {
 					if (_FrameTimer.Elapsed.TotalMilliseconds > FrameCurrent.FrameTime) {
@@ -380,6 +393,7 @@ namespace positron
 							if(_AnimationCurrent.Looping)
 							{
 								_AnimationFrameIndex = 0;
+                                _FirstUpdate = true;
 							}
 							else
 							{
@@ -401,6 +415,12 @@ namespace positron
 			if(animation != _AnimationCurrent)
 				StartAnimation(animation);
 		}
+        public void LoopSound__HACK(object sound_key)
+        {
+            Sound sound = Sound.Get (sound_key);
+            var sound_anim = new SpriteAnimation(Texture, (int)(1000 * sound.Duration),  true, false, Texture.DefaultRegionIndex);
+            PlayAnimation(sound_anim);
+        }
         /// <summary>
         /// Plays a new static animation (oxymoron) with a single frame
         /// using the current animation with the specified region given
@@ -418,6 +438,7 @@ namespace positron
 					animation = _AnimationNext.Value;
 			}
 			if (animation != null) {
+                _FirstUpdate = true;
 				_AnimationFrameIndex = 0;
 				_AnimationCurrent = animation;
 				_FrameTimer.Restart();

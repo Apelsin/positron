@@ -39,8 +39,8 @@ namespace positron
 			// Assign base class variables here, before calling the base class initializer
 			
             // Testing:
-            PerimeterOffsetX = 3 - PerimeterX;
-            PerimeterOffsetY = 3 - PerimeterY;
+            PerimeterOffsetX = 102 + 3 - PerimeterX;
+            PerimeterOffsetY = -6 + 3 - PerimeterY;
 			
 			
 			// X and Y positioner variables
@@ -104,8 +104,8 @@ namespace positron
 			
 			// Setup background tiles
 			var BackgroundTiles = new FadedTileMap (Background, PerimeterX + 20, PerimeterY + 12, Texture.Get ("sprite_tile_bg2_atlas"));
-			BackgroundTiles.PositionX = (PerimeterOffsetX - 10) * TileSize;
-			BackgroundTiles.PositionY = (PerimeterOffsetY - 6) * TileSize;
+			BackgroundTiles.PositionX = (PerimeterOffsetX - 18) * TileSize;
+			BackgroundTiles.PositionY = (PerimeterOffsetY - 2) * TileSize;
 			BackgroundTiles.PositionZ = 1.0;
 			BackgroundTiles.RandomMap ();
 			BackgroundTiles.Build ();
