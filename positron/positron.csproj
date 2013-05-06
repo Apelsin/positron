@@ -13,7 +13,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>False</Optimize>
+    <Optimize>True</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -121,6 +121,7 @@
     <Compile Include="Asset Management\Sound.cs" />
     <Compile Include="Scene\SceneCredits.cs" />
     <Compile Include="Drawables\SceneElements\Prop\MusicLooperHACK.cs" />
+    <Compile Include="Scene\SceneSix.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

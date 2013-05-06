@@ -45,14 +45,17 @@ namespace positron
             var looper = new MusicLooperHACK(this, "camprespite_loop");
             looper.Preserve = true;
             looper.RenderSetTransfer += (sender, e) => {
-                if(!(e.From.Scene is ISceneGameplay) && (e.To.Scene is ISceneGameplay))
-                {
-                    looper.SetLoop("last_human_loop");
-                }
-                else if((e.From.Scene is ISceneGameplay) && !(e.To.Scene is ISceneGameplay))
-                {
-                    looper.SetLoop("camprespite_loop");
-                }
+                Program.MainGame.AddUpdateEventHandler(this, (sender1, e1)=> {
+                    if(!(e.From.Scene is ISceneGameplay) && (e.To.Scene is ISceneGameplay))
+                    {
+                        looper.SetLoop("last_human_loop");
+                    }
+                    else if((e.From.Scene is ISceneGameplay) && !(e.To.Scene is ISceneGameplay))
+                    {
+                        looper.SetLoop("camprespite_loop");
+                    }
+                    return true;
+                });
             };
 
 		}
