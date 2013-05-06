@@ -119,7 +119,6 @@ namespace positron
 		}
 		public void Render (double time)
 		{
-			GL.Color4 (Color.White);
 			GL.PushMatrix ();
 			{
 				GL.BindTexture (TextureTarget.Texture2D, TextureID);

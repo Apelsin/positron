@@ -26,9 +26,22 @@ namespace positron
 				if(!(e.From is SceneTwo))
 				{
 					var stanzas = new List<DialogStanza>();
-					DialogSpeaker speaker = DialogSpeaker.Get("protagonist");
-					stanzas.Add(new DialogStanza(speaker, "Here I am"));
-					stanzas.Add (new DialogStanza(speaker, "TO SAVE THE DAY!"));
+					DialogSpeaker protagonist = DialogSpeaker.Get("protagonist");
+                    DialogSpeaker radio = DialogSpeaker.Get("radio");
+                    stanzas.Add(new DialogStanza(protagonist, "Where... Where am I?"));
+                    stanzas.Add(new DialogStanza(radio, "*bzzsk*"));
+                    stanzas.Add(new DialogStanza(protagonist, "Is this a two-way radio?"));
+                    stanzas.Add(new DialogStanza(radio, "*vvvVVVVzzzzt*"));
+                    stanzas.Add(new DialogStanza(radio, "Greetings life form!"));
+                    stanzas.Add(new DialogStanza(protagonist, "Hey! Does this thing work?"));
+                    stanzas.Add(new DialogStanza(radio, "I hear you just fine."));
+                    stanzas.Add(new DialogStanza(radio, "You need to make your way out of this area\nas soon as you possibly can."));
+                    stanzas.Add(new DialogStanza(protagonist, "Who are you?!\nWhy do I need to leave?"));
+                    stanzas.Add(new DialogStanza(radio, "There's no time to explain.\nPlease just trust me."));
+                    stanzas.Add(new DialogStanza(protagonist, "Okay, but why should I trust you?"));
+                    stanzas.Add(new DialogStanza(radio, "I've got to go..."));
+                    stanzas.Add(new DialogStanza(radio, "*clk-hsssss*"));
+
 					var dialog = new Dialog(e.To.HUD, "Dialog", stanzas);
 					dialog.Begin();
 					Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
@@ -82,6 +95,7 @@ namespace positron
 			// Stage elements
 			var ft0 = new FloorTile (Rear, xp, yp);
 			FirstTile = ft0;
+            new RadioProp(Rear, xp, yp + TileSize);
 			var ft1 = new FloorTile (Rear, xp + TileSize, yp);
 			var ft2 = new FloorTile (Rear, xp + 2 * TileSize, yp - TileSize * 0.5);
 
@@ -89,8 +103,7 @@ namespace positron
             var infogfx_texture = Texture.Get("sprite_infogfx_cabinet_buttons");
             var a_infogfx = new SpriteBase(Rear, ft1.CornerX + TileSize, ft1.CornerY + TileSize, infogfx_texture).SetRegion("left");
             var d_infogfx = new SpriteBase(Rear, a_infogfx.CornerX + TileSize, a_infogfx.CornerY, infogfx_texture).SetRegion ("right");
-            var w_infogfx = new SpriteBase(Rear, 0, _DoorToNextScene.CornerY + _DoorToNextScene.SizeY + 4, infogfx_texture).SetRegion ("do_action");
-			w_infogfx.PositionX = _DoorToNextScene.PositionX;
+            var w_infogfx = new SpriteBase(Rear, _DoorToNextScene.PositionX, _DoorToNextScene.CornerY + _DoorToNextScene.SizeY + 4, infogfx_texture).SetRegion ("do_action");
 
 			// Gateways
 			var gw1 = new Gateway (Front, xp + TileSize * 4, yp + recess_gw, false);

@@ -292,8 +292,8 @@ namespace positron
 			if (time > 0.0f) {
 				double a = Math.Abs (_ViewPosition.X - pan.X);
 				double b = Math.Abs (_ViewPosition.Y - pan.Y);
-				a = Helper.SmootherStep (view_size_scaled_x - 64, view_size_scaled_x, a);
-				b = Helper.SmootherStep (view_size_scaled_y - 64, view_size_scaled_y, b);
+				a = Helper.SmootherStep (view_size_scaled_x - 128, view_size_scaled_x, a);
+				b = Helper.SmootherStep (view_size_scaled_y - 128, view_size_scaled_y, b);
 				pan.X = _ViewPosition.X + (pan.X - _ViewPosition.X) * a;
 				pan.Y = _ViewPosition.Y + (pan.Y - _ViewPosition.Y) * b;
 				float alpha = Math.Min (1.0f, (2000f * (float)time) / (float)Math.Max (50f, (pan - _ViewPosition).Length));

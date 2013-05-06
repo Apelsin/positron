@@ -200,10 +200,10 @@ namespace positron
 				}
 				w_half = w * 0.5;
 				h_half = h * 0.5;
-				var A = new Vertex(corner_x - w_half, corner_y - h_half, 0.0, 0.0, 0.0, 1.0, x0, -y0);
-				var B = new Vertex(corner_x + w_half, corner_y - h_half, 0.0, 0.0, 0.0, 1.0, x1, -y0);
-				var C = new Vertex(corner_x + w_half, corner_y + h_half, 0.0, 0.0, 0.0, 1.0, x1, -y1);
-				var D = new Vertex(corner_x - w_half, corner_y + h_half, 0.0, 0.0, 0.0, 1.0, x0, -y1);
+				var A = new Vertex(corner_x - w_half, corner_y - h_half, 1.0, x0, -y0);
+				var B = new Vertex(corner_x + w_half, corner_y - h_half, 1.0, x1, -y0);
+				var C = new Vertex(corner_x + w_half, corner_y + h_half, 1.0, x1, -y1);
+				var D = new Vertex(corner_x - w_half, corner_y + h_half, 1.0, x0, -y1);
 				_VBO = new VertexBuffer(A, B, C, D);
 				//BPVBO = new VertexBuffer(A, B, C, D);
 			}

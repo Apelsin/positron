@@ -145,6 +145,7 @@ namespace positron
 			// Character
 			PsdLoader.LoadSpriteSheet ("sprite_player", "character",	"sprite_protagonist.psd");
 			LoadTexture("sprite_protagonist_picture", 	"character",	"sprite_protagonist_picture.png");
+            LoadTexture ("sprite_radio_picture",        "character",    "sprite_radio_picture.png");
 
 			// Dialog box
 			LoadTexture ("sprite_dialog_fade_up",	"dialog_box",	"sprite_dialog_fade_up.png");

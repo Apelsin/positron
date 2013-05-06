@@ -26,7 +26,8 @@ namespace positron
         #region Member Variables
 		public void AddUpdateEventHandler(object sender, UpdateEventHandler handler)
 		{
-			_UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
+            lock(_UpdateEventList)
+			    _UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
 		}
         #region Test stuff
         Stopwatch TestWatch = new Stopwatch();

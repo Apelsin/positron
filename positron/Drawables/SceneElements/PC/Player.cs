@@ -572,6 +572,8 @@ namespace positron
             } else {
                 FixtureUpper.CollisionCategories = Category.Cat1;
             }
+            //Body.LinearVelocity /= Math.Max(Body.LinearVelocity.Length() / (10f * (float)Configuration.MeterInPixels), 1.0f);
+            Body.LinearDamping = 1.0f;
             base.Update (time);
             bool going_down = Body.LinearVelocity.Y < 0.01f;
             if (going_down && !GoneDown) { // Inflection

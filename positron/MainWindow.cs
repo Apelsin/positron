@@ -302,10 +302,13 @@ namespace positron
 				Exit ();
 			}
 
-			// Depth buffer init
-			GL.Enable (EnableCap.DepthTest);
-			GL.ClearDepth (1.0);
-			GL.DepthFunc (DepthFunction.Lequal);
+            GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
+
+            GL.EnableClientState(ArrayCap.VertexArray);
+            //GL.EnableClientState(ArrayCap.NormalArray);
+            GL.EnableClientState(ArrayCap.TextureCoordArray);
+            GL.EnableClientState(ArrayCap.ColorArray);
+
 
 			// Blending init
 			GL.Enable (EnableCap.Blend);
@@ -313,12 +316,16 @@ namespace positron
 			GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One);
 
 			// Culling init
+            // Depth buffer init
+            GL.Enable (EnableCap.DepthTest);
+            GL.ClearDepth (1.0);
+            GL.DepthFunc (DepthFunction.Lequal);
 			GL.Enable (EnableCap.CullFace);
 
 			// Create Color Tex
 			GL.GenTextures (1, out CanvasTexture);
 			GL.BindTexture (TextureTarget.Texture2D, CanvasTexture);
-			GL.TexImage2D (TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8, _CanvasWidth, _CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+			GL.TexImage2D (TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, _CanvasWidth, _CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
 			GL.TexParameter (TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
 			GL.TexParameter (TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 			GL.TexParameter (TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
@@ -488,10 +495,6 @@ namespace positron
 		{
 			MakeCurrent(); // The context now belongs to this thread. No other thread may use it!
 
-			GL.Enable(EnableCap.DepthTest);
-			GL.Enable(EnableCap.PointSmooth);
-			GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
-
             while (!Exiting)
             {
                 // Instantiate a main game in the current scope only
@@ -575,20 +578,17 @@ namespace positron
 			{
 				// FBO viewport
 				GL.Viewport(0, 0, _CanvasWidth, _CanvasHeight);
-				GL.ClearColor (Color.Black);
-				GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Do clear
+                GL.ClearColor (Color.Black);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 				Matrix4 perspective = Matrix4.CreateOrthographicOffCenter(0.0f, _CanvasWidth, 0.0f, _CanvasHeight, -128, 128);
 				//Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView(1.0f, 1.0f, 0.01f, 10.0f);
 				GL.MatrixMode(MatrixMode.Projection);
 				GL.LoadMatrix(ref perspective);
 				GL.MatrixMode(MatrixMode.Modelview);
 				GL.LoadIdentity();
-
                 RenderDrawingWatch.Restart();
 				Program.MainGame.Draw(time);
                 _LastRenderDrawingTime = RenderDrawingWatch.Elapsed.TotalSeconds;
-                GL.Color4(Color.White);
-
 			}
 			GL.PopAttrib();
 			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // unbind FBO
