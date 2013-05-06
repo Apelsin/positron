@@ -42,15 +42,12 @@ namespace positron
 				// Prepare game resources
 				// This makes OpenGL calls
 				PositronGame.InitialSetup ();
-				// Instantiate a main game
-				MainGame = new PositronGame ();
-				// Game setup
-				MainGame.Setup ();
-				MainGame.SetupTests ();
 				// TEST: Dump all the settings:
 				Configuration.DumpEverything ();
 			}
-			MainWindow.Run (); // Run the window thread
+            // Run the window thread
+            // Game will be set up by render/update thread -because reasons-
+			MainWindow.Run (); 
 		}
 	}
 }

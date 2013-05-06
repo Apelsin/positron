@@ -89,7 +89,6 @@ namespace positron
 //                collider_y_lower * Configuration.MeterInPixels, 0.0), this.RenderSet.Scene.WorldBlueprint, 2000);
 
             bool interact = collider_y_lower + PassThruMargin > platform_y_upper;
-            Console.WriteLine (interact ? "Collide" : "Pass-thru");
             contact.Enabled = interact;
             return interact;
         

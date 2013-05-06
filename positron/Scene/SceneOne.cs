@@ -86,9 +86,10 @@ namespace positron
 			var ft2 = new FloorTile (Rear, xp + 2 * TileSize, yp - TileSize * 0.5);
 
 			// Control key indicators (info graphics)
-            var a_infogfx = new SpriteBase(Rear, ft1.CornerX + TileSize, ft1.CornerY + TileSize, Texture.Get("sprite_infogfx_key_a"));
-            var d_infogfx = new SpriteBase(Rear, a_infogfx.CornerX + TileSize, a_infogfx.CornerY, Texture.Get("sprite_infogfx_key_d"));
-			var w_infogfx = new SpriteBase(Rear, 0, _DoorToNextScene.CornerY + _DoorToNextScene.SizeY + 4, Texture.Get("sprite_infogfx_key_w"));
+            var infogfx_texture = Texture.Get("sprite_infogfx_cabinet_buttons");
+            var a_infogfx = new SpriteBase(Rear, ft1.CornerX + TileSize, ft1.CornerY + TileSize, infogfx_texture).SetRegion("left");
+            var d_infogfx = new SpriteBase(Rear, a_infogfx.CornerX + TileSize, a_infogfx.CornerY, infogfx_texture).SetRegion ("right");
+            var w_infogfx = new SpriteBase(Rear, 0, _DoorToNextScene.CornerY + _DoorToNextScene.SizeY + 4, infogfx_texture).SetRegion ("do_action");
 			w_infogfx.PositionX = _DoorToNextScene.PositionX;
 
 			// Gateways
@@ -118,7 +119,7 @@ namespace positron
 				//Console.WriteLine("{0} acted on {1}: {2}", sender, e.Self, e.Info);
 			}, fs10, 3.0);
 
-			var space_infogfx = new SpriteBase (Rear, xp + fs11.PositionX - 128, yp + fs10.PositionY, Texture.Get ("sprite_infogfx_key_spacebar"));
+            var space_infogfx = new SpriteBase (Rear, xp + fs11.PositionX - 128, yp + fs10.PositionY, infogfx_texture).SetRegion("jump");
 
 			fs11.Theta = Math.PI * 0.5;
 			var fs12 = new PressureSwitch (Front, xp + TileSize * 12, yp + recess_switch, (sender, e) => {

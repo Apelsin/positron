@@ -59,7 +59,8 @@ namespace positron
 			BackgroundTiles.Build ();
 
 			// Control key indicators (info graphics)
-            var f_infogfx = new SpriteBase(Rear, xp - 2 * TileSize, yp, Texture.Get("sprite_infogfx_key_f"));
+            var infogfx_texture = Texture.Get("sprite_infogfx_cabinet_buttons");
+            var f_infogfx = new SpriteBase(Rear, xp - 2 * TileSize, yp, infogfx_texture).SetRegion("use_equipped_item");
 
 			// Get cross-scene variables
 			Scene previous_scene = (Scene)Program.MainGame.Scenes["SceneOne"];

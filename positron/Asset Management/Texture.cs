@@ -184,15 +184,7 @@ namespace positron
 
 			var bg_pipes = LoadTexture("sprite_bg_pipes", "background", "sprite_bg_pipes.png");
 			
-			
-			var infogfx_key_spacebar = LoadTexture ("sprite_infogfx_key_spacebar",	"user_interface",	"sprite_infogfx_key_spacebar.png");
-			var infogfx_key_w =	 LoadTexture ("sprite_infogfx_key_w",	"user_interface",	"sprite_infogfx_key_w.png");
-			var infogfx_key_a =	 LoadTexture ("sprite_infogfx_key_a",	"user_interface",	"sprite_infogfx_key_a.png");
-			var infogfx_key_s =	 LoadTexture ("sprite_infogfx_key_s",	"user_interface",	"sprite_infogfx_key_s.png");
-			var infogfx_key_d =	 LoadTexture ("sprite_infogfx_key_d",	"user_interface",	"sprite_infogfx_key_d.png");
-			var infogfx_key_e =	 LoadTexture ("sprite_infogfx_key_e",	"user_interface",	"sprite_infogfx_key_e.png");
-			var infogfx_key_f =	 LoadTexture ("sprite_infogfx_key_f",	"user_interface",	"sprite_infogfx_key_f.png");
-			
+            var infogfx_cabinet = PsdLoader.LoadSpriteSheet("sprite_infogfx_cabinet_buttons", "user_interface", "sprite_infogfx_cabinet_buttons.psd");
 			
 			// TEST PSDLOADER
 			PsdLoader.LoadSpriteSheet("sprite_dumbo", "sprite_dumbo.psd");

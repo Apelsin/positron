@@ -95,7 +95,11 @@ namespace positron
 		/// Ordered dictionary containing the current keyboard keys being pressed in time order
 		/// </summary>
 		public OrderedDictionary KeysPressed = new OrderedDictionary();
-		/// <summary>
+        /// <summary>
+        /// Signifies that the main game needs to be destroyed and then reinstantiated / reinitialized
+        /// </summary>
+        bool Reset = false;
+        /// <summary>
 		/// Signifies that the program is exiting
 		/// </summary>
 		bool Exiting = false;
@@ -189,29 +193,22 @@ namespace positron
 			}
 			Keyboard.KeyDown += delegate(object sender, KeyboardKeyEventArgs e)
 			{
-				if (e.Key == Key.Escape)
+				if (e.Key == Configuration.KeyReset)
 				{
 					if(KeysPressed.Contains (Key.ShiftLeft) || KeysPressed.Contains (Key.ShiftRight) )
 					{
-                        Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
-                        {
-							Program.MainGame.Demolish();
-                            Program.MainGame = new PositronGame(); // Godspeed.
-                            Program.MainGame.Setup();
-                            Program.MainGame.SetupTests();
-                            GC.Collect();
-                            GC.WaitForPendingFinalizers();
-                            return false;
-                        });
+                        this.Exit();
 					}
 					else
-						this.Exit();
+                    {
+                        Reset = true;
+                    }
 				}
-				else if(e.Key == Key.B)
+				else if(e.Key == Configuration.KeyToggleDrawBlueprints)
 				{
 					Configuration.DrawBlueprints ^= true;
 				}
-				else if(e.Key == Key.V)
+				else if(e.Key == Configuration.KeyToggleShowDebugVisuals)
 				{
 					Configuration.ShowDebugVisuals ^= true;
 				}
@@ -230,9 +227,9 @@ namespace positron
 			};
 			Keyboard.KeyUp += delegate(object sender, KeyboardKeyEventArgs e)
 			{
-				/*if (e.Key == Key.F)
+				if (e.Key == Configuration.KeyToggleFullScreen)
 				{
-					lock(UpdateLock)
+					lock(Program.MainUpdateLock)
 					{
 						if (this.WindowState == WindowState.Fullscreen)
 							this.WindowState = WindowState.Normal;
@@ -240,7 +237,7 @@ namespace positron
 							this.WindowState = WindowState.Fullscreen;
 						OnResize(null);
 					}
-				}*/
+				}
 				IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
 				bool key_press = true;
 				lock(Program.MainUpdateLock)
@@ -495,36 +492,59 @@ namespace positron
 			GL.Enable(EnableCap.PointSmooth);
 			GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
 
-			// Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
-			UpdateWatch.Start();
-			RenderWatch.Start();
-			FrameWatch.Start();
-            TestWatch.Start();
-            RenderDrawingWatch.Start();
+            while (!Exiting)
+            {
+                // Instantiate a main game in the current scope only
+                lock(Program.MainUpdateLock)
+                {
+                    Reset = false;
+                    if(Program.MainGame != null)
+                    {
+                        Program.MainGame.Demolish();
+                        Program.MainGame = null;
+                        GC.Collect();
+                    }
+                    Program.MainGame = new PositronGame ();
+                }
+                // Game setup
+                Program.MainGame.Setup ();
+                // Don't even ask me why this is like this
+                Scene.SetupScenes(ref Program.MainGame);
+                Program.MainGame.SetupTests ();
 
-			// Store this in a local variable because accessors have overhead!
-            // Bear with me...this will get a bit tricky to explain pefrectly...
-			while (!Exiting) {
-				// Sleep the thread for the most milliseconds less than the frame limit time
-				double time_until = FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001;
-				while (FrameWatch.Elapsed.TotalSeconds < time_until)
-					Thread.Sleep(Configuration.ThreadSleepTimeStep); // Does this help?
-				// Hard-loop the remainder
-				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
+    			// Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
+    			UpdateWatch.Start();
+    			RenderWatch.Start();
+    			FrameWatch.Start();
+                TestWatch.Start();
+                RenderDrawingWatch.Start();
 
-                _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
-                //Console.WriteLine(_LastFrameTime);
-				FrameWatch.Restart();
-                UpdateWatch.Restart();
-				lock(Program.MainUpdateLock)
-					Update(_LastFrameTime);
-				_LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
-				RenderWatch.Restart();
-				lock(Program.MainUpdateLock)
-					RenderView(_LastFrameTime);
-                // TODO: Figure out why this does wild shit if FPS > 60
-				SwapBuffers();
-                _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
+                while(!Reset && !Exiting)
+                {
+        			// Store this in a local variable because accessors have overhead!
+                    // Bear with me...this will get a bit tricky to explain pefrectly...
+    			
+    				// Sleep the thread for the most milliseconds less than the frame limit time
+    				double time_until = FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001;
+    				while (FrameWatch.Elapsed.TotalSeconds < time_until)
+    					Thread.Sleep(Configuration.ThreadSleepTimeStep); // Does this help?
+    				// Hard-loop the remainder
+    				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
+
+                    _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
+                    //Console.WriteLine(_LastFrameTime);
+    				FrameWatch.Restart();
+                    UpdateWatch.Restart();
+    				lock(Program.MainUpdateLock)
+    					Update(_LastFrameTime);
+    				_LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
+    				RenderWatch.Restart();
+    				lock(Program.MainUpdateLock)
+    					RenderView(_LastFrameTime);
+                    // TODO: Figure out why this does wild shit if FPS > 60
+    				SwapBuffers();
+                    _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
+                }
 			}
 			Context.MakeCurrent(null);
 		}

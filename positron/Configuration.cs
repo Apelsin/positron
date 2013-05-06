@@ -3,6 +3,8 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
+using OpenTK.Input;
+
 namespace positron
 {
 	public static class Configuration
@@ -22,6 +24,20 @@ namespace positron
 		private static int _CanvasHeight;
 		private static bool _DrawBlueprints;
 		private static bool _ShowDebugVisuals;
+
+        private static Key
+            _KeyUp,
+            _KeyLeft,
+            _KeyDown,
+            _KeyRight,
+            _KeyJump,
+            _KeyUseEquippedItem,
+            _KeyDoAction,
+            _KeyCrouch,
+            _KeyReset,
+            _KeyToggleFullScreen,
+            _KeyToggleShowDebugVisuals,
+            _KeyToggleDrawBlueprints;
 		#endregion
 
 		private static Dictionary<String, object> __dict__ = new Dictionary<String, object>();
@@ -65,6 +81,18 @@ namespace positron
 			_CanvasHeight = 720 / 2;
 			_DrawBlueprints = false;
 			_ShowDebugVisuals = false;
+            _KeyUp = Key.W;
+            _KeyLeft = Key.A;
+            _KeyDown = Key.S;
+            _KeyRight = Key.D;
+            _KeyJump = Key.F;
+            _KeyUseEquippedItem = Key.G;
+            _KeyDoAction = Key.H;
+            _KeyCrouch = Key.C;
+            _KeyReset = Key.Escape;
+            _KeyToggleFullScreen = Key.BackSlash;
+            _KeyToggleShowDebugVisuals = Key.V;
+            _KeyToggleDrawBlueprints = Key.B;
 		}
 		#region Alias Accessors
 		public static string ArtworkPath {
@@ -134,6 +162,18 @@ namespace positron
 			get { return _ShowDebugVisuals; }
 			set { _ShowDebugVisuals = value; }
 		}
+        public static Key KeyUp { get { return _KeyUp; } }
+        public static Key KeyLeft { get { return _KeyLeft; } }
+        public static Key KeyDown { get { return _KeyDown; } }
+        public static Key KeyRight { get { return _KeyRight; } }
+        public static Key KeyJump { get { return _KeyJump; } }
+        public static Key KeyUseEquippedItem { get { return _KeyUseEquippedItem; } }
+        public static Key KeyDoAction { get { return _KeyDoAction; } }
+        public static Key KeyCrouch { get { return _KeyCrouch; } }
+        public static Key KeyReset { get { return _KeyReset; } }
+        public static Key KeyToggleFullScreen { get { return _KeyToggleFullScreen; } }
+        public static Key KeyToggleShowDebugVisuals { get { return _KeyToggleShowDebugVisuals; } }
+        public static Key KeyToggleDrawBlueprints { get { return _KeyToggleDrawBlueprints; } }
 		public static void Set(String key, object value)
 		{
 			__dict__[key] = value;
@@ -158,6 +198,18 @@ namespace positron
 			yield return new KeyValuePair<String, object>("_AdaptiveTimeStep", _AdaptiveTimeStep);
 			yield return new KeyValuePair<String, object>("_DrawBlueprints", _DrawBlueprints);
 			yield return new KeyValuePair<String, object>("_ShowDebugVisuals", _ShowDebugVisuals);
+            yield return new KeyValuePair<String, object>("_KeyUp", _KeyUp);
+            yield return new KeyValuePair<String, object>("_KeyLeft", _KeyLeft);
+            yield return new KeyValuePair<String, object>("_KeyDown", _KeyDown);
+            yield return new KeyValuePair<String, object>("_KeyRight", _KeyRight);
+            yield return new KeyValuePair<String, object>("_KeyJump", _KeyJump);
+            yield return new KeyValuePair<String, object>("_KeyUseEquippedItem", _KeyUseEquippedItem);
+            yield return new KeyValuePair<String, object>("_KeyDoAction", _KeyDoAction);
+            yield return new KeyValuePair<String, object>("_KeyCrouch", _KeyCrouch);
+            yield return new KeyValuePair<String, object>("_KeyReset", _KeyReset);
+            yield return new KeyValuePair<String, object>("_KeyToggleFullScreen", _KeyToggleFullScreen);
+            yield return new KeyValuePair<String, object>("_KeyToggleShowDebugVisuals", _KeyToggleShowDebugVisuals);
+            yield return new KeyValuePair<String, object>("_KeyToggleDrawBlueprints", _KeyToggleDrawBlueprints);
 			foreach(KeyValuePair<String, object> e in __dict__)
 				yield return e;
 		}

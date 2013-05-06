@@ -215,7 +215,7 @@ namespace positron
 		protected double _TileX;
 		protected double _TileY;
 
-		protected Dictionary<string, SpriteAnimation> _Animations;
+		//protected Dictionary<string, SpriteAnimation> _Animations;
 		protected Stopwatch _FrameTimer;
 		protected int _AnimationFrameIndex;
 
@@ -401,6 +401,16 @@ namespace positron
 			if(animation != _AnimationCurrent)
 				StartAnimation(animation);
 		}
+        /// <summary>
+        /// Plays a new static animation (oxymoron) with a single frame
+        /// using the current animation with the specified region given
+        /// the region label
+        /// </summary>
+        public SpriteBase SetRegion (string region_label)
+        {
+            PlayAnimation(new SpriteAnimation(Texture, region_label));
+            return this;
+        }
 		protected void StartAnimation (SpriteAnimation animation)
 		{
 			if (animation == null) {

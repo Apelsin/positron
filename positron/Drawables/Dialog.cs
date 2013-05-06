@@ -185,7 +185,7 @@ namespace positron
 		}
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
 		{
-			if (e.Key == Key.Space) {
+			if (e.Key == Configuration.KeyDoAction) {
 				Next();
 				return false;
 			}

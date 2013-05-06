@@ -74,7 +74,7 @@ namespace positron
 		}
 		public static IEnumerable<Type> FindAllEndClasses(this Type self)
 		{
-			foreach(var asm in AppDomain.CurrentDomain.GetAssemblies())
+            foreach(var asm in AppDomain.CurrentDomain.GetAssemblies())
 			{
 				var types = asm.GetTypes();
 				foreach (var type in types)

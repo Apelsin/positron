@@ -328,21 +328,21 @@ namespace positron
 		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
         {
 			
-            if (e.Key == Key.W && !_WieldingGun) {
+            if (e.Key == Configuration.KeyUp && !_WieldingGun) {
                 DoActionHere ();
 //            }
-//            else if (e.Key == Key.Space) {
+//            else if (e.Key == Configuration.KeyJump) {
 //                Jump ();
-			} else if (e.Key == Key.F) {
+			} else if (e.Key == Configuration.KeyUseEquippedItem) {
 				_WieldingGun = true;
-			} else if (e.Key == Key.S) {
+			} else if (e.Key == Configuration.KeyDown) {
 				_WouldCrouch = true;
 			}
 			return true;
 		}
 		public bool KeyUp (object sender, KeyboardKeyEventArgs e)
 		{
-			if (e.Key == Key.F && _WieldingGun) {
+			if (e.Key == Configuration.KeyUseEquippedItem && _WieldingGun) {
 				UpdateEventHandler late;
 				late = (u_sender, u_e) =>
 				{
@@ -367,22 +367,25 @@ namespace positron
 					return true;
 				};
 				Program.MainGame.AddUpdateEventHandler (this, late);
-			} else if (e.Key == Key.S) {
+			} else if (e.Key == Configuration.KeyDown) {
 				_WouldCrouch = false;
 			}
 			return true;
 		}
 		public KeysUpdateEventArgs KeysUpdate (object sender, KeysUpdateEventArgs e)
 		{
-			float fx = (e.KeysPressedWhen.Contains (Key.A) ? -1.0f : 0.0f) + (e.KeysPressedWhen.Contains (Key.D) ? 1.0f : 0.0f);
+			float fx =
+                (e.KeysPressedWhen.Contains (Configuration.KeyLeft) ? -1.0f : 0.0f) +
+                (e.KeysPressedWhen.Contains (Configuration.KeyRight) ? 1.0f : 0.0f);
 			if (_WieldingGun) {
-				_AimAngle =  Math.PI * ((e.KeysPressedWhen.Contains (Key.S) ? -0.25 : 0.0f) + (e.KeysPressedWhen.Contains (Key.W) ? 0.25f : 0.0f));
+				_AimAngle =  Math.PI * (
+                    (e.KeysPressedWhen.Contains (Configuration.KeyDown) ? -0.25 : 0.0f) +
+                    (e.KeysPressedWhen.Contains (Configuration.KeyUp) ? 0.25f : 0.0f));
 				if (fx != 0.0f) {
 					_TileX = fx;
 					fx = 0.0f;
 				}
 			}
-			//float fy = (e.KeysPressed.Contains(Key.S) ? -1.0f : 0.0f) + (e.KeysPressed.Contains(Key.W) ? 1.0f : 0.0f);
 			fx *= 5f;
 			//vy *= 10f;
 			//this.Body.ApplyForce(new Microsoft.Xna.Framework.Vector2(vx * _SpriteBody.Mass, vy * _SpriteBody.Mass));
@@ -402,9 +405,9 @@ namespace positron
  					if (_WieldingGun) {
 						if(Crouching)
 							PlayAnimation (AnimationAimGunFwdCrouch);
-						else if (e.KeysPressedWhen.Contains (Key.W))
+						else if (e.KeysPressedWhen.Contains (Configuration.KeyUp))
 							PlayAnimation (AnimationAimGunFwdUp);
-						else if (e.KeysPressedWhen.Contains (Key.S))
+						else if (e.KeysPressedWhen.Contains (Configuration.KeyDown))
 							PlayAnimation (AnimationAimGunFwdDown);
 						else
 							PlayAnimation (AnimationAimGunFwd);
@@ -426,7 +429,7 @@ namespace positron
 			foreach(DictionaryEntry de in e.KeysPressedWhen)
 			{
 				Key k = (Key)de.Key;
-				if(k == Key.Space)
+				if(k == Configuration.KeyJump)
 				{
 					if(Helper.KeyPressedInTime((DateTime)de.Value, DateTime.Now))
 					{
