@@ -210,6 +210,8 @@ namespace positron
 			//Scene next_scene = (Scene)Program.MainGame.Scenes["SceneSix"];
 			//_DoorToNextScene = new Door(Rear, x0 + TileSize * 76, y1 + TileSize, next_scene.DoorToPreviousScene);
 			_DoorToNextScene = new Door(Rear, ft_door.CornerX, ft_door.CornerY + TileSize, next_scene.DoorToPreviousScene);
+			_DoorToNextScene.CornerX = ft_door.CornerX;
+			_DoorToNextScene.CornerY = ft_door.CornerY + TileSize;
 			_DoorToNextScene.Destination.Position += _DoorToNextScene.Position;
 			
 

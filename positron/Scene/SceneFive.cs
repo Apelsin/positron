@@ -140,11 +140,15 @@ namespace positron
 			new FloorTile(Stage, x0 + TileSize * (PerimeterX - 1), y0 + TileSize * 2);
 			new FloorTile(Stage, x0 + TileSize * (PerimeterX - 1), y0 + TileSize * 3);
 
+
 			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneSix"];
 			//_DoorToNextScene = new Door(Rear, 0 , y0 + TileSize * -76, next_scene.DoorToPreviousScene);
-			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX, _DoorToPreviousScene.PositionY + TileSize * -93.5, next_scene.DoorToPreviousScene);
-			_DoorToNextScene.Destination.Position += _DoorToNextScene.Position;
-			
+			_DoorToNextScene.CornerX = _DoorToPreviousScene.CornerX;
+			_DoorToNextScene.CornerY = _DoorToPreviousScene.PositionY + TileSize * -93.5;
+			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
+			_DoorToNextScene.Destination.Corner += _DoorToNextScene.Corner;
+
+
 			// Call the base class initializer
 			base.InitializeScene ();
 		}
