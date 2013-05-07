@@ -16,9 +16,9 @@ using FarseerPhysics.Factories;
 
 namespace positron
 {
-	public class SceneSix : SceneBasicBox
+	public class SceneSeven : SceneBasicBox
 	{
-		protected SceneSix ():
+		protected SceneSeven ():
 			base()
 		{
 		}
@@ -37,8 +37,8 @@ namespace positron
 			//PerimeterOffsetY = -8;
 			PerimeterOffsetX = 100;
 			PerimeterOffsetY = -100;
-			PerimeterX = 20;
-			PerimeterY = 10;
+			PerimeterX = 8;
+			PerimeterY = 40;
 			
 			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;
@@ -50,11 +50,9 @@ namespace positron
 			
 			xp += TileSize * PerimeterX - (TileSize * 1);
 			yp -= TileSize * 3;
-
-			new FloorTile (Rear, xp + TileSize * 3, yp + TileSize * 3);
-
+			
 			// Set up previous door:
-			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneFive"];
+			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneSix"];
 			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 			
 			// Setup background tiles
@@ -67,36 +65,36 @@ namespace positron
 			
 			// Control key indicators (info graphics)
 			var f_infogfx = new SpriteBase(Rear, xp - 2 * TileSize, yp, Texture.Get("sprite_infogfx_key_f"));
-
-
+			
+			
 			ExtenderPlatform last_platform_0 = new ExtenderPlatform (Stage, xp + TileSize * (6), yp + TileSize * 4, true);
 			new ExtenderPlatform (Stage, xp + TileSize * (7), yp + TileSize * 4, last_platform_0);
-
-			var bs_lower0 = new ProjectileSwitch (Front, xp + TileSize * (16.5), yp + TileSize * (5 + 0.5) , (sender, e) =>
+			
+			var bs_lower0 = new ProjectileSwitch (Front, xp + TileSize * (16.5), yp + TileSize * (11 + 0.5) , (sender, e) =>
 			                                      {
 				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				last_platform_0.OnAction (e.Self, new ActionEventArgs (bstate, last_platform_0));
 				//bool bstate_bs_lower_0 = last_platform_2.State != SwitchState.Open;
 				//gw_lower1.OnAction (e.Self, new ActionEventArgs (bstate || bstate_bs_lower_0, gw_lower1));
-			}, 5.0);
+			}, 0.1);
 			
 			// Platform set below top
 			ExtenderPlatform last_platform_1 = new ExtenderPlatform (Stage, xp + TileSize * (0), yp + TileSize * 8, true);
 			new ExtenderPlatform (Stage, xp + TileSize * (1), yp + TileSize * 8, last_platform_1);
-
+			
 			var bs_lower1 = new ProjectileSwitch (Front, xp + TileSize * (22.5), yp + TileSize * (7 + 0.5) , (sender, e) =>
 			                                      {
 				bool bstate = (SwitchState)e.Info != SwitchState.Open;
 				last_platform_1.OnAction (e.Self, new ActionEventArgs (bstate, last_platform_1));
 				//bool bstate_bs_lower_0 = last_platform_2.State != SwitchState.Open;
 				//gw_lower1.OnAction (e.Self, new ActionEventArgs (bstate || bstate_bs_lower_0, gw_lower1));
-			}, 5.0);
+			}, 0.1);
 			
 			double recess_switch = -4.0;
 			double recess_gw = -2.0;
-
+			
 			var i = 8;
-
+			
 			new FloorTile (Rear, xp - TileSize * 1, yp + 2 * TileSize + 8 + i);
 			new FloorTile (Rear, xp - TileSize * 0, yp + 2 * TileSize + 8 + i);
 			var ft_door = new FloorTile (Rear, xp + TileSize * 1, yp + 2 * TileSize + 8 + i);

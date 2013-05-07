@@ -221,7 +221,7 @@ namespace positron
 				//_WorldMain.Step (0.0f);
 				// HACK: Perform deferred updates while all bodies are enabled
 				// and have their fixtures' proxies set up (???) and yeah...
-				ProcessUpdateEventList (0.0);
+				//ProcessUpdateEventList (0.0);
 				if(_CurrentScene != null)
 					_CurrentScene.OnSceneExit (this, scea);
 				next_scene.OnSceneEntry (this, scea);

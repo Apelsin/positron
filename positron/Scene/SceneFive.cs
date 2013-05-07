@@ -32,7 +32,8 @@ namespace positron
 		protected override void InstantiateConnections()
 		{
 			_DoorToPreviousScene = new Door(Rear, 0, 0);
-			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 8 * TileSize, 3 * TileSize);
+			//_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 8 * TileSize, 3 * TileSize);
+			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 3 * TileSize, _DoorToPreviousScene.CornerY);
 		}
 		protected override void InitializeScene ()
 		{
@@ -135,6 +136,14 @@ namespace positron
                 var block = new FloorTile(Stage, x0 + TileSize * (PerimeterX - i - 1), y0 + TileSize * PerimeterY);
             }
 
+			new FloorTile(Stage, x0 + TileSize * (PerimeterX - 1), y0 + TileSize * 1);
+			new FloorTile(Stage, x0 + TileSize * (PerimeterX - 1), y0 + TileSize * 2);
+			new FloorTile(Stage, x0 + TileSize * (PerimeterX - 1), y0 + TileSize * 3);
+
+			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneSix"];
+			//_DoorToNextScene = new Door(Rear, 0 , y0 + TileSize * -76, next_scene.DoorToPreviousScene);
+			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX, _DoorToPreviousScene.PositionY + TileSize * -93.5, next_scene.DoorToPreviousScene);
+			_DoorToNextScene.Destination.Position += _DoorToNextScene.Position;
 			
 			// Call the base class initializer
 			base.InitializeScene ();
