@@ -115,7 +115,7 @@ namespace positron
 		{
 			lock (Body) {
 				object sender = fixtureB.Body.UserData;
-				if (sender is Player || sender is BasicBullet) {
+				if (sender is Player) {
 
 					// TODO: implement hit-direction checking CORRECTLY
 					// Previous attempts have been awful and thus removed

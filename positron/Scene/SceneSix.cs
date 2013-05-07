@@ -50,7 +50,7 @@ namespace positron
 			yp -= TileSize * 3;
 			
 			// Set up previous door:
-			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneThree"];
+			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneFive"];
 			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 			
 			// Setup background tiles
@@ -100,10 +100,10 @@ namespace positron
 			new FloorTile (Rear, xp + TileSize * 2, yp + 2 * TileSize + 8 + i);
 			//new FloorTile (Rear, xp + TileSize, yp + 2 * TileSize + 8);
 			
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneFive"];
+			//Scene next_scene = (Scene)Program.MainGame.Scenes["SceneSeven"];
 			//_DoorToNextScene = new Door(Rear, x0 + TileSize * 76, y1 + TileSize, next_scene.DoorToPreviousScene);
-			_DoorToNextScene = new Door(Rear, ft_door.CornerX, ft_door.CornerY + TileSize, next_scene.DoorToPreviousScene);
-			_DoorToNextScene.Destination.Position += _DoorToNextScene.Position;
+			//_DoorToNextScene = new Door(Rear, ft_door.CornerX, ft_door.CornerY + TileSize, next_scene.DoorToPreviousScene);
+			//_DoorToNextScene.Destination.Position += _DoorToNextScene.Position;
 			
 			
 			

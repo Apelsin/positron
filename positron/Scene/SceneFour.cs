@@ -31,13 +31,15 @@ namespace positron
 		protected override void InitializeScene ()
 		{
 			// Assign base class variables here, before calling the base class initializer
-			double x0 = PerimeterOffsetX * TileSize;
-			double y0 = PerimeterOffsetY * TileSize;
+			
 			PerimeterOffsetX = 87;
-			PerimeterOffsetY = -11;
+			PerimeterOffsetY = -12;
 			PerimeterX = 32;
 			PerimeterY = 12;
-			
+
+            double x0 = PerimeterOffsetX * TileSize;
+            double y0 = PerimeterOffsetY * TileSize;
+
 			// Store width and height in local variables for easy access
 			int w_i = (int)ViewWidth;
 			int h_i = (int)ViewHeight;
@@ -55,8 +57,8 @@ namespace positron
 			
 			// Setup background tiles
 			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg4_atlas"));
-			BackgroundTiles.PositionX = (PerimeterOffsetX - 9) * TileSize;
-			BackgroundTiles.PositionY = (PerimeterOffsetY - 4) * TileSize;
+			BackgroundTiles.PositionX = (PerimeterOffsetX - 18) * TileSize;
+			BackgroundTiles.PositionY = (PerimeterOffsetY ) * TileSize;
 			BackgroundTiles.PositionZ = 1.0;
 			BackgroundTiles.RandomMap ();
 			BackgroundTiles.Build ();
