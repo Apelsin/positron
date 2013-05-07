@@ -12,7 +12,7 @@ namespace positron
     {
         private static IntPtr AudioDevice;
         private static ContextHandle AudioCtx;
-        private static XRamExtension XRam = new XRamExtension();
+        //private static XRamExtension XRam = new XRamExtension();
         private static Hashtable Sounds = new Hashtable();
         private static Sound DefaultSound;
 
@@ -105,8 +105,8 @@ namespace positron
                 throw new FileNotFoundException("File missing: ", file_path);
             int buffer_id = AL.GenBuffer();
             int source_id = AL.GenSource();
-            if(XRam.IsInitialized)
-                XRam.SetBufferMode(1, ref buffer_id, XRamExtension.XRamStorage.Hardware);
+//            if(XRam.IsInitialized)
+//                XRam.SetBufferMode(1, ref buffer_id, XRamExtension.XRamStorage.Hardware);
 
             int channels, bits_per_sample, sample_rate;
             byte[] sound_data = LoadWave(File.Open(file_path, FileMode.Open), out channels, out bits_per_sample, out sample_rate);

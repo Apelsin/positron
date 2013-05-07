@@ -216,12 +216,16 @@ namespace positron
 						}
 					}
 				}
+<<<<<<< HEAD
 				// HACK: Perform a zero-time update to transparently perform
 				// deferred updates without affecting their fixtures, etc.
 				//_WorldMain.Step (0.0f);
 				// HACK: Perform deferred updates while all bodies are enabled
 				// and have their fixtures' proxies set up (???) and yeah...
 				//ProcessUpdateEventList (0.0);
+=======
+
+>>>>>>> 472f5c8f375c1bf66089c7c64ab647c272af162a
 				if(_CurrentScene != null)
 					_CurrentScene.OnSceneExit (this, scea);
 				next_scene.OnSceneEntry (this, scea);
