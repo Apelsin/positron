@@ -23,6 +23,7 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="Execute" command="${TargetFile}" workingdir="${TargetDir}" />
+        <Command type="BeforeBuild" command="cp ../../../lib/OpenAL/OpenAL32.dll ./" workingdir="${TargetDir}" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -39,6 +40,7 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="AfterBuild" command="${ProjectDir}/makebundle.sh ${TargetName} ${ProjectName}" workingdir="${TargetDir}" externalConsole="True" />
+        <Command type="BeforeBuild" command="cp ../lib/OpenAL/OpenAL32.dll ." workingdir="${TargetDir}" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
