@@ -120,6 +120,7 @@
     <Compile Include="Drawables\SceneElements\Prop\MusicLooperHACK.cs" />
     <Compile Include="Scene\SceneSix.cs" />
     <Compile Include="Scene\SceneSeven.cs" />
+    <Compile Include="Scene\SceneEight.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
