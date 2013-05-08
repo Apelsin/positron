@@ -62,7 +62,6 @@
     <Compile Include="Drawables\Drawable.cs" />
     <Compile Include="Drawables\Circle.cs" />
     <Compile Include="IColorable.cs" />
-    <Compile Include="Scene\SceneThree.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="Drawables\SpriteObject.cs" />
@@ -78,14 +77,9 @@
     <Compile Include="Drawables\HUD\HealthMeter.cs" />
     <Compile Include="PositronGame.cs" />
     <Compile Include="Drawables\IVariant.cs" />
-    <Compile Include="Scene\SceneOne.cs" />
-    <Compile Include="Scene\Scene.cs" />
-    <Compile Include="Scene\SceneTwo.cs" />
-    <Compile Include="Scene\SceneBasicBox.cs" />
     <Compile Include="SharedState.cs" />
     <Compile Include="Drawables\TileMap.cs" />
     <Compile Include="Drawables\Dialog.cs" />
-    <Compile Include="Scene\SceneFirstMenu.cs" />
     <Compile Include="Drawables\HUD\UIButton.cs" />
     <Compile Include="Drawables\HUD\UIElementGroup.cs" />
     <Compile Include="Drawables\HUD\IUIElement.cs" />
@@ -98,9 +92,7 @@
     <Compile Include="IStateShare.cs" />
     <Compile Include="IShooter.cs" />
     <Compile Include="Drawables\ISceneElement.cs" />
-    <Compile Include="Scene\SceneIntro.cs" />
     <Compile Include="PTextWriter.cs" />
-    <Compile Include="Scene\ISceneGameplay.cs" />
     <Compile Include="Drawables\SceneElements\Baddie\BaddieRobotCrawlerShooter.cs" />
     <Compile Include="Drawables\SceneElements\Baddie\Spidey.cs" />
     <Compile Include="Drawables\SceneElements\PC\Player.cs" />
@@ -114,17 +106,20 @@
     <Compile Include="Drawables\SceneElements\Prop\ExtenderPlatform.cs" />
     <Compile Include="Drawables\SceneElements\Prop\SmallGateway.cs" />
     <Compile Include="Drawables\SceneElements\Prop\PressureSwitch.cs" />
-    <Compile Include="Scene\SceneFour.cs">
-      <DependentUpon>SceneTwo.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Scene\SceneFour.cs">
-      <DependentUpon>SceneTwo.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Scene\SceneFive.cs" />
     <Compile Include="Drawables\SceneElements\Prop\RadioProp.cs" />
     <Compile Include="Asset Management\Sound.cs" />
-    <Compile Include="Scene\SceneCredits.cs" />
     <Compile Include="Drawables\SceneElements\Prop\MusicLooperHACK.cs" />
+    <Compile Include="Scene\SceneThree.cs" />
+    <Compile Include="Scene\SceneOne.cs" />
+    <Compile Include="Scene\Scene.cs" />
+    <Compile Include="Scene\SceneTwo.cs" />
+    <Compile Include="Scene\SceneBasicBox.cs" />
+    <Compile Include="Scene\SceneFirstMenu.cs" />
+    <Compile Include="Scene\SceneIntro.cs" />
+    <Compile Include="Scene\ISceneGameplay.cs" />
+    <Compile Include="Scene\SceneFour.cs" />
+    <Compile Include="Scene\SceneFive.cs" />
+    <Compile Include="Scene\SceneCredits.cs" />
     <Compile Include="Scene\SceneSix.cs" />
     <Compile Include="Scene\SceneSeven.cs" />
     <Compile Include="Scene\SceneEight.cs" />
