@@ -80,6 +80,8 @@ namespace positron
 			_AdaptiveTimeStep = false;
 			_CanvasWidth = 1280 / 2;
 			_CanvasHeight = 720 / 2;
+			//_CanvasWidth = 1280 ;
+			//_CanvasHeight = 640;
 			_DrawBlueprints = false;
 			_ShowDebugVisuals = false;
             _KeyUp = Key.W;
