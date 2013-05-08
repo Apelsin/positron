@@ -163,7 +163,7 @@ namespace positron
 		}
 		public void ChangeScene (Scene next_scene)
 		{
-			if (_CurrentScene == next_scene)
+			if (_CurrentScene == next_scene || next_scene == null)
 				return;
 			SceneChangeEventArgs scea = new SceneChangeEventArgs (_CurrentScene, next_scene);
 			IEnumerable<RenderSet> next_sets = next_scene.AllRenderSetsInOrder ();

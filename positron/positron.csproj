@@ -23,7 +23,7 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="Execute" command="${TargetFile}" workingdir="${TargetDir}" />
-        <Command type="BeforeBuild" command="cp ../../../lib/OpenAL/OpenAL32.dll ./" workingdir="${TargetDir}" externalConsole="True" />
+        <Command type="BeforeBuild" command="cp ../../../lib/OpenAL/OpenAL32.dll ./" workingdir="${TargetDir}" />
       </CustomCommands>
     </CustomCommands>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -39,7 +39,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <CustomCommands>
       <CustomCommands>
-        <Command type="AfterBuild" command="${ProjectDir}/makebundle.sh ${TargetName} ${ProjectName}" workingdir="${TargetDir}" externalConsole="True" />
+        <Command type="AfterBuild" command="${ProjectDir}/makebundle.sh ${TargetName} ${ProjectName}" workingdir="${TargetDir}" />
         <Command type="BeforeBuild" command="cp ../lib/OpenAL/OpenAL32.dll ." workingdir="${TargetDir}" />
       </CustomCommands>
     </CustomCommands>
@@ -117,7 +117,9 @@
     <Compile Include="Scene\SceneFour.cs">
       <DependentUpon>SceneTwo.cs</DependentUpon>
     </Compile>
-    <Compile Include="Scene\SceneFour.cs" />
+    <Compile Include="Scene\SceneFour.cs">
+      <DependentUpon>SceneTwo.cs</DependentUpon>
+    </Compile>
     <Compile Include="Scene\SceneFive.cs" />
     <Compile Include="Drawables\SceneElements\Prop\RadioProp.cs" />
     <Compile Include="Asset Management\Sound.cs" />

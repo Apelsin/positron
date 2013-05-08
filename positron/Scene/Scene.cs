@@ -415,23 +415,55 @@ namespace positron
 		/// Instantiates and initializes one instnace
 		/// of every subclass of Scene in this assembly
 		/// </summary>
-		static public void InstantiateScenes (ref PositronGame game)
-		{
-			// Brave new world:
-			game.WorldMain = new World(new Microsoft.Xna.Framework.Vector2(0.0f, (float)Configuration.ForceDueToGravity));
-			// This is EVIL:
-			IEnumerable<Type> model_enum = typeof(Scene).FindAllEndClasses ();
+		static public void InstantiateScenes (ref PositronGame game, Type type_filter)
+        {
+            // Brave new world:
+            game.WorldMain = new World (new Microsoft.Xna.Framework.Vector2 (0.0f, (float)Configuration.ForceDueToGravity));
+            // This is EVIL:
+            IEnumerable<Type> model_enum = typeof(Scene).FindAllEndClasses ();
+//			foreach (Type m in model_enum) {
+//				Console.WriteLine("Picked {0}", m.Name);
+//			}
+            Scene current_scene = game.CurrentScene;
+            bool redirect = current_scene != null;
+            List<object> remove_keys = new List<object> ();
+            foreach (object key in game.Scenes.Keys) {
+                Scene scene = (Scene)game.Scenes [key];
+                if (type_filter.DescendantOf (scene.GetType ()))
+                    remove_keys.Add (key);
+            }
+            foreach (object key in remove_keys) {
+                Scene scene = (Scene)game.Scenes [key];
+                game.Scenes.Remove (key);
+                if(current_scene == scene && redirect)
+                    current_scene = null;
+            }
+            if(current_scene == null && redirect)
+            {
+                foreach(Scene scene in game.Scenes.Values)
+                {
+                    current_scene = scene;
+                    break;
+                }
+            }
 			foreach (Type m in model_enum) {
-				Console.WriteLine("Picked {0}", m.Name);
+                if(type_filter.DescendantOf(m))
+                {
+    				BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+    				ConstructorInfo ctor = m.GetConstructor(flags, null, new Type[] { }, null);
+    				object instanace = ctor.Invoke(null);
+    				Scene scene = (Scene)instanace;
+    				game.Scenes.Add(scene.Name, scene);
+                    if(current_scene == null && redirect)
+                        current_scene = scene;
+                }
 			}
-			foreach (Type m in model_enum) {
-				BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-				ConstructorInfo ctor = m.GetConstructor(flags, null, new Type[] { }, null);
-				object instanace = ctor.Invoke(null);
-				Scene scene = (Scene)instanace;
-				game.Scenes.Add(scene.Name, scene);
-			}
+            game.CurrentScene = current_scene;
 		}
+        static void InstantiateScenes(ref PositronGame game)
+        {
+            InstantiateScenes (ref game, typeof(Scene));
+        }
 		static public void InitializeScenes(ref PositronGame game)
 		{
 			foreach(Scene scene in game.Scenes.Values)

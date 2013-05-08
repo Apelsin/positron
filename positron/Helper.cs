@@ -96,6 +96,23 @@ namespace positron
 				}
 			}
 		}
+        public static bool DescendantOf (this Type self, Type type)
+        {
+            bool descendant = true;
+            Type base_type = type;
+            while((base_type != typeof(object)) && !(descendant = (base_type = base_type.BaseType) == self));
+            if(!descendant)
+            {
+                Type[] interfaces = type.GetInterfaces();
+                for(int i = 0; i < interfaces.Length; i++)
+                {
+                    if(interfaces[i] == self)
+                        return true;
+                }
+            }
+            return descendant;
+        }
+
 //		public static Microsoft.Xna.Framework.Vector2 ContactNormalAbsolute(this Contact contact)
 //		{
 //			FarseerPhysics.Collision.Manifold manifold = new Manifold();
