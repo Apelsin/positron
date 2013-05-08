@@ -41,7 +41,7 @@ namespace positron
 			// Setup background tiles
 			var BackgroundTiles = new TileMap (Background, 48, 24, Texture.Get ("sprite_tile_bg2_atlas"));
 			BackgroundTiles.PositionX = (PerimeterOffsetX - 24) * TileSize;
-			BackgroundTiles.PositionY = (PerimeterOffsetY - 4) * TileSize;
+			BackgroundTiles.PositionY = (PerimeterOffsetY + 10) * TileSize;
 			BackgroundTiles.PositionZ = 1.0;
 			BackgroundTiles.RandomMap ();
 			BackgroundTiles.Build ();
