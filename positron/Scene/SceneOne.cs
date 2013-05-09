@@ -19,8 +19,8 @@ namespace positron
 	public class SceneOne : SceneBasicBox
 	{
 		protected SpriteObject FirstTile;
-		protected SceneOne ():
-			base()
+        protected SceneOne (PositronGame game):
+			base(game)
 		{
 			SceneEntry += (sender, e) => {
 				if(!(e.From is SceneTwo))
@@ -44,11 +44,11 @@ namespace positron
 
 					var dialog = new Dialog(e.To.HUD, "Dialog", stanzas);
 					dialog.Begin();
-					Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) =>
+					_Game.AddUpdateEventHandler(this, (sender2, e2) =>
 					{
-						Program.MainGame.Player1.PositionX = FirstTile.PositionX;
-						Program.MainGame.Player1.PositionY =
-							FirstTile.PositionY + 0.5 * (FirstTile.SizeY + Program.MainGame.Player1.Texture.DefaultRegion.SizeY);
+						_Game.Player1.PositionX = FirstTile.PositionX;
+						_Game.Player1.PositionY =
+							FirstTile.PositionY + 0.5 * (FirstTile.SizeY + _Game.Player1.Texture.DefaultRegion.SizeY);
 						return true;
 					});
 				}
@@ -75,7 +75,7 @@ namespace positron
 			// Set up doors:
 			//Scene prev_scene = (Scene)Scene.Scenes["SceneOne"];
 			//_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneTwo"];
+			Scene next_scene = (Scene)_Game.Scenes["SceneTwo"];
 			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
 			_DoorToNextScene.Destination.Position = _DoorToNextScene.Position;
 

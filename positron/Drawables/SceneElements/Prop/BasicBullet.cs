@@ -32,7 +32,7 @@ namespace positron
 			Body.IsBullet = true;
 			Body.OnCollision += (Fixture fixtureA, Fixture fixtureB, Contact contact) =>
 			{
-                Program.MainGame.AddUpdateEventHandler(this, (sender, e) =>
+                _RenderSet.Scene.Game.AddUpdateEventHandler(this, (sender, e) =>
                 {
                     new BulletCollisionParticle(RenderSet.Scene, PositionX, PositionY).CenterShift();
                     Derez();
@@ -64,7 +64,7 @@ namespace positron
         {
             Hit = new SpriteAnimation(Texture, 10, false, "f1", "f2", "f3", "f4");
             _AnimationNext = new Lazy<SpriteAnimation>(() => { 
-                Program.MainGame.AddUpdateEventHandler(this, (sender, e) =>
+                _RenderSet.Scene.Game.AddUpdateEventHandler(this, (sender, e) =>
                 {
                     RenderSet.Remove (this);
                     this.Dispose();

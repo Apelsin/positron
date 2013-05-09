@@ -81,8 +81,8 @@ namespace positron
 			ScaleY = (int)(_RenderSet.Scene.ViewSize.Y * 0.25);
             FadeUp = Texture.Get("sprite_dialog_fade_up");
 
-			SpeakerWriter = new PTextWriter(new Size((int)ScaleX, 24));
-			SpeechWriter = new PTextWriter(new Size((int)ScaleX, (int)ScaleY - 24));
+            SpeakerWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, 24));
+            SpeechWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, (int)ScaleY - 24));
 		}
 		public override void Render (double time)
 		{
@@ -143,13 +143,13 @@ namespace positron
 		}
 		public void Begin()
 		{
-			_RevertTime = Program.MainGame.TimeStepCoefficient;
-			Program.MainGame.TimeStepCoefficient = _PauseTime;
+			_RevertTime = _RenderSet.Scene.Game.TimeStepCoefficient;
+            _RenderSet.Scene.Game.TimeStepCoefficient = _PauseTime;
 			_RenderSet.Add(this);
 			_Shown = true;
 			StanzaIndex = 0;
 			UpdateContent();
-			Program.MainGame.SetInputAccepters(ToString(), this);
+            _RenderSet.Scene.Game.SetInputAccepters(ToString(), this);
 		}
 		public void Next ()
 		{
@@ -164,7 +164,7 @@ namespace positron
 		{
 			// Update the actual GL Texture with the rendered text in the thread
 			// with the GL context
-			Program.MainGame.AddUpdateEventHandler (this, (sender2, e2) => {
+            _RenderSet.Scene.Game.AddUpdateEventHandler (this, (sender2, e2) => {
 				SpeakerWriter.Clear();
 				if(CurrentStanza.Speaker != null)
 				{
@@ -180,10 +180,10 @@ namespace positron
 		}
 		public void End()
 		{
-			Program.MainGame.RemoveInputAccepters(ToString());
+            _RenderSet.Scene.Game.RemoveInputAccepters(ToString());
 			_Shown = false;
 			_RenderSet.Remove(this);
-			Program.MainGame.TimeStepCoefficient = _RevertTime;
+            _RenderSet.Scene.Game.TimeStepCoefficient = _RevertTime;
 			if(DialogEnd != null)
 				DialogEnd(this, new DialogEndEventArgs());
 		}

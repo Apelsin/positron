@@ -242,14 +242,14 @@ namespace positron
 			Body.SleepingAllowed = false; // Avoid dumb shit
 
 			// HACK: Only enable bodies for which the object is in the current scene
-			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
+            Body.Enabled = _RenderSet.Scene == _RenderSet.Scene.Game.CurrentScene;
 
 			InitBlueprints();
 		}
         protected float PlatformCollisionRaycast (Fixture fixture, Microsoft.Xna.Framework.Vector2 point, Microsoft.Xna.Framework.Vector2 normal, float fraction)
         {
             // TODO: Have these values be not hard-coded
-            lock(Program.MainUpdateLock)
+            lock(_RenderSet.Scene.Game.UpdateLock)
             {
                 if(fixture == FixtureUpper || fixture == FixtureLower)
                     return 1.0f;
@@ -294,7 +294,7 @@ namespace positron
             else if (fixture_a == FixtureUpper && !Crouching && !Jumping && !CrouchHeadroomHitTest ()) {
                 PlayAnimation (Traveling ? AnimationCrawl : AnimationCrouch);
             }
-            lock(Program.MainUpdateLock) // Paranoid
+            lock(_RenderSet.Scene.Game.UpdateLock) // Paranoid
                 BodyPlatformRayCast(PlatformCollisionRaycast);
 			return true;
 		}
@@ -366,7 +366,7 @@ namespace positron
 					GunStowTimer.Restart ();
 					return true;
 				};
-				Program.MainGame.AddUpdateEventHandler (this, late);
+                _RenderSet.Scene.Game.AddUpdateEventHandler (this, late);
 			} else if (e.Key == Configuration.KeyDown) {
 				_WouldCrouch = false;
 			}
@@ -516,7 +516,7 @@ namespace positron
 			if(Jumping || (Crouching && !CrouchHeadroomHitTest()))
 				return;
 			RayCastCallback callback = (fixture, point, normal, fraction) => {
-				lock(Program.MainUpdateLock)
+                lock(_RenderSet.Scene.Game.UpdateLock)
 				{
 					// TODO: Have these values be not hard-coded
 					if(fixture == FixtureUpper || fixture == FixtureLower)
@@ -557,7 +557,7 @@ namespace positron
 					return 1.0f;
 				}
 			};
-			lock(Program.MainUpdateLock) // Paranoid
+            lock(_RenderSet.Scene.Game.UpdateLock) // Paranoid
 				BodyPlatformRayCast(callback);
 		}
 		public override void Update (double time)
@@ -578,7 +578,7 @@ namespace positron
             bool going_down = Body.LinearVelocity.Y < 0.01f;
             if (going_down && !GoneDown) { // Inflection
                 // This is here because sometimes collision event isn't raised
-                lock(Program.MainUpdateLock) // Paranoid
+                lock(_RenderSet.Scene.Game.UpdateLock) // Paranoid
                     BodyPlatformRayCast(PlatformCollisionRaycast);
             }
 			GoneDown = going_down;

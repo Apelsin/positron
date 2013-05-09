@@ -33,6 +33,7 @@ namespace positron
 	{
 		#region State
 		#region Member
+        protected PositronGame _Game;
 		public int PlayerKeyUpdates = 0;
 		public int ThreadedUpdateCount = 0;
 		/// <summary>
@@ -133,9 +134,15 @@ namespace positron
 
         double _LastFrameTime, _LastUpdateTime, _LastRenderTime;
         double _LastRenderDrawingTime;
+        
+        /// <summary>
+        /// Lock to synchronize user input controls
+        /// </summary>
+        public static object UserInputLock = new object();
 
 		#endregion
 		#region Accessors
+        public PositronGame Game { get { return _Game; } set { _Game = value; } }
 		/// <summary>
 		/// Width of canvas in pixels
 		/// </summary>
@@ -165,19 +172,16 @@ namespace positron
 		protected virtual void OnKeysUpdate (double time)
 		{
 			//TODO: Not sure if this respects UpdateLock (verify)
-			lock(Program.MainUserInputLock)
+			lock(UserInputLock)
 			{
 				KeysUpdateEventArgs args = new KeysUpdateEventArgs (KeysPressed, time);
                 if (KeysUpdate != null)
                 {
                     KeysUpdate(this, args);
                 }
-				lock(Program.MainGame.InputAccepterGroupsLock)
-				{
-					IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
-					for(int i = 0; i < accepters.Length; i++)
-						accepters[i].KeysUpdate(this, args); // Trickle down arguments
-				}
+				IInputAccepter[] accepters = _Game.InputAccepterGroup;
+				for(int i = 0; i < accepters.Length; i++)
+					accepters[i].KeysUpdate(this, args); // Trickle down arguments
 			}
 		}
 		#endregion
@@ -186,7 +190,7 @@ namespace positron
 			: base()
 		{
 
-			lock (Program.MainUpdateLock)
+			//lock (_Game.UpdateLock)
 			{
 				this.Width = _CanvasWidth;
 				this.Height = _CanvasHeight;
@@ -212,16 +216,15 @@ namespace positron
 				{
 					Configuration.ShowDebugVisuals ^= true;
 				}
-				lock(Program.MainUpdateLock)
+                lock(UserInputLock)
 				{
-                    IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
+                    IInputAccepter[] accepters = _Game.InputAccepterGroup;
                     bool key_press = true;
 					for(int i = 0; i < accepters.Length; i++)
 						key_press = key_press && accepters[i].KeyDown(this, e);
                     if(key_press)
                     {
-                        lock(Program.MainUserInputLock)
-                            KeysPressed.Add (e.Key, DateTime.Now);
+                        KeysPressed.Add (e.Key, DateTime.Now);
                     }
                 }
 				
@@ -230,7 +233,7 @@ namespace positron
 			{
 				if (e.Key == Configuration.KeyToggleFullScreen)
 				{
-					lock(Program.MainUpdateLock)
+					lock(_Game.UpdateLock)
 					{
 						if (this.WindowState == WindowState.Fullscreen)
 							this.WindowState = WindowState.Normal;
@@ -239,16 +242,16 @@ namespace positron
 						OnResize(null);
 					}
 				}
-				IInputAccepter[] accepters = Program.MainGame.InputAccepterGroup;
+				IInputAccepter[] accepters = _Game.InputAccepterGroup;
 				bool key_press = true;
-				lock(Program.MainUpdateLock)
+                lock(UserInputLock)
 				{
 					for(int i = 0; i < accepters.Length; i++)
 						key_press = key_press && accepters[i].KeyUp(this, e);
 				}
 				if(key_press)
 				{
-					lock(Program.MainUserInputLock)
+					lock(UserInputLock)
 						KeysPressed.Remove (e.Key);
 				}
 			};
@@ -256,7 +259,8 @@ namespace positron
 			{
 				// Note that we cannot call any OpenGL methods directly. What we can do is set
 				// a flag and respond to it from the rendering thread.
-				lock (Program.MainUpdateLock)
+                var _lock = _Game == null ? e : _Game.UpdateLock;
+                lock (_lock)
 				{
 					Width = Math.Max (Width, _CanvasWidth);
 					Height = Math.Max (Height, _CanvasHeight);
@@ -273,7 +277,7 @@ namespace positron
 			{
 				// Note that we cannot call any OpenGL methods directly. What we can do is set
 				// a flag and respond to it from the rendering thread.
-				lock (Program.MainUpdateLock)
+                lock (_Game.UpdateLock)
 				{
 					PositionChanged = true;
 					PositiondX = (PositionX - X) / (float)Width;
@@ -342,7 +346,8 @@ namespace positron
 			FBOSafety (); // Make sure things won't explode!
 
 			Context.MakeCurrent (null); // Release the OpenGL context so it can be used on the new thread.
-			lock (Program.MainUpdateLock) {
+            //lock (_Game.UpdateLock)
+            {
 				_RenderingThread = new Thread (RenderLoop);
 				_UpdatingThread = new Thread (UpdateLoop);
 				_RenderingThread.IsBackground = true;
@@ -499,23 +504,27 @@ namespace positron
 
             while (!Exiting)
             {
-                // Instantiate a main game in the current scope only
-                lock(Program.MainUpdateLock)
+                if(_Game != null)
                 {
-                    Reset = false;
-                    if(Program.MainGame != null)
+                    lock(_Game.UpdateLock)
                     {
-                        Program.MainGame.Demolish();
-                        Program.MainGame = null;
-                        GC.Collect();
+                        Reset = false;
+                        if(_Game != null)
+                        {
+                            _Game.Demolish();
+                            _Game = null;
+                            GC.Collect();
+                        }
                     }
-                    Program.MainGame = new PositronGame ();
                 }
+                if(_Game == null)
+                    _Game = new PositronGame (this);
+
                 // Game setup
-                Program.MainGame.Setup ();
+                _Game.Setup ();
                 // Don't even ask me why this is like this
-                Scene.SetupScenes(ref Program.MainGame);
-                Program.MainGame.SetupTests ();
+                Scene.SetupScenes(ref _Game);
+                _Game.SetupTests ();
 
     			// Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
     			UpdateWatch.Start();
@@ -540,11 +549,11 @@ namespace positron
                     //Console.WriteLine(_LastFrameTime);
     				FrameWatch.Restart();
                     UpdateWatch.Restart();
-    				lock(Program.MainUpdateLock)
+    				lock(_Game.UpdateLock)
     					Update(_LastFrameTime);
     				_LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
     				RenderWatch.Restart();
-    				lock(Program.MainUpdateLock)
+                    lock(_Game.UpdateLock)
     					RenderView(_LastFrameTime);
                     // TODO: Figure out why this does wild shit if FPS > 60
     				SwapBuffers();
@@ -562,7 +571,7 @@ namespace positron
 		void Update (double time)
 		{
 			OnKeysUpdate (time);
-			Program.MainGame.Update (time);
+			_Game.Update (time);
 		}
 		
 		#endregion
@@ -590,7 +599,7 @@ namespace positron
 				GL.MatrixMode(MatrixMode.Modelview);
 				GL.LoadIdentity();
                 RenderDrawingWatch.Restart();
-				Program.MainGame.Draw(time);
+				_Game.Draw(time);
                 _LastRenderDrawingTime = RenderDrawingWatch.Elapsed.TotalSeconds;
                 GL.Color4(1.0, 1.0, 1.0, 1.0);
 			}
@@ -603,7 +612,7 @@ namespace positron
 			#region Render Main Viewport
 
 			int viewport_width, viewport_height;
-			lock (Program.MainUpdateLock)
+            lock(_Game.UpdateLock)
 			{
 				if (VieportChanged)
 				{

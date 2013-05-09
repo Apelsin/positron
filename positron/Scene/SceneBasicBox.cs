@@ -9,6 +9,7 @@ namespace positron
 		protected int PerimeterX = 18;
 		protected int PerimeterY = 8;
 		protected double TileSize = 32;
+        protected SceneBasicBox(PositronGame game): base(game) {}
 		protected override void InitializeScene()
 		{
 			base.InitializeScene();

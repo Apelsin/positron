@@ -18,7 +18,7 @@ namespace positron
 		}
 	}
 	public delegate void SharedStateChangeEventHandler<T>(object sender, SharedStateChangeEventArgs<T> e);
-	public class SharedState<T>
+	public class SharedState<T> : IDisposable
 	{
 		public event SharedStateChangeEventHandler<T> SharedStateChanged;
 		protected object _ValueLock = new object();
@@ -68,6 +68,10 @@ namespace positron
 				self__value = self.Value;
 			return self__value;
 		}
+        public virtual void Dispose()
+        {
+            this.SharedStateChanged = null;
+        }
 	}
 }
 

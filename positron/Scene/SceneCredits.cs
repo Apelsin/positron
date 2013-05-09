@@ -6,8 +6,8 @@ namespace positron
 	public class SceneCredits : Scene
 	{
 		public Dialog MainDialog;
-		public SceneCredits ():
-				base()
+        public SceneCredits (PositronGame game):
+            base(game)
 		{
 			SceneEntry += (sender, e) => {
                 var stanzas = new List<DialogStanza>();
@@ -20,7 +20,7 @@ namespace positron
                 var dialog = new Dialog(e.To.HUD, "Dialog", stanzas);
                 dialog.DialogEnd += (sender2, e2) =>
                 {
-                    Program.MainGame.ChangeScene((Scene)Program.MainGame.Scenes["SceneFirstMenu"]);
+                    _Game.ChangeScene((Scene)_Game.Scenes["SceneFirstMenu"]);
                 };
                 dialog.Begin();
 			};

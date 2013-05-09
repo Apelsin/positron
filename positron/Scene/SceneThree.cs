@@ -26,8 +26,8 @@ namespace positron
 		protected int Perimeter2Y = 8;
 
 		protected double TileSize = 32;
-		protected SceneThree ():
-			base()
+		protected SceneThree (PositronGame game):
+			base(game)
 		{
 			SceneEntry += (sender, e) => {
 				var stanzas = new List<DialogStanza>();
@@ -103,7 +103,7 @@ namespace positron
             xp += (PerimeterX / 2) * TileSize;
 			
             // Set up doors:
-            Scene prev_scene = (Scene)Program.MainGame.Scenes ["SceneTwo"];
+            Scene prev_scene = (Scene)_Game.Scenes ["SceneTwo"];
             _DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 //			Scene next_scene = (Scene)Scene.Scenes["SceneThree"];
 //			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
@@ -237,7 +237,7 @@ namespace positron
 			bs_lower3.CenterShift ();
             bs_lower3.Theta = -MathHelper.PiOver2;
 
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneFour"];
+			Scene next_scene = (Scene)_Game.Scenes["SceneFour"];
             _DoorToNextScene = new Door(Rear, x0 + TileSize * 76, y1 + TileSize, next_scene.DoorToPreviousScene);
             _DoorToNextScene.Destination.Corner += _DoorToNextScene.Corner;
 

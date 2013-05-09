@@ -10,16 +10,16 @@ namespace positron
 	public class SceneFirstMenu : Scene
 	{
 		protected UIElementGroup UIGroup;
-		protected SceneFirstMenu():
-			base()
+        protected SceneFirstMenu (PositronGame game):
+            base(game)
 		{
 			UIGroup = new UIElementGroup();
 			this.SceneEntry += (sender, e) => {
                 Sound.KillTheNoise();
-                Program.MainGame.SetInputAccepters("Main Menu",  new IInputAccepter[] { UIGroup });
+                _Game.SetInputAccepters("Main Menu",  new IInputAccepter[] { UIGroup });
 			};
 			SceneExit += (sender, e) => {
-				Program.MainGame.RemoveInputAccepters("Main Menu");
+                _Game.RemoveInputAccepters("Main Menu");
 			};
 			SetupPlayerOnExit();
 		}
@@ -34,19 +34,19 @@ namespace positron
 			             new SpriteBase.SpriteFrame(texture, 4),
 			             new SpriteBase.SpriteFrame(texture, 2), UIGroup).CenterShift()).Action += (sender, e) =>
 			{
-				Program.MainGame.CurrentScene = (Scene)Program.MainGame.Scenes[(string)Configuration.Get("SceneBeginning")];
+                _Game.CurrentScene = (Scene)_Game.Scenes[(string)Configuration.Get("SceneBeginning")];
 			};
 			((UIButton) new UIButton(this, x_center, y_center - 48,
 			             new SpriteBase.SpriteFrame(texture, 5),
 			                         new SpriteBase.SpriteFrame(texture, 3), UIGroup).CenterShift()).Action += (sender, e) =>
 			{
-				Program.MainGame.CurrentScene = (Scene)Program.MainGame.Scenes["SceneCredits"];
+                _Game.CurrentScene = (Scene)_Game.Scenes["SceneCredits"];
 			};
 
             var looper = new MusicLooperHACK(this, "last_human_loop");
             looper.Preserve = true;
             looper.RenderSetTransfer += (sender, e) => {
-                Program.MainGame.AddUpdateEventHandler(this, (sender1, e1)=> {
+                _Game.AddUpdateEventHandler(this, (sender1, e1)=> {
                     if(!(e.From.Scene is ISceneGameplay) && (e.To.Scene is ISceneGameplay))
                     {
                         looper.SetLoop("induction_loop");

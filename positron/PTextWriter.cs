@@ -23,15 +23,15 @@ namespace positron
 		protected List<Brush> ColorBrushes;
 		protected int TextureID;
 
-		public PTextWriter(Size areaSize)
+		public PTextWriter(IGLContextLateUpdate context, Size area_size)
 		{
 			Positions = new List<PointF>();
 			Lines = new List<string>();
 			ColorBrushes = new List<Brush>();
 			
-			TextBitmap = new Bitmap(areaSize.Width, areaSize.Height);
+			TextBitmap = new Bitmap(area_size.Width, area_size.Height);
             // HACK FIXIE
-            Program.MainGame.AddUpdateEventHandler(this, (sender, e) =>
+            context.AddUpdateEventHandler(this, (sender, e) =>
                 {
                     TextureID = CreateTexture();
                     return true;

@@ -124,6 +124,7 @@
     <Compile Include="Scene\SceneSeven.cs" />
     <Compile Include="Scene\SceneEight.cs" />
     <Compile Include="Scene\SceneWin.cs" />
+    <Compile Include="IGLContextLateUpdate.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

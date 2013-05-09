@@ -122,7 +122,7 @@ namespace positron
 			// HACK: Positioning the body must occur after world
 			// has been solved at least one time in order to avoid
 			// fixtures being shifted rather than the bodies.
-			Program.MainGame.WorldMain.Step (0.0f);
+			_RenderSet.Scene.Game.WorldMain.Step (0.0f);
 
 			RenderSetEntry += EnteredRenderSet; // Virtual default event handler
 		}
@@ -147,7 +147,7 @@ namespace positron
 			_SpriteBody.Friction = 0.5f;
 
 			// HACK: Only enable bodies for which the object is in the current scene
-			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
+			Body.Enabled = _RenderSet.Scene == _RenderSet.Scene.Game.CurrentScene;
 
 			InitBlueprints();
 		}
