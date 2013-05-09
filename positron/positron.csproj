@@ -13,7 +13,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>True</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -23,7 +23,7 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="Execute" command="${TargetFile}" workingdir="${TargetDir}" />
-        <Command type="BeforeBuild" command="cp ../../../lib/OpenAL/OpenAL32.dll ./" workingdir="${TargetDir}" />
+        <Command type="BeforeBuild" command="cp ../../../lib/OpenAL/OpenAL32.dll ./" workingdir="${TargetDir}" externalConsole="True" pauseExternalConsole="True" />
       </CustomCommands>
     </CustomCommands>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
