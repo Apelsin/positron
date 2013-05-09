@@ -123,6 +123,7 @@
     <Compile Include="Scene\SceneSix.cs" />
     <Compile Include="Scene\SceneSeven.cs" />
     <Compile Include="Scene\SceneEight.cs" />
+    <Compile Include="Scene\SceneWin.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

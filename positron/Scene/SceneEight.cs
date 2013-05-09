@@ -21,6 +21,17 @@ namespace positron
 		protected SceneEight ():
 			base()
 		{
+            // Debugging purposes
+//            SceneEntry += (sender, e) => {
+//                Program.MainGame.AddUpdateEventHandler(this, (sender1, e1) => {
+//                    if(Program.MainGame.Player1 != null)
+//                    {
+//                        Program.MainGame.Player1.Position = DoorToNextScene.Position;
+//                        return true;
+//                    }
+//                    return false;
+//                });
+//            };
 		}
 		protected override void InstantiateConnections()
 		{
@@ -194,14 +205,19 @@ namespace positron
 			}, 15.0);
 
 			var ft_door = new FloorTile (Rear, xp + TileSize * 28, yp + 4 * TileSize);
-
-			/*
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneNine"];
-			_DoorToNextScene.CornerX = ft_door.CornerX;
-			_DoorToNextScene.CornerY = ft_door.CornerY + TileSize;
-			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
-			_DoorToNextScene.Destination.Corner += _DoorToNextScene.Corner;
-			*/
+            _DoorToNextScene.PositionX = ft_door.PositionX;
+            _DoorToNextScene.CornerY = ft_door.CornerY + ft_door.SizeY;
+            _DoorToNextScene.NextScene = (Scene)Program.MainGame.Scenes["SceneWin"];
+//            _DoorToNextScene.Action += (sender, e) => {
+//                Program.MainGame.AddUpdateEventHandler(this, (sender1, e1) =>
+//                {
+//                    lock(Program.MainUpdateLock)
+//                    {
+//                        Scene.InstantiateScenes(ref Program.MainGame, typeof(ISceneGameplay), typeof(SceneFirstMenu));
+//                    }
+//                    return true;
+//                });
+//            };
 
 			// Call the base class initializer
 			base.InitializeScene ();

@@ -100,7 +100,8 @@ namespace positron
         {
             bool descendant = true;
             Type base_type = type;
-            while((base_type != typeof(object)) && !(descendant = (base_type = base_type.BaseType) == self));
+            while((base_type != typeof(object)) && !(descendant = base_type == self))
+                base_type = base_type.BaseType;
             if(!descendant)
             {
                 Type[] interfaces = type.GetInterfaces();

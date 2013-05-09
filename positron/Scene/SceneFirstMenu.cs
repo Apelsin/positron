@@ -15,6 +15,7 @@ namespace positron
 		{
 			UIGroup = new UIElementGroup();
 			this.SceneEntry += (sender, e) => {
+                Sound.KillTheNoise();
                 Program.MainGame.SetInputAccepters("Main Menu",  new IInputAccepter[] { UIGroup });
 			};
 			SceneExit += (sender, e) => {
@@ -42,17 +43,17 @@ namespace positron
 				Program.MainGame.CurrentScene = (Scene)Program.MainGame.Scenes["SceneCredits"];
 			};
 
-            var looper = new MusicLooperHACK(this, "camprespite_loop");
+            var looper = new MusicLooperHACK(this, "last_human_loop");
             looper.Preserve = true;
             looper.RenderSetTransfer += (sender, e) => {
                 Program.MainGame.AddUpdateEventHandler(this, (sender1, e1)=> {
                     if(!(e.From.Scene is ISceneGameplay) && (e.To.Scene is ISceneGameplay))
                     {
-                        looper.SetLoop("last_human_loop");
+                        looper.SetLoop("induction_loop");
                     }
                     else if((e.From.Scene is ISceneGameplay) && !(e.To.Scene is ISceneGameplay))
                     {
-                        looper.SetLoop("camprespite_loop");
+                        looper.SetLoop("last_human_loop");
                     }
                     return true;
                 });

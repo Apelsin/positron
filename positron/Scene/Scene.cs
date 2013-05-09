@@ -394,7 +394,7 @@ namespace positron
 						var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
 						health_meter.Preserve = true;
 
-						player_1.DerezEvent += (sender3, e3) => { health_meter.Dispose(); };
+                        player_1.DerezEvent += (sender3, e3) => { health_meter.RenderSet.Remove(health_meter); };
 
 						return true;
 					});
@@ -415,7 +415,7 @@ namespace positron
 		/// Instantiates and initializes one instnace
 		/// of every subclass of Scene in this assembly
 		/// </summary>
-		static public void InstantiateScenes (ref PositronGame game, Type type_filter)
+		static public void InstantiateScenes (ref PositronGame game, params Type[] type_filters)
         {
             // Brave new world:
             game.WorldMain = new World (new Microsoft.Xna.Framework.Vector2 (0.0f, (float)Configuration.ForceDueToGravity));
@@ -424,41 +424,56 @@ namespace positron
 //			foreach (Type m in model_enum) {
 //				Console.WriteLine("Picked {0}", m.Name);
 //			}
-            Scene current_scene = game.CurrentScene;
-            bool redirect = current_scene != null;
+            Scene next_scene = game.CurrentScene;
+            bool redirect = next_scene != null;
             List<object> remove_keys = new List<object> ();
             foreach (object key in game.Scenes.Keys) {
                 Scene scene = (Scene)game.Scenes [key];
-                if (type_filter.DescendantOf (scene.GetType ()))
-                    remove_keys.Add (key);
+                for (int i = 0; i < type_filters.Length; i++) {
+                    if (type_filters [i].DescendantOf (scene.GetType ())) {
+                        remove_keys.Add (key);
+                    }
+                }
             }
             foreach (object key in remove_keys) {
                 Scene scene = (Scene)game.Scenes [key];
                 game.Scenes.Remove (key);
-                if(current_scene == scene && redirect)
-                    current_scene = null;
+                if (next_scene == scene && redirect)
+                    next_scene = null;
+                scene.Dispose ();
             }
-            if(current_scene == null && redirect)
-            {
-                foreach(Scene scene in game.Scenes.Values)
-                {
-                    current_scene = scene;
-                    break;
+//            foreach (object key in game.Scenes.Keys) {
+//                Scene scene = (Scene)game.Scenes [key];
+//                if (next_scene == null && redirect) {
+//                    next_scene = scene;
+//                    break;
+//                }
+//            }
+            List<Scene> new_scenes = new List<Scene> ();
+            foreach (Type m in model_enum) {
+                for (int i = 0; i < type_filters.Length; i++) {
+                    if (type_filters [i].DescendantOf (m)) {
+                        BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+                        ConstructorInfo ctor = m.GetConstructor (flags, null, new Type[] { }, null);
+                        object instanace = ctor.Invoke (null);
+                        Scene scene = (Scene)instanace;
+                        game.Scenes.Add (scene.Name, scene);
+                        new_scenes.Add (scene);
+//                        if (next_scene == null && redirect)
+//                            next_scene = scene;
+                    }
                 }
             }
-			foreach (Type m in model_enum) {
-                if(type_filter.DescendantOf(m))
-                {
-    				BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-    				ConstructorInfo ctor = m.GetConstructor(flags, null, new Type[] { }, null);
-    				object instanace = ctor.Invoke(null);
-    				Scene scene = (Scene)instanace;
-    				game.Scenes.Add(scene.Name, scene);
-                    if(current_scene == null && redirect)
-                        current_scene = scene;
-                }
-			}
-            game.CurrentScene = current_scene;
+            if (next_scene == null) {
+                next_scene = (Scene)game.Scenes["SceneFirstMenu"];
+            }
+            foreach (Scene scene in new_scenes)
+                scene.InstantiateConnections ();
+            foreach (Scene scene in new_scenes)
+                scene.InitializeScene ();
+            if (redirect) {
+                Program.MainGame.CurrentScene = next_scene;
+            }
 		}
         static void InstantiateScenes(ref PositronGame game)
         {
@@ -466,16 +481,16 @@ namespace positron
         }
 		static public void InitializeScenes(ref PositronGame game)
 		{
-			foreach(Scene scene in game.Scenes.Values)
+            foreach(Scene scene in game.Scenes.Values)
 				scene.InstantiateConnections();
-			foreach(Scene scene in game.Scenes.Values)
+            foreach(Scene scene in game.Scenes.Values)
 				scene.InitializeScene();
 		}
         static public void SetupScenes(ref PositronGame game)
         {
             Scene.InstantiateScenes(ref game); // Instantiate one of each of the scenes defined in this entire assembly
             game.CurrentScene = (Scene)Program.MainGame.Scenes["SceneFirstMenu"];
-            Scene.InitializeScenes(ref game);
+            //Scene.InitializeScenes(ref game);
         }
 		#endregion
 		#endregion

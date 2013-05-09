@@ -40,6 +40,7 @@ namespace positron
                     {
                         LoadWaveFile ("camprespite_loop", "camprespite_loop.wav");
                         LoadWaveFile ("last_human_loop", "last_human_loop.wav");
+                        LoadWaveFile ("induction_loop", "induction_loop.wav");
                     }
                     else
                         throw new Exception("Failed to set current audio context");
@@ -156,8 +157,8 @@ namespace positron
                     data_signature = new string(reader.ReadChars(4));
                 }
 
-                if (data_signature != "data")
-                    throw new NotSupportedException("Specified wave file is not supported.");
+//                if (data_signature != "data")
+//                    throw new NotSupportedException("Specified wave file is not supported.");
                 
                 int data_chunk_size = reader.ReadInt32();
                 

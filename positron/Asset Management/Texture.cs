@@ -160,6 +160,7 @@ namespace positron
 			main_menu_buttons.Regions.BuildTiledRegions(2, 128, 32);
 
 			var android_now = PsdLoader.LoadSpriteSheet("sprite_android_now", "sprite_android_now.psd");
+            var win = LoadTexture("sprite_win", "sprite_win.png");
 			
 			// Background
 			// TODO: make this not-hardcoded

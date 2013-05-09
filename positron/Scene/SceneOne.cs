@@ -53,17 +53,6 @@ namespace positron
 					});
 				}
 			};
-//            SceneExit += (sender, e) => 
-//            {
-//                Program.MainGame.AddUpdateEventHandler(this, (sender1, e1) =>
-//                {
-//                    lock(Program.MainUpdateLock)
-//                    {
-//                        Scene.InstantiateScenes(ref Program.MainGame, typeof(ISceneGameplay));
-//                    }
-//                    return true;
-//                });
-//            };
 		}
 		protected override void InstantiateConnections ()
 		{
