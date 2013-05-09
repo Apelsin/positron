@@ -48,10 +48,10 @@ namespace positron
 		#region State
 		#region Member Variables
 		protected string _Name;
+        protected PositronGame _Game;
 		protected Vector2d _ViewSize;
 		protected Vector3d _ViewOffset;
 		protected Vector3d _ViewPosition;
-		protected World _World;
 		protected Drawable _FollowTarget;
         protected HUDQuad FrameTimeMeter;
         protected HUDQuad UpdateTimeMeter;
@@ -132,7 +132,8 @@ namespace positron
 			get { return _ViewPosition; }
 			//set { _ViewPosition = value; }
 		}
-		public World World { get { return _World; } }
+        public PositronGame Game { get { return _Game; } }
+		public World World { get { return Game.WorldMain; } }
 		public Object RenderLock { get { return _RenderLock; } }
 		public Drawable FollowTarget { get { return _FollowTarget; } }
 		public Door DoorToNextScene { get { return _DoorToNextScene; } }
@@ -141,17 +142,16 @@ namespace positron
 		#endregion
 		#region Behavior
 		#region Member
-		protected Scene (string name, World world)
+        protected Scene (PositronGame game, string name)
 		{
-			_Name = name;
-
-			_World = world;
+            _Game = game;
+            _Name = name;
 
 			// TODO: This is awful. Fix it.
 			// TODO: Actually fix this.
 			// TODO: Seriously, make this -not suck-
-			ViewWidth = Program.MainWindow.CanvasWidth;
-			ViewHeight = Program.MainWindow.CanvasHeight;
+            ViewWidth = _Game.Window.CanvasWidth;
+			ViewHeight = _Game.Window.CanvasHeight;
 
 			Background = new RenderSet(this);
 			Rear = new RenderSet(this);
@@ -181,8 +181,8 @@ namespace positron
 				}
 			};
 		}
-		protected Scene ():
-			this("Scene", Program.MainGame.WorldMain)
+		protected Scene (PositronGame game):
+			this(game, "Scene")
 		{
 			_Name = GetType ().Name;
 		}
@@ -219,18 +219,18 @@ namespace positron
         protected void UpdateHUDStats()
         {
             double w_x, w = 4000.0;
-            w_x = w * Program.MainWindow.LastFrameTime;
+            w_x = w * _Game.Window.LastFrameTime;
             FrameTimeMeter.B.X = FrameTimeMeter.A.X + w_x;
             FrameTimeMeter.C.X = FrameTimeMeter.D.X + w_x;
-            w_x = w * Program.MainWindow.LastUpdateTime;
+            w_x = w * _Game.Window.LastUpdateTime;
             UpdateTimeMeter.B.X = FrameTimeMeter.A.X + w_x;
             UpdateTimeMeter.C.X = FrameTimeMeter.D.X + w_x;
-            w_x = w * Program.MainWindow.LastRenderTime;
+            w_x = w * _Game.Window.LastRenderTime;
             RenderTimeMeter.A.X = UpdateTimeMeter.B.X;
             RenderTimeMeter.D.X = UpdateTimeMeter.C.X;
             RenderTimeMeter.B.X = RenderTimeMeter.A.X + w_x;
             RenderTimeMeter.C.X = RenderTimeMeter.D.X + w_x;
-            w_x = w * Program.MainWindow.LastRenderDrawingTime;
+            w_x = w * _Game.Window.LastRenderDrawingTime;
             RenderDrawingMeter.A.Y = RenderTimeMeter.A.Y + 3;
             RenderDrawingMeter.B.Y = RenderTimeMeter.B.Y + 3;
             RenderDrawingMeter.C.Y = RenderTimeMeter.C.Y - 3;
@@ -249,10 +249,10 @@ namespace positron
 				AdaptiveTimeSteps[ATSIndex] = Math.Min ((float)time, Configuration.MaxWorldTimeStep);
 				ATSIndex = (ATSIndex + 1) % AdaptiveTimeSteps.Length;
 				float t = AdaptiveTimeSteps[ATSIndex];
-				_World.Step(t);
+				World.Step(t);
 			}
 			else
-				_World.Step(Math.Min ((float)time, Configuration.MaxWorldTimeStep));
+				World.Step(Math.Min ((float)time, Configuration.MaxWorldTimeStep));
             UpdateHUDStats();
 		}
 		public void Render (double time)
@@ -336,7 +336,7 @@ namespace positron
 		}
 		public void RayCast (RayCastCallback callback, Microsoft.Xna.Framework.Vector2 point1, Microsoft.Xna.Framework.Vector2 point2)
 		{
-			_World.RayCast (callback, point1, point2);
+			World.RayCast (callback, point1, point2);
 			if (Configuration.DrawBlueprints) {
 				lock(RenderLock)
 				{
@@ -349,7 +349,7 @@ namespace positron
 		}
 		public List<Fixture> TestPointAll (Microsoft.Xna.Framework.Vector2 point)
 		{
-			List<Fixture> hit_fixture = _World.TestPointAll (point);
+			List<Fixture> hit_fixture = World.TestPointAll (point);
 			if (Configuration.DrawBlueprints) {
 				lock(RenderLock)
 				{
@@ -371,7 +371,7 @@ namespace positron
 			SceneExit += (sender, e) => {
 				if(e.To is ISceneGameplay)
 				{
-					Program.MainGame.AddUpdateEventHandler(this, (sender2, e2) => {
+					_Game.AddUpdateEventHandler(this, (sender2, e2) => {
 						double start_x = 0, start_y = 0;
 						if(e.To.DoorToPreviousScene != null)
 						{
@@ -384,23 +384,23 @@ namespace positron
 						// Setup Player 1
 						//
 
-						Player player_1 = Program.MainGame.Player1;
+						Player player_1 = _Game.Player1;
 						if(player_1 != null)
 						{
 							player_1.Derez();
 							//Program.MainGame.RemoveInputAccepters("Player1");
 						}
-						player_1 = Program.MainGame.Player1 = new Player(e.To.Stage, start_x, start_y, Texture.Get("sprite_player"));
+						player_1 = _Game.Player1 = new Player(e.To.Stage, start_x, start_y, Texture.Get("sprite_player"));
 						player_1.CornerY += 32;
 						//e.To.Follow(player_1, true);
-						Program.MainGame.SetLastInputAccepters("Player1", new IInputAccepter[] { player_1 });
+                        _Game.SetLastInputAccepters("Player1", new IInputAccepter[] { player_1 });
 						Follow(player_1);
 						
 						var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
 						health_meter.Preserve = true;
 
                         player_1.DerezEvent += (sender3, e3) => {
-							Program.MainGame.RemoveInputAccepters("Player1");
+                            _Game.RemoveInputAccepters("Player1");
 							health_meter.RenderSet.Remove(health_meter);
 						};
 
@@ -464,8 +464,8 @@ namespace positron
                 for (int i = 0; i < type_filters.Length; i++) {
                     if (type_filters [i].DescendantOf (m)) {
                         BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-                        ConstructorInfo ctor = m.GetConstructor (flags, null, new Type[] { }, null);
-                        object instanace = ctor.Invoke (null);
+                        ConstructorInfo ctor = m.GetConstructor (flags, null, new Type[] { typeof(PositronGame) }, null);
+                        object instanace = ctor.Invoke (new object[] { game });
                         Scene scene = (Scene)instanace;
                         game.Scenes.Add (scene.Name, scene);
                         new_scenes.Add (scene);
@@ -482,7 +482,7 @@ namespace positron
             foreach (Scene scene in new_scenes)
                 scene.InitializeScene ();
             if (redirect) {
-                Program.MainGame.CurrentScene = next_scene;
+                game.CurrentScene = next_scene;
             }
 		}
 //		static public void InitializeScenes(ref PositronGame game)
@@ -495,7 +495,7 @@ namespace positron
         static public void SetupScenes(ref PositronGame game)
         {
             Scene.InstantiateScenes(ref game); // Instantiate one of each of the scenes defined in this entire assembly
-            game.CurrentScene = (Scene)Program.MainGame.Scenes["SceneFirstMenu"];
+            game.CurrentScene = (Scene)game.Scenes["SceneFirstMenu"];
             //Scene.InitializeScenes(ref game);
         }
 		#endregion

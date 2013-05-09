@@ -31,7 +31,7 @@ namespace positron
 			_State.SharedStateChanged += (sender, e) => 
 			{
 				PlayAnimation (e.CurrentState ? Open : Close);
-				Body.Enabled = (RenderSet.Scene == Program.MainGame.CurrentScene) && !e.CurrentState;
+                Body.Enabled = (_RenderSet.Scene == _RenderSet.Scene.Game.CurrentScene) && !e.CurrentState;
 			};
 		}
 		protected override void EnteredRenderSet (object sender, RenderSetChangeEventArgs e)

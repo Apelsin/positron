@@ -40,6 +40,12 @@ namespace positron
 		{
 			Refresh(sender, e);
 		}
+        public override void Dispose()
+        {
+            this.Action = null;
+            this.Refresh = null;
+            base.Dispose();
+        }
 	}
 }
 

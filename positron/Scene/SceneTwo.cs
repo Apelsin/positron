@@ -18,8 +18,8 @@ namespace positron
 {
 	public class SceneTwo : SceneBasicBox
 	{
-		protected SceneTwo ():
-			base()
+        protected SceneTwo (PositronGame game):
+			base(game)
 		{
 		}
 		protected override void InstantiateConnections()
@@ -47,7 +47,7 @@ namespace positron
 			yp += TileSize;
 
 			// Set up previous door:
-			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneOne"];
+            Scene prev_scene = (Scene)_Game.Scenes["SceneOne"];
 			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 
 			// Setup background tiles
@@ -63,7 +63,7 @@ namespace positron
             var f_infogfx = new SpriteBase(Rear, xp - 2 * TileSize, yp, infogfx_texture).SetRegion("use_equipped_item");
 
 			// Get cross-scene variables
-			Scene previous_scene = (Scene)Program.MainGame.Scenes["SceneOne"];
+            Scene previous_scene = (Scene)_Game.Scenes["SceneOne"];
 
 			double recess_switch = -4.0;
 			double recess_gw = -2.0;
@@ -127,7 +127,7 @@ namespace positron
 			}
 
 			// Set up next door:
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneThree"];
+            Scene next_scene = (Scene)_Game.Scenes["SceneThree"];
 			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;
 			_DoorToNextScene.PositionX = last_platform_1.PositionX;
 			_DoorToNextScene.CornerY = yp += last_platform_1.SizeY;

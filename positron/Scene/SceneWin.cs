@@ -9,13 +9,13 @@ namespace positron
     {
         Stopwatch DerpTimer = new Stopwatch();
         SpriteBase WinThing;
-        public SceneWin ():
-            base()
+        public SceneWin (PositronGame game):
+            base(game)
         {
             SceneEntry += (sender, e) => {
-                if(Program.MainGame.Player1 != null)
+                if(_Game.Player1 != null)
                 {
-                    Program.MainGame.Player1.Derez();
+                    _Game.Player1.Derez();
 					DerpTimer.Start();
                 }
             };
@@ -33,8 +33,8 @@ namespace positron
             WinThing.Theta = gx;
             base.Update(time);
 			if (DerpTimer.Elapsed.TotalSeconds > 5.0) {
-				lock(Program.MainUpdateLock)
-					Scene.InstantiateScenes (ref Program.MainGame);
+                lock(_Game.UpdateLock)
+                    Scene.InstantiateScenes (ref _Game);
 			}
         }
     }

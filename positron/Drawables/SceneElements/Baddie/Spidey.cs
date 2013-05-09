@@ -22,7 +22,7 @@ namespace positron
 
 		bool HandleOnCollision (Fixture fixtureA, Fixture fixtureB, Contact contact)
 		{
-			Player p = Program.MainGame.Player1;
+			Player p = _RenderSet.Scene.Game.Player1;
 			object world_object = fixtureB.Body.UserData;
 			bool collided_with_player = p != null && fixtureB.Body == p.Body;
 			bool collided_with_bullet = world_object is BasicBullet;
@@ -43,7 +43,7 @@ namespace positron
 		public override void Update (double time)
 		{
 			// Basic movement behavior:
-			Player p = Program.MainGame.Player1;
+			Player p = _RenderSet.Scene.Game.Player1;
 			if (p != null)
 			{
 				if(JumpTimer.Elapsed.TotalSeconds >= JumpIntervalVaried)

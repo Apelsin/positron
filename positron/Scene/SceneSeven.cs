@@ -18,8 +18,8 @@ namespace positron
 {
 	public class SceneSeven : SceneBasicBox
 	{
-		protected SceneSeven ():
-			base()
+        protected SceneSeven (PositronGame game):
+			base(game)
 		{
 		}
 		protected override void InstantiateConnections()
@@ -47,7 +47,7 @@ namespace positron
 			BackgroundTiles.Build ();
 			
 			// Set up previous door:
-			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneSix"];
+            Scene prev_scene = (Scene)_Game.Scenes["SceneSix"];
 			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 			
 			// Store width and height in local variables for easy access
@@ -162,7 +162,7 @@ namespace positron
 
 
 
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneEight"];
+            Scene next_scene = (Scene)_Game.Scenes["SceneEight"];
 			_DoorToNextScene.CornerX = ft_door.CornerX;
 			_DoorToNextScene.CornerY = ft_door.CornerY + TileSize;
 			_DoorToNextScene.Destination = next_scene.DoorToPreviousScene;

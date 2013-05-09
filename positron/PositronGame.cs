@@ -17,7 +17,7 @@ using FarseerPhysics.Factories;
 
 namespace positron
 {
-	public class PositronGame: IUpdateSync, IDisposable
+	public class PositronGame: IUpdateSync, IDisposable, IGLContextLateUpdate
     {
         #region Event-Related
 		protected List<KeyValuePair<object, UpdateEventHandler>> _UpdateEventList = new List<KeyValuePair<object, UpdateEventHandler>>();
@@ -36,6 +36,7 @@ namespace positron
 		public Player Player1;
 		int IncrementTest = 0;
 		#endregion
+        protected ThreadedRendering _Window;
 		protected Hashtable _Scenes = new Hashtable();
 		protected Scene _CurrentScene;
 		protected World _WorldMain;
@@ -46,18 +47,13 @@ namespace positron
         /// <summary>
         /// Lock to synchronize rendering and updating
         /// </summary>
-        public readonly object MainUpdateLock = new object();
-        
-        /// <summary>
-        /// Lock to synchronize user input controls
-        /// </summary>
-        public readonly object MainUserInputLock = new object();
+        public readonly object UpdateLock = new object();
 
-        protected readonly Object _InputAccepterGroupsLock = new Object();
 		#endregion
 		#region Static Variables
 		#endregion
 		#region Member Accessors
+        public ThreadedRendering Window { get { return _Window; } }
 		public Hashtable Scenes { get { return _Scenes; } }
 		public Scene CurrentScene {
 			get { return _CurrentScene; }
@@ -73,15 +69,13 @@ namespace positron
 					return new IInputAccepter[] { };
 			}
 		}
-		public Object InputAccepterGroupsLock {
-			get { return _InputAccepterGroupsLock; }
-		}
 		#endregion
 		#region Static Accessors
 		#endregion
 
-		public PositronGame ()
+		public PositronGame (ThreadedRendering window)
 		{
+            _Window = window;
 		}
 		public static void InitialSetup ()
 		{
@@ -98,14 +92,14 @@ namespace positron
 		}
 		public void SetInputAccepters (string name, params IInputAccepter[] input_accepters)
 		{
-			lock (_InputAccepterGroupsLock) {
+            lock (InputAccepterGroups) {
 				if(!InputAccepterGroups.Contains(name))
 					InputAccepterGroups.Insert (0, name, input_accepters);
 			}
 		}
 		public void SetLastInputAccepters (string name, params IInputAccepter[] input_accepters)
 		{
-			lock (_InputAccepterGroupsLock) {
+            lock (InputAccepterGroups) {
 				if(!InputAccepterGroups.Contains(name))
 				{
 					InputAccepterGroups.Add (name, input_accepters);
@@ -114,7 +108,7 @@ namespace positron
 		}
 		public void MixAddInputAccepters (string name, params IInputAccepter[] input_accepters)
 		{
-			lock (_InputAccepterGroupsLock) {
+            lock (InputAccepterGroups) {
 				IInputAccepter[] mixed = new IInputAccepter[InputAccepterGroup.Length + input_accepters.Length];
 				int idx = 0;
 				for(int i = 0; i < InputAccepterGroup.Length; i++)
@@ -126,7 +120,7 @@ namespace positron
 		}
 		public void RemoveInputAccepters (string name)
 		{
-			lock (_InputAccepterGroupsLock) {
+            lock (InputAccepterGroups) {
 				InputAccepterGroups.Remove (name);
 			}
 		}
@@ -171,7 +165,7 @@ namespace positron
 			IEnumerable<RenderSet> current_sets = null;
 			IEnumerator<RenderSet> current_set_enum = null;
 			RenderSetChangeEventArgs rscea;
-			lock (Program.MainUpdateLock) {												// Don't even think about not locking this threaded monstrosity
+			lock (UpdateLock) {												// Don't even think about not locking this threaded monstrosity
 				if (_CurrentScene != null) {
 					// Get the enumerable for the render sets; these need to be in the same order!
 					current_sets = _CurrentScene.AllRenderSetsInOrder ();
@@ -258,7 +252,7 @@ namespace positron
 		}
 		public void Dispose ()
 		{
-			lock (Program.MainUpdateLock) {
+			lock (UpdateLock) {
 				foreach(Scene scene in Scenes.Values)
 					scene.Dispose();
                 _Scenes.Clear();
@@ -273,7 +267,7 @@ namespace positron
 		}
 		public void Demolish()
 		{
-			lock (Program.MainUpdateLock) {
+			lock (UpdateLock) {
 				foreach(Scene scene in Scenes.Values)
 				{
 					foreach(RenderSet render_set in scene.AllRenderSetsInOrder())

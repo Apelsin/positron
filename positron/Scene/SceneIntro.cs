@@ -6,8 +6,8 @@ namespace positron
 	public class SceneIntro : Scene
 	{
 		public Dialog MainDialog;
-		public SceneIntro ():
-				base()
+        public SceneIntro (PositronGame game):
+            base(game)
 		{
 			SceneEntry += (sender, e) => {
                 var stanzas = new List<DialogStanza>();
@@ -17,7 +17,7 @@ namespace positron
                 var dialog = new Dialog(e.To.HUD, "Dialog", stanzas);
                 dialog.DialogEnd += (sender2, e2) =>
                 {
-                    Program.MainGame.ChangeScene((Scene)Program.MainGame.Scenes["SceneOne"]);
+                    _Game.ChangeScene((Scene)_Game.Scenes["SceneOne"]);
                 };
                 dialog.Begin();
 			};

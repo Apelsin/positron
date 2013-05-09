@@ -41,7 +41,7 @@ namespace positron
 			_State.SharedStateChanged += (sender, e) => 
 			{
 				PlayAnimation (e.CurrentState ? Extend : Collapse);
-				Body.Enabled = (RenderSet.Scene == Program.MainGame.CurrentScene) && e.CurrentState;
+                Body.Enabled = (_RenderSet.Scene == _RenderSet.Scene.Game.CurrentScene) && e.CurrentState;
 			};
             Body.OnCollision += HandleOnCollision;
 		}
@@ -115,7 +115,7 @@ namespace positron
 			_SpriteBody.Friction = 0.2f;
 			
 			// HACK: Only enable bodies for which the object is in the current scene
-			Body.Enabled = this.RenderSet.Scene == Program.MainGame.CurrentScene;
+            Body.Enabled = this.RenderSet.Scene == _RenderSet.Scene.Game.CurrentScene;
 			
 			InitBlueprints();
 		}

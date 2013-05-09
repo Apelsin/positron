@@ -25,8 +25,8 @@ namespace positron
 
         protected double TileSize = 32;
 
-        protected SceneFive ():
-			base()
+        protected SceneFive (PositronGame game):
+            base(game)
 		{
 		}
 		protected override void InstantiateConnections()
@@ -74,9 +74,9 @@ namespace positron
                 double yp1 = yp;
                 double xp1 = xp;
                 var bs1 = new ProjectileSwitch(this.Front, xp + TileSize, yp + 2 * TileSize, (sender, e) => {
-                    Program.MainGame.AddUpdateEventHandler(this, (ueh_sender, ueh_e) => { // GL context
+                    _Game.AddUpdateEventHandler(this, (ueh_sender, ueh_e) => { // GL context
                         var bs2 = new ProjectileSwitch(this.Front, xp1 - 11.5 * TileSize, yp1 + 2 * TileSize, (sender1, e1)=>{
-                            Program.MainGame.AddUpdateEventHandler(this, (ueh2_sender, ueh2_e) => { // GL context
+                            _Game.AddUpdateEventHandler(this, (ueh2_sender, ueh2_e) => { // GL context
                                 var ps1 = new PressureSwitch(this.Front, xp1 - 5 * TileSize, yp1 + 4, (sender2, e2) => {
                                     bool bstate = (SwitchState)e2.Info == SwitchState.Open;
                                     ep1.OnAction (e2.Self, new ActionEventArgs (bstate, ep1));
@@ -100,7 +100,7 @@ namespace positron
            
 			
 			// Set up previous door:
-			Scene prev_scene = (Scene)Program.MainGame.Scenes["SceneFour"];
+            Scene prev_scene = (Scene)_Game.Scenes["SceneFour"];
 			_DoorToPreviousScene.Destination = prev_scene.DoorToNextScene;
 			
 			// Setup background tiles
@@ -141,7 +141,7 @@ namespace positron
 			new FloorTile(Stage, x0 + TileSize * (PerimeterX - 1), y0 + TileSize * 3);
 
 
-			Scene next_scene = (Scene)Program.MainGame.Scenes["SceneSix"];
+            Scene next_scene = (Scene)_Game.Scenes["SceneSix"];
 			//_DoorToNextScene = new Door(Rear, 0 , y0 + TileSize * -76, next_scene.DoorToPreviousScene);
 			_DoorToNextScene.CornerX = _DoorToPreviousScene.CornerX;
 			_DoorToNextScene.CornerY = _DoorToPreviousScene.PositionY + TileSize * -93.5;
