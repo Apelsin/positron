@@ -16,13 +16,13 @@ namespace positron
                 if(Program.MainGame.Player1 != null)
                 {
                     Program.MainGame.Player1.Derez();
+					derp_timer.Start();
                 }
             };
         }
         protected override void InitializeScene()
         {
             win_thing = new SpriteBase(HUD, ViewWidth / 2.0, ViewHeight / 2.0, Texture.Get ("sprite_win")).CenterShift();
-            derp_timer.Start();
             base.InitializeScene();
         }
         public override void Update(double time)
