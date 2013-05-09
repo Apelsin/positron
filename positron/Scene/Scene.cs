@@ -379,11 +379,16 @@ namespace positron
 							start_y = e.To.DoorToPreviousScene.CornerY;
 						}
 						//new Spidey(e.To.Stage, start_x, start_y);
+
+						//
+						// Setup Player 1
+						//
+
 						Player player_1 = Program.MainGame.Player1;
 						if(player_1 != null)
 						{
 							player_1.Derez();
-							Program.MainGame.RemoveInputAccepters("Player1");
+							//Program.MainGame.RemoveInputAccepters("Player1");
 						}
 						player_1 = Program.MainGame.Player1 = new Player(e.To.Stage, start_x, start_y, Texture.Get("sprite_player"));
 						player_1.CornerY += 32;
@@ -394,7 +399,10 @@ namespace positron
 						var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
 						health_meter.Preserve = true;
 
-                        player_1.DerezEvent += (sender3, e3) => { health_meter.RenderSet.Remove(health_meter); };
+                        player_1.DerezEvent += (sender3, e3) => {
+							Program.MainGame.RemoveInputAccepters("Player1");
+							health_meter.RenderSet.Remove(health_meter);
+						};
 
 						return true;
 					});
@@ -417,6 +425,8 @@ namespace positron
 		/// </summary>
 		static public void InstantiateScenes (ref PositronGame game, params Type[] type_filters)
         {
+			if (type_filters.Length == 0)
+				type_filters = new Type[] { typeof(Scene) };
             // Brave new world:
             game.WorldMain = new World (new Microsoft.Xna.Framework.Vector2 (0.0f, (float)Configuration.ForceDueToGravity));
             // This is EVIL:
@@ -475,17 +485,13 @@ namespace positron
                 Program.MainGame.CurrentScene = next_scene;
             }
 		}
-        static void InstantiateScenes(ref PositronGame game)
-        {
-            InstantiateScenes (ref game, typeof(Scene));
-        }
-		static public void InitializeScenes(ref PositronGame game)
-		{
-            foreach(Scene scene in game.Scenes.Values)
-				scene.InstantiateConnections();
-            foreach(Scene scene in game.Scenes.Values)
-				scene.InitializeScene();
-		}
+//		static public void InitializeScenes(ref PositronGame game)
+//		{
+//            foreach(Scene scene in game.Scenes.Values)
+//				scene.InstantiateConnections();
+//            foreach(Scene scene in game.Scenes.Values)
+//				scene.InitializeScene();
+//		}
         static public void SetupScenes(ref PositronGame game)
         {
             Scene.InstantiateScenes(ref game); // Instantiate one of each of the scenes defined in this entire assembly

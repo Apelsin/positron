@@ -32,6 +32,10 @@ namespace positron
             win_thing.Scale = new Vector3d(fx);
             win_thing.Theta = gx;
             base.Update(time);
+			if (derp_timer.Elapsed.TotalSeconds > 5.0) {
+				lock(Program.MainUpdateLock)
+					Scene.InstantiateScenes (ref Program.MainGame);
+			}
         }
     }
 }
