@@ -40,9 +40,11 @@ namespace positron
 		private int CreateTexture()
 		{
 			int texture_id;
-			//Important, or wrong color on some computers
-			GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (float)TextureEnvMode.Replace);
-			Bitmap bitmap = TextBitmap;
+            Bitmap bitmap = TextBitmap;
+
+			// "Important, or wrong color on some computers" THEY SAID
+			GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (float)TextureEnvMode.Replace);	
+
 			GL.GenTextures(1, out texture_id);
 			GL.BindTexture(TextureTarget.Texture2D, texture_id);
 			
@@ -58,7 +60,11 @@ namespace positron
 			//GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Nearest);
-			GL.Finish();
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            // Seriously do not forget to set this back to modulate or you will run into stupid shit like GL.Color3/4 not working.
+            GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (float)TextureEnvMode.Modulate);
+
 			bitmap.UnlockBits(data);
 			return texture_id;
 		}

@@ -186,10 +186,10 @@ namespace positron
 		{
 			_Name = GetType ().Name;
 		}
-		protected virtual void InstantiateConnections ()
+		public virtual void InstantiateConnections ()
 		{
 		}
-		protected virtual void InitializeScene ()
+		public virtual void InitializeScene ()
 		{
 			SetupHUD();
 		}
@@ -266,7 +266,7 @@ namespace positron
 						CalculatePan((float)time);
 
                         GL.Translate(Math.Round(_ViewPosition.X), Math.Round(_ViewPosition.Y), Math.Round(_ViewPosition.Z));
-                        //GL.Translate(ScenePan);
+                        //GL.Translate(_ViewPosition.X, _ViewPosition.Y, _ViewPosition.Z);
                     }
 					Background.Render (time);
 					Rear.Render (time);
@@ -413,91 +413,13 @@ namespace positron
         {
             SceneEntry = null;
             SceneExit = null;
-            foreach (RenderSet render_set in AllRenderSetsInOrder()) {
-                render_set.Clear ();
+            foreach(RenderSet render_set in AllRenderSetsInOrder())
+            {
+                foreach(IRenderable renderable in render_set)
+                    renderable.Dispose();
+                render_set.Dispose();
             }
 		}
-		#endregion
-		#region Static
-		/// <summary>
-		/// Instantiates and initializes one instnace
-		/// of every subclass of Scene in this assembly
-		/// </summary>
-		static public void InstantiateScenes (ref PositronGame game, params Type[] type_filters)
-        {
-			if (type_filters.Length == 0)
-				type_filters = new Type[] { typeof(Scene) };
-            // Brave new world:
-            game.WorldMain = new World (new Microsoft.Xna.Framework.Vector2 (0.0f, (float)Configuration.ForceDueToGravity));
-            // This is EVIL:
-            IEnumerable<Type> model_enum = typeof(Scene).FindAllEndClasses ();
-//			foreach (Type m in model_enum) {
-//				Console.WriteLine("Picked {0}", m.Name);
-//			}
-            Scene next_scene = game.CurrentScene;
-            bool redirect = next_scene != null;
-            List<object> remove_keys = new List<object> ();
-            foreach (object key in game.Scenes.Keys) {
-                Scene scene = (Scene)game.Scenes [key];
-                for (int i = 0; i < type_filters.Length; i++) {
-                    if (type_filters [i].DescendantOf (scene.GetType ())) {
-                        remove_keys.Add (key);
-                    }
-                }
-            }
-            foreach (object key in remove_keys) {
-                Scene scene = (Scene)game.Scenes [key];
-                game.Scenes.Remove (key);
-                if (next_scene == scene && redirect)
-                    next_scene = null;
-                scene.Dispose ();
-            }
-//            foreach (object key in game.Scenes.Keys) {
-//                Scene scene = (Scene)game.Scenes [key];
-//                if (next_scene == null && redirect) {
-//                    next_scene = scene;
-//                    break;
-//                }
-//            }
-            List<Scene> new_scenes = new List<Scene> ();
-            foreach (Type m in model_enum) {
-                for (int i = 0; i < type_filters.Length; i++) {
-                    if (type_filters [i].DescendantOf (m)) {
-                        BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-                        ConstructorInfo ctor = m.GetConstructor (flags, null, new Type[] { typeof(PositronGame) }, null);
-                        object instanace = ctor.Invoke (new object[] { game });
-                        Scene scene = (Scene)instanace;
-                        game.Scenes.Add (scene.Name, scene);
-                        new_scenes.Add (scene);
-//                        if (next_scene == null && redirect)
-//                            next_scene = scene;
-                    }
-                }
-            }
-            if (next_scene == null) {
-                next_scene = (Scene)game.Scenes["SceneFirstMenu"];
-            }
-            foreach (Scene scene in new_scenes)
-                scene.InstantiateConnections ();
-            foreach (Scene scene in new_scenes)
-                scene.InitializeScene ();
-            if (redirect) {
-                game.CurrentScene = next_scene;
-            }
-		}
-//		static public void InitializeScenes(ref PositronGame game)
-//		{
-//            foreach(Scene scene in game.Scenes.Values)
-//				scene.InstantiateConnections();
-//            foreach(Scene scene in game.Scenes.Values)
-//				scene.InitializeScene();
-//		}
-        static public void SetupScenes(ref PositronGame game)
-        {
-            Scene.InstantiateScenes(ref game); // Instantiate one of each of the scenes defined in this entire assembly
-            game.CurrentScene = (Scene)game.Scenes["SceneFirstMenu"];
-            //Scene.InitializeScenes(ref game);
-        }
 		#endregion
 		#endregion
 	}

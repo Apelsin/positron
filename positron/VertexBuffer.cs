@@ -31,7 +31,7 @@ namespace positron
             Position = new Vector3d(px, py, pz);
             TexCoord = new Vector2d(tcx, tcy);
         }
-        public static readonly int Stride = Marshal.SizeOf(default(VertexLite));
+        public static readonly int Stride = Marshal.SizeOf(typeof(VertexLite));
     }
     public struct Vertex
     {
@@ -67,14 +67,14 @@ namespace positron
             TexCoord = new Vector2d(tcx, tcy);
             Color = new Vector4(r, g, b, a);
         }
-        public static readonly int Stride = Marshal.SizeOf(default(Vertex));
+        public static readonly int Stride = Marshal.SizeOf(typeof(Vertex));
     }
     public sealed class VertexBuffer : IDisposable // Sealed for performance boost
     {
-        private static IntPtr VertexPtr = new IntPtr(0);
+        private static readonly IntPtr VertexPtr = new IntPtr(0);
         //private static IntPtr NormalPtr = new IntPtr(Vector3d.SizeInBytes + VertexPtr.ToInt64());
-        private static IntPtr TexCoordPtr = new IntPtr(Vector3d.SizeInBytes + VertexPtr.ToInt64());
-        private static IntPtr ColorPtr = new IntPtr(Vector2d.SizeInBytes + TexCoordPtr.ToInt64());
+        private static readonly IntPtr TexCoordPtr = new IntPtr(Vector3d.SizeInBytes + VertexPtr.ToInt64());
+        private static readonly IntPtr ColorPtr = new IntPtr(Vector2d.SizeInBytes + TexCoordPtr.ToInt64());
         
 
         protected int _Id;
@@ -145,11 +145,11 @@ namespace positron
             GL.TexCoordPointer (2, TexCoordPointerType.Double, _Size, TexCoordPtr);
             //GL.ColorPointer (4, ColorPointerType.Float, _Size, ColorPtr);
             if (_ColorBufferUsed) {
-                GL.EnableClientState(ArrayCap.ColorArray);
+                //GL.EnableClientState(ArrayCap.ColorArray);
                 GL.ColorPointer (4, ColorPointerType.Float, _Size, ColorPtr);
             }
-            else
-                GL.DisableClientState(ArrayCap.ColorArray);
+            //else
+            //    GL.DisableClientState(ArrayCap.ColorArray);
             GL.DrawArrays(BeginMode.Quads, 0, _DataLength); // TODO: Make this part not-hardcoded
         }
 		public void Dispose()

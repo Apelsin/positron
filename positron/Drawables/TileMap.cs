@@ -62,10 +62,10 @@ namespace positron
                     double y0 = Texture.Regions[IndexMap[i, j]].Low.Y / Texture.Height;
                     double x1 = Texture.Regions[IndexMap[i, j]].High.X / Texture.Width;
                     double y1 = Texture.Regions[IndexMap[i, j]].High.Y / Texture.Height;
-                    var A = new Vertex(tile_size.X * i,         tile_size.Y * j,        1.0, x0, -y0);
-                    var B = new Vertex(tile_size.X * (i + 1),   A.Position.Y,           1.0, x1, -y0);
-                    var C = new Vertex(B.Position.X,            tile_size.Y * (j + 1),  1.0, x1, -y1);
-                    var D = new Vertex(A.Position.X,            C.Position.Y,           1.0, x0, -y1);
+                    var A = new Vertex(tile_size.X * i,         tile_size.Y * j,        0.0, x0, -y0);
+                    var B = new Vertex(tile_size.X * (i + 1),   A.Position.Y,           0.0, x1, -y0);
+                    var C = new Vertex(B.Position.X,            tile_size.Y * (j + 1),  0.0, x1, -y1);
+                    var D = new Vertex(A.Position.X,            C.Position.Y,           0.0, x0, -y1);
                     vertices[idx++] = A;
                     vertices[idx++] = B;
                     vertices[idx++] = C;
@@ -82,6 +82,7 @@ namespace positron
 				// So much for DRY...
 				//GL.Scale(Size);
 				GL.Translate (_Position + CalculateMovementParallax());
+                //GL.Translate (_Position);
                 Draw();
 			}
 			GL.PopMatrix();
@@ -113,10 +114,10 @@ namespace positron
                     double y0 = Texture.Regions[IndexMap[i, j]].Low.Y / Texture.Height;
                     double x1 = Texture.Regions[IndexMap[i, j]].High.X / Texture.Width;
                     double y1 = Texture.Regions[IndexMap[i, j]].High.Y / Texture.Height;
-                    var A = new Vertex(tile_size.X * i,         tile_size.Y * j,        1.0, x0, -y0, 1.0f, 1.0f, 1.0f, height_mag);
-                    var B = new Vertex(tile_size.X * (i + 1),   A.Position.Y,           1.0, x1, -y0, 1.0f, 1.0f, 1.0f, height_mag);
-                    var C = new Vertex(B.Position.X,            tile_size.Y * (j + 1),  1.0, x1, -y1, 1.0f, 1.0f, 1.0f, height_mag);
-                    var D = new Vertex(A.Position.X,            C.Position.Y,           1.0, x0, -y1, 1.0f, 1.0f, 1.0f, height_mag);
+                    var A = new Vertex(tile_size.X * i,         tile_size.Y * j,        0.0, x0, -y0, 1.0f, 1.0f, 1.0f, height_mag);
+                    var B = new Vertex(tile_size.X * (i + 1),   A.Position.Y,           0.0, x1, -y0, 1.0f, 1.0f, 1.0f, height_mag);
+                    var C = new Vertex(B.Position.X,            tile_size.Y * (j + 1),  0.0, x1, -y1, 1.0f, 1.0f, 1.0f, height_mag);
+                    var D = new Vertex(A.Position.X,            C.Position.Y,           0.0, x0, -y1, 1.0f, 1.0f, 1.0f, height_mag);
                     vertices[idx++] = A;
                     vertices[idx++] = B;
                     vertices[idx++] = C;

@@ -29,13 +29,13 @@ namespace positron
             base(game)
 		{
 		}
-		protected override void InstantiateConnections()
+		public override void InstantiateConnections()
 		{
 			_DoorToPreviousScene = new Door(Rear, 0, 0);
 			//_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 8 * TileSize, 3 * TileSize);
 			_DoorToNextScene = new Door(Rear, _DoorToPreviousScene.CornerX + 3 * TileSize, _DoorToPreviousScene.CornerY);
 		}
-		protected override void InitializeScene ()
+		public override void InitializeScene ()
 		{
 			// Assign base class variables here, before calling the base class initializer
 			
@@ -107,7 +107,7 @@ namespace positron
 			var BackgroundTiles = new FadedTileMap (Background, PerimeterX + 20, PerimeterY + 12, Texture.Get ("sprite_tile_bg2_atlas"));
 			BackgroundTiles.PositionX = (PerimeterOffsetX - 18) * TileSize;
 			BackgroundTiles.PositionY = (PerimeterOffsetY - 2) * TileSize;
-			BackgroundTiles.PositionZ = 1.0;
+			BackgroundTiles.Parallax = 1.0;
 			BackgroundTiles.RandomMap ();
 			BackgroundTiles.Build ();
 			

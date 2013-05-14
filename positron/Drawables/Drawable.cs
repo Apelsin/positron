@@ -19,6 +19,7 @@ namespace positron
 		protected Vector3d _Scale = new Vector3d();
 		protected Vector3d _Velocity = new Vector3d();
 		protected double _Theta = 0.0;
+        protected double _Parallax = 0.0;
 		protected bool _Preserve = false;
 		#endregion
 		#region Accessors
@@ -38,6 +39,10 @@ namespace positron
 			get { return _Position.Z; }
 			set { _Position.Z = value; }
 		}
+        public virtual double Parallax {
+            get { return _Parallax; }
+            set { _Parallax = value; }
+        }
         public virtual Vector3d Corner
         {
 			get { return Position - new Vector3d(0.5 * SizeX, 0.5 * SizeY, PositionZ); }
@@ -140,9 +145,9 @@ namespace positron
 		public abstract void Render(double time);
 		protected virtual Vector3d CalculateMovementParallax ()
 		{
-			if(this._RenderSet == this._RenderSet.Scene.HUD)
+			if(_Parallax == 0.0 || this._RenderSet == this._RenderSet.Scene.HUD)
 				return Vector3d.Zero;
-			double depth = 10.0 / MathUtil.Clamp(_Position.Z + 10.0, 1000.0, 0.1) - 1.0;
+			double depth = 10.0 / MathUtil.Clamp(_Parallax + 10.0, 1000.0, 0.1) - 1.0;
 			return this._RenderSet.Scene.ViewPosition * (depth);
 		}
 		public virtual void Dispose ()
@@ -154,7 +159,6 @@ namespace positron
             }
 			RenderSetEntry = null;
 			RenderSetTransfer = null;
-
 		}
 	}
 }

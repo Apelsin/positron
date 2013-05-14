@@ -24,7 +24,7 @@ namespace positron
 			//Configuration.DumpEverything ();
             // Run the window thread
             // Game will be set up by render/update thread -because reasons-
-			main_window.Run (); 
-		}
+			main_window.Run ();
+        }
 	}
 }

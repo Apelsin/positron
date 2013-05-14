@@ -343,7 +343,7 @@ namespace positron
 			GL.PushMatrix();
 			{
 				GL.Translate (_Position + CalculateMovementParallax());
-                //GL.Translate(Math.Floor (Position.X), Math.Floor (Position.Y), Math.Floor (Position.Z));
+                //GL.Translate(_Position);
 				GL.Rotate(_Theta, 0.0, 0.0, 1.0);
                 GL.Scale(_Scale);
                 Draw();
