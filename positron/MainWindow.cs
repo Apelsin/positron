@@ -34,8 +34,6 @@ namespace positron
 		#region State
 		#region Member
         protected PositronGame _Game;
-		public int PlayerKeyUpdates = 0;
-		public int ThreadedUpdateCount = 0;
 		/// <summary>
 		/// GL handle for canvas FBO texture
 		/// </summary>
@@ -138,7 +136,7 @@ namespace positron
         /// <summary>
         /// Lock to synchronize user input controls
         /// </summary>
-        public static object UserInputLock = new object();
+        public readonly object UserInputLock = new object();
 
 		#endregion
 		#region Accessors
@@ -307,25 +305,28 @@ namespace positron
 				Exit ();
 			}
 
-            GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
+            FBOSafety (); // Make sure things won't explode!
 
+            // Texture init
+            GL.Enable(EnableCap.Texture2D);
+
+            // VBO init
             GL.EnableClientState(ArrayCap.VertexArray);
             //GL.EnableClientState(ArrayCap.NormalArray);
             GL.EnableClientState(ArrayCap.TextureCoordArray);
             GL.EnableClientState(ArrayCap.ColorArray);
 
-
 			// Blending init
-			GL.Enable (EnableCap.Blend);
-			//GL.BlendFunc (BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+		    GL.Enable (EnableCap.Blend);
 			GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One);
 
-			// Culling init
-            // Depth buffer init
+			// Depth buffer init
             GL.Enable (EnableCap.DepthTest);
             GL.ClearDepth (1.0);
             GL.DepthFunc (DepthFunction.Lequal);
-			GL.Enable (EnableCap.CullFace);
+
+            // Culling init
+			//GL.Enable (EnableCap.CullFace);
 
 			// Create Color Tex
 			GL.GenTextures (1, out CanvasTexture);
@@ -338,20 +339,23 @@ namespace positron
 			// GL.Ext.GenerateMipmap( GenerateMipmapTarget.Texture2D );
 			
 			// Create a FBO and attach the textures
-			GL.Ext.GenFramebuffers (1, out CanvasFBO);
-			GL.Ext.BindFramebuffer (FramebufferTarget.FramebufferExt, CanvasFBO);
-			GL.Ext.FramebufferTexture2D (FramebufferTarget.FramebufferExt,
+			GL.GenFramebuffers (1, out CanvasFBO);
+			GL.BindFramebuffer (FramebufferTarget.Framebuffer, CanvasFBO);
+			GL.FramebufferTexture2D (FramebufferTarget.Framebuffer,
                 FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, CanvasTexture, 0);
 
-			FBOSafety (); // Make sure things won't explode!
+            GL.BindTexture (TextureTarget.Texture2D, 0);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+            Context.VSync = true; // Because reasons
 
 			Context.MakeCurrent (null); // Release the OpenGL context so it can be used on the new thread.
             //lock (_Game.UpdateLock)
             {
 				_RenderingThread = new Thread (RenderLoop);
 				_UpdatingThread = new Thread (UpdateLoop);
-				_RenderingThread.IsBackground = true;
-				_UpdatingThread.IsBackground = true;
+				//_RenderingThread.IsBackground = true;
+				//_UpdatingThread.IsBackground = true;
 				_RenderingThread.Start ();
 				_UpdatingThread.Start ();
 			}
@@ -383,7 +387,6 @@ namespace positron
 
 			if (CanvasFBO != 0)
 				GL.Ext.DeleteFramebuffers(1, ref CanvasFBO);
-
 			base.OnUnload(e);
 		}
 		
@@ -454,10 +457,10 @@ namespace positron
 			GL.GetInteger(GetPName.Stereo, out queryinfo[3]);
 			GL.GetInteger(GetPName.Samples, out queryinfo[4]);
 			GL.GetInteger(GetPName.Doublebuffer, out queryinfo[5]);
-			Console.WriteLine("max. ColorBuffers: " + queryinfo[0] + " max. AuxBuffers: " + queryinfo[1] + " max. DrawBuffers: " + queryinfo[2] +
-			                  "\nStereo: " + queryinfo[3] + " Samples: " + queryinfo[4] + " DoubleBuffer: " + queryinfo[5]);
+			//Console.WriteLine("max. ColorBuffers: " + queryinfo[0] + " max. AuxBuffers: " + queryinfo[1] + " max. DrawBuffers: " + queryinfo[2] +
+			//                  "\nStereo: " + queryinfo[3] + " Samples: " + queryinfo[4] + " DoubleBuffer: " + queryinfo[5]);
 			
-			Console.WriteLine("Last GL Error: " + GL.GetError());
+			//Console.WriteLine("Last GL Error: " + GL.GetError());
 		}
 
 
@@ -498,69 +501,50 @@ namespace positron
 		}
 		#endregion
 		#region RenderLoop
-		void RenderLoop()
-		{
-			MakeCurrent(); // The context now belongs to this thread. No other thread may use it!
+		void RenderLoop ()
+        {
+            MakeCurrent (); // The context now belongs to this thread. No other thread may use it!
 
-            while (!Exiting)
-            {
-                if(_Game != null)
-                {
-                    lock(_Game.UpdateLock)
-                    {
-                        Reset = false;
-                        if(_Game != null)
-                        {
-                            _Game.Demolish();
-                            _Game = null;
-                            GC.Collect();
-                        }
+            while (!Exiting) {
+                using (_Game = new PositronGame (this)) {
+                    //Game setup
+
+                    // Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
+                    UpdateWatch.Start ();
+                    RenderWatch.Start ();
+                    FrameWatch.Start ();
+                    TestWatch.Start ();
+                    RenderDrawingWatch.Start ();
+
+                    while (!Reset && !Exiting) {
+                        // Store this in a local variable because accessors have overhead!
+                        // Bear with me...this will get a bit tricky to explain pefrectly...
+        			
+                        // Sleep the thread for the most milliseconds less than the frame limit time
+                        double time_until = FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001;
+                        while (FrameWatch.Elapsed.TotalSeconds < time_until)
+                            Thread.Sleep (Configuration.ThreadSleepTimeStep); // Does this help?
+                        // Hard-loop the remainder
+                        while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
+
+                        _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
+                        //Console.WriteLine(_LastFrameTime);
+                        FrameWatch.Restart ();
+                        UpdateWatch.Restart ();
+                        lock (_Game.UpdateLock)
+                            Update (_LastFrameTime);
+                        _LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
+                        RenderWatch.Restart ();
+                        lock (_Game.UpdateLock)
+                            RenderView (_LastFrameTime);
+                        // TODO: Figure out why this does wild shit if FPS > 60
+                        SwapBuffers ();
+                        _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
                     }
+                    Sound.KillTheNoise (); // I don't know where a better place for this could be...
+                    Reset = false;
                 }
-                if(_Game == null)
-                    _Game = new PositronGame (this);
-
-                // Game setup
-                _Game.Setup ();
-                // Don't even ask me why this is like this
-                Scene.SetupScenes(ref _Game);
-                _Game.SetupTests ();
-
-    			// Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
-    			UpdateWatch.Start();
-    			RenderWatch.Start();
-    			FrameWatch.Start();
-                TestWatch.Start();
-                RenderDrawingWatch.Start();
-
-                while(!Reset && !Exiting)
-                {
-        			// Store this in a local variable because accessors have overhead!
-                    // Bear with me...this will get a bit tricky to explain pefrectly...
-    			
-    				// Sleep the thread for the most milliseconds less than the frame limit time
-    				double time_until = FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001;
-    				while (FrameWatch.Elapsed.TotalSeconds < time_until)
-    					Thread.Sleep(Configuration.ThreadSleepTimeStep); // Does this help?
-    				// Hard-loop the remainder
-    				while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
-
-                    _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
-                    //Console.WriteLine(_LastFrameTime);
-    				FrameWatch.Restart();
-                    UpdateWatch.Restart();
-    				lock(_Game.UpdateLock)
-    					Update(_LastFrameTime);
-    				_LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
-    				RenderWatch.Restart();
-                    lock(_Game.UpdateLock)
-    					RenderView(_LastFrameTime);
-                    // TODO: Figure out why this does wild shit if FPS > 60
-    				SwapBuffers();
-                    _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
-                }
-                Sound.KillTheNoise(); // I don't know where a better place for this could be...
-			}
+            }
 			Context.MakeCurrent(null);
 		}
 		
@@ -585,72 +569,66 @@ namespace positron
 		{
 			#region Render Frame Buffer
 
-			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, CanvasFBO); // Bind canvas FBO
-			GL.PushAttrib(AttribMask.ViewportBit);
+			
+            //GL.PushAttrib(AttribMask.ViewportBit);
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, CanvasFBO); // Bind canvas FBO
 			{
 				// FBO viewport
 				GL.Viewport(0, 0, _CanvasWidth, _CanvasHeight);
                 GL.ClearColor (Color.Black);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-				Matrix4 perspective = Matrix4.CreateOrthographicOffCenter(0.0f, _CanvasWidth, 0.0f, _CanvasHeight, -128, 128);
-				//Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView(1.0f, 1.0f, 0.01f, 10.0f);
+                // TODO: pre-calculate these
+                double p = 1.0;
+                double distance = -0.5 * _CanvasHeight / Math.Tan (0.5 * p); // -0.5 * h * cot(0.5 * p)
+                double ratio = (double)_CanvasWidth / (double)_CanvasHeight;
+                Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView((float)p, (float)ratio, 0.01f, 9999.0f);
 				GL.MatrixMode(MatrixMode.Projection);
 				GL.LoadMatrix(ref perspective);
-				GL.MatrixMode(MatrixMode.Modelview);
-				GL.LoadIdentity();
+                GL.Translate ((double)_CanvasWidth / -2.0, (double)_CanvasHeight / -2.0, distance);
                 RenderDrawingWatch.Restart();
 				_Game.Draw(time);
                 _LastRenderDrawingTime = RenderDrawingWatch.Elapsed.TotalSeconds;
                 GL.Color4(1.0, 1.0, 1.0, 1.0);
+
 			}
-			GL.PopAttrib();
-			GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // unbind FBO
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // unbind FBO
+			//GL.PopAttrib();
+			
 
 
 			#endregion
 
 			#region Render Main Viewport
-
-			int viewport_width, viewport_height;
-            lock(_Game.UpdateLock)
-			{
-				if (VieportChanged)
-				{
-					VieportChanged = false;
-				}
-				viewport_width = ViewportWidth;
-				viewport_height = ViewportHeight;
-			}
 			GL.BindTexture(TextureTarget.Texture2D, CanvasTexture); // Bind the canvas
-			GL.PushAttrib(AttribMask.ViewportBit);
+            //GL.PushAttrib(AttribMask.ViewportBit);
 			{
 				// FBO viewport
-				GL.Viewport(0, 0, ViewportWidth, ViewportHeight);
+                GL.Viewport(0, 0, ViewportWidth, ViewportHeight);
 				GL.ClearColor (Color.Black);
 				GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Do clear
-				Matrix4 perspective = Matrix4.CreateOrthographic(ViewportWidth, ViewportHeight, -128, 128);
+                Matrix4 perspective = Matrix4.CreateOrthographic(ViewportWidth, ViewportHeight, -128, 128);
 				GL.MatrixMode(MatrixMode.Projection);
 				GL.LoadMatrix(ref perspective);
-				GL.MatrixMode(MatrixMode.Modelview);
-				GL.LoadIdentity();
 				GL.PushMatrix();
-				GL.Translate(-FBOScaleX * 0.5, -FBOScaleY * 0.5, 0.0);
-				GL.Begin(BeginMode.Quads);
-				GL.TexCoord2(0.0f, 0.0f);
-				GL.Vertex3(0.0f, 0.0f, 0.0f);
-				GL.TexCoord2(1.0f, 0.0f);
-				GL.Vertex3(FBOScaleX, 0.0f, 0.0);
-				GL.TexCoord2(1.0f, 1.0);
-				GL.Vertex3(FBOScaleX, FBOScaleY, 0.0f);
-				GL.TexCoord2(0.0f, 1.0f);
-				GL.Vertex3(0.0f, FBOScaleY, 0.0f);
-				GL.End();
+                {
+                    GL.Translate(FBOScaleX / -2.0, FBOScaleY / -2.0, 0);
+    				GL.Begin(BeginMode.Quads);
+    				GL.TexCoord2(0.0f, 0.0f);
+    				GL.Vertex3(0.0f, 0.0f, 0.0f);
+    				GL.TexCoord2(1.0f, 0.0f);
+                    GL.Vertex3(FBOScaleX, 0.0f, 0.0);
+    				GL.TexCoord2(1.0f, 1.0);
+                    GL.Vertex3(FBOScaleX, FBOScaleY, 0.0f);
+    				GL.TexCoord2(0.0f, 1.0f);
+                    GL.Vertex3(0.0f, FBOScaleY, 0.0f);
+    				GL.End();
+                }
 				GL.PopMatrix ();
 			}
-			GL.PopAttrib();
+			//GL.PopAttrib();
 			GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
 			
-			GL.Flush();
+			//GL.Flush();
 
 			#endregion
 		}

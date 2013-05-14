@@ -15,12 +15,12 @@ namespace positron
             SceneEntry += (sender, e) => {
                 if(_Game.Player1 != null)
                 {
-                    _Game.Player1.Derez();
-					DerpTimer.Start();
+                    _Game.Player1.Derez();	
                 }
+                DerpTimer.Start();
             };
         }
-        protected override void InitializeScene()
+        public override void InitializeScene()
         {
             WinThing = new SpriteBase(HUD, ViewWidth / 2.0, ViewHeight / 2.0, Texture.Get ("sprite_win")).CenterShift();
             base.InitializeScene();
@@ -34,7 +34,7 @@ namespace positron
             base.Update(time);
 			if (DerpTimer.Elapsed.TotalSeconds > 5.0) {
                 lock(_Game.UpdateLock)
-                    Scene.InstantiateScenes (ref _Game);
+                    _Game.SetupScenes ();
 			}
         }
     }

@@ -23,7 +23,7 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="Execute" command="${TargetFile}" workingdir="${TargetDir}" />
-        <Command type="BeforeBuild" command="cp ../../../lib/OpenAL/OpenAL32.dll ./" workingdir="${TargetDir}" externalConsole="True" pauseExternalConsole="True" />
+        <Command type="BeforeBuild" command="cp ../../../lib/OpenAL/OpenAL32.dll ./" workingdir="${TargetDir}" />
       </CustomCommands>
     </CustomCommands>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -108,7 +108,6 @@
     <Compile Include="Drawables\SceneElements\Prop\PressureSwitch.cs" />
     <Compile Include="Drawables\SceneElements\Prop\RadioProp.cs" />
     <Compile Include="Asset Management\Sound.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\MusicLooperHACK.cs" />
     <Compile Include="Scene\SceneThree.cs" />
     <Compile Include="Scene\SceneOne.cs" />
     <Compile Include="Scene\Scene.cs" />
@@ -125,6 +124,7 @@
     <Compile Include="Scene\SceneEight.cs" />
     <Compile Include="Scene\SceneWin.cs" />
     <Compile Include="IGLContextLateUpdate.cs" />
+    <Compile Include="Drawables\SceneElements\Prop\MusicLooper_LessHackish.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

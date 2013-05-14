@@ -23,7 +23,7 @@ namespace positron
 			};
 			SetupPlayerOnExit();
 		}
-		protected override void InitializeScene ()
+		public override void InitializeScene ()
 		{
 			base.InitializeScene ();
 		}

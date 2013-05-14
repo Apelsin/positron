@@ -127,11 +127,11 @@ namespace positron
 {
     public static class P_GL
     {
-        public static void TranslateHard(double x, double y, double z = 0.0)
+        public static void __TranslateHard(double x, double y, double z = 0.0)
         {
             GL.Translate((int)x, (int)y, (int)z);
         }
-        public static void TranslateHard(Vector3d p)
+        public static void __TranslateHard(Vector3d p)
         {
             GL.Translate((int)p.X, (int)p.Y, (int)p.Z);
         }

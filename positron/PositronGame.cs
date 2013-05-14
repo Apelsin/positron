@@ -76,6 +76,11 @@ namespace positron
 		public PositronGame (ThreadedRendering window)
 		{
             _Window = window;
+            // TODO: world objects need to be pending initialization before the world is controlled by the scene
+            FarseerPhysics.Settings.VelocityIterations = 1;
+            InputAccepterGroups = new OrderedDictionary();
+            SetupScenes();
+            _CurrentScene = (Scene)_Scenes["SceneFirstMenu"];
 		}
 		public static void InitialSetup ()
 		{
@@ -83,12 +88,6 @@ namespace positron
 			Texture.InitialSetup();
             Sound.InitialSetup();
 			DialogSpeaker.InitialSetup();
-		}
-		public void Setup ()
-		{
-			// TODO: world objects need to be pending initialization before the world is controlled by the scene
-			FarseerPhysics.Settings.VelocityIterations = 1;
-			InputAccepterGroups = new OrderedDictionary();
 		}
 		public void SetInputAccepters (string name, params IInputAccepter[] input_accepters)
 		{
@@ -124,10 +123,10 @@ namespace positron
 				InputAccepterGroups.Remove (name);
 			}
 		}
-		public void SetupTests ()
-		{
-			TestWatch.Start();
-		}
+//		public void SetupTests ()
+//		{
+//			TestWatch.Start();
+//		}
 		protected void ProcessUpdateEventList (double time)
 		{
 			lock (_UpdateEventList)
@@ -155,6 +154,68 @@ namespace positron
 				}
 			}
 		}
+        /// <summary>
+        /// Instantiates and initializes one instnace
+        /// of every subclass of Scene in this assembly
+        /// </summary>
+        public void SetupScenes (params Type[] type_filters)
+        {
+            if (type_filters.Length == 0)
+            type_filters = new Type[] { typeof(Scene) };
+            // Brave new world:
+            _WorldMain = new World (new Microsoft.Xna.Framework.Vector2 (0.0f, (float)Configuration.ForceDueToGravity));
+            // This is EVIL:
+            IEnumerable<Type> model_enum = typeof(Scene).FindAllEndClasses ();
+            //          foreach (Type m in model_enum) {
+            //              Console.WriteLine("Picked {0}", m.Name);
+            //          }
+            Scene next_scene = _CurrentScene;
+            bool redirect = next_scene != null;
+            List<object> remove_keys = new List<object> ();
+            foreach (object key in _Scenes.Keys) {
+                Scene scene = (Scene)_Scenes [key];
+                for (int i = 0; i < type_filters.Length; i++) {
+                    if (type_filters [i].DescendantOf (scene.GetType ())) {
+                        remove_keys.Add (key);
+                    }
+                }
+            }
+            foreach (object key in remove_keys) {
+                Scene scene = (Scene)_Scenes [key];
+                _Scenes.Remove (key);
+                if (next_scene == scene && redirect)
+                    next_scene = null;
+                scene.Dispose ();
+            }
+            //            foreach (object key in game.Scenes.Keys) {
+            //                Scene scene = (Scene)game.Scenes [key];
+            //                if (next_scene == null && redirect) {
+            //                    next_scene = scene;
+            //                    break;
+            //                }
+            //            }
+            List<Scene> new_scenes = new List<Scene> ();
+            foreach (Type m in model_enum) {
+                for (int i = 0; i < type_filters.Length; i++) {
+                    if (type_filters [i].DescendantOf (m)) {
+                        BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+                        ConstructorInfo ctor = m.GetConstructor (flags, null, new Type[] { typeof(PositronGame) }, null);
+                        object instanace = ctor.Invoke(new object[] { this });
+                        Scene scene = (Scene)instanace;
+                        _Scenes.Add (scene.Name, scene);
+                        new_scenes.Add (scene);
+                    }
+                }
+            }
+            if (next_scene == null) {
+                next_scene = (Scene)_Scenes["SceneFirstMenu"];
+            }
+            foreach (Scene scene in new_scenes)
+                scene.InstantiateConnections ();
+            foreach (Scene scene in new_scenes)
+                scene.InitializeScene ();
+            CurrentScene = next_scene; // Change scenes as necessary
+        }
 		public void ChangeScene (Scene next_scene)
 		{
 			if (_CurrentScene == next_scene || next_scene == null)
@@ -253,8 +314,9 @@ namespace positron
 		public void Dispose ()
 		{
 			lock (UpdateLock) {
-				foreach(Scene scene in Scenes.Values)
-					scene.Dispose();
+                Demolish();
+				//foreach(Scene scene in Scenes.Values)
+				//	scene.Dispose();
                 _Scenes.Clear();
                 _Scenes = null;
                 InputAccepterGroups.Clear();
@@ -270,15 +332,9 @@ namespace positron
 			lock (UpdateLock) {
 				foreach(Scene scene in Scenes.Values)
 				{
-					foreach(RenderSet render_set in scene.AllRenderSetsInOrder())
-					{
-						foreach(IRenderable renderable in render_set)
-							renderable.Dispose();
-						render_set.Dispose();
-					}
 					scene.Dispose();
 				}
-				Dispose ();
+				//Dispose ();
 			}
 		}
 	}

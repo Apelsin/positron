@@ -95,7 +95,8 @@ namespace positron
 		{
 			Textures = new Hashtable();
 			_DefaultTexture = LoadTexture ("sprite_null", "sprite_null.png");
-			LoadTexture ("sprite_four_square", "sprite_four_square.png");
+            LoadTexture ("sprite_small_disc", "sprite_small_disc.png");
+            LoadTexture ("sprite_four_square", "sprite_four_square.png");
 			LoadTexture ("sprite_indicator", "sprite_indicator.png");
 			LoadTexture ("sprite_indicator_gloss", "sprite_indicator_gloss.png");
 			LoadTexture ("sprite_spidey_0", "sprite_spidey_0.png");

@@ -37,12 +37,12 @@ namespace positron
 				dialog.Begin();
 			};
 		}
-		protected override void InstantiateConnections()
+		public override void InstantiateConnections()
 		{
             //_DoorToPreviousScene = new Door(Rear, 72 * TileSize, -8 * TileSize);
 			_DoorToPreviousScene = new Door(Rear, 0, 0);
 		}
-        protected override void InitializeScene ()
+        public override void InitializeScene ()
         {
             // Basic perimeter:
             double x0 = PerimeterOffsetX * TileSize;
@@ -88,7 +88,7 @@ namespace positron
             var BackgroundTiles = new TileMap (Background, Perimeter2X, 6, Texture.Get ("sprite_dark_rubble_atlas"));
             BackgroundTiles.CornerX = x0 - 2 * TileSize;
             BackgroundTiles.CornerY = y0;
-            BackgroundTiles.PositionZ = 1.0;
+            BackgroundTiles.Parallax = 1.0;
             BackgroundTiles.RandomMap ();
             BackgroundTiles.Build ();
             // Store width and height in local variables for easy access
@@ -115,7 +115,7 @@ namespace positron
 					new SpriteBase (Background,
 					               x0 + pipe_texture.Width * i - TileSize,
 					               y0 - pipe_texture.Height + TileSize - 6, pipe_texture);
-                bg_pipes.PositionZ = 0.5;
+                bg_pipes.Parallax = 0.5;
             }
 
             double y1 = y0 - (Perimeter2Y + 1) * TileSize;
