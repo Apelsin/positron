@@ -19,7 +19,7 @@ namespace positron
 		protected SpriteAnimation Extend;
 		protected SpriteAnimation Collapse;
 
-        protected float PassThruMargin = 2.0f / (float)Configuration.MeterInPixels;
+        protected float PassThruMargin = 4.0f / (float)Configuration.MeterInPixels;
 
 		public ExtenderPlatform (RenderSet render_set, double x, double y, bool initial_state = false):
 			this(render_set, x, y, new SharedState<bool>(initial_state))
@@ -41,9 +41,10 @@ namespace positron
 			_State.SharedStateChanged += (sender, e) => 
 			{
 				PlayAnimation (e.CurrentState ? Extend : Collapse);
-                Body.Enabled = (_RenderSet.Scene == _RenderSet.Scene.Game.CurrentScene) && e.CurrentState;
+                Body.Enabled = (Set.Scene == Set.Scene.Game.CurrentScene) && e.CurrentState;
 			};
-            Body.OnCollision += HandleOnCollision;
+            if(Body != null)
+                Body.OnCollision += HandleOnCollision;
 		}
         protected bool HandleOnCollision (Fixture fixture_a, Fixture fixture_b, Contact contact)
         {
@@ -96,7 +97,7 @@ namespace positron
         }
 		protected override void EnteredRenderSet (object sender, RenderSetChangeEventArgs e)
 		{
-			Body.Enabled = (RenderSet.Scene == e.To.Scene) && _State;
+			Body.Enabled = (Set.Scene == e.To.Scene) && _State;
 		}
 		protected override void InitPhysics()
 		{
@@ -115,7 +116,7 @@ namespace positron
 			_SpriteBody.Friction = 0.2f;
 			
 			// HACK: Only enable bodies for which the object is in the current scene
-            Body.Enabled = this.RenderSet.Scene == _RenderSet.Scene.Game.CurrentScene;
+            Body.Enabled = this.Set.Scene == _RenderSet.Scene.Game.CurrentScene;
 			
 			InitBlueprints();
 		}
@@ -130,6 +131,12 @@ namespace positron
 			if(Action != null)
 				Action(sender, e);
 		}
+        public override void Dispose()
+        {
+            Action = null;
+            _State = null;
+            base.Dispose();
+        }
 	}
 }
 

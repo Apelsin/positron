@@ -27,11 +27,13 @@ namespace positron
 		public SharedState(T initial_state)
 		{
 			_Value = initial_state;
-			SharedStateChanged += (sender, e) => {
-				lock(_ValueLock)
-					_Value = e.CurrentState;
-			};
+            SharedStateChanged += HandleSharedStateChanged;
 		}
+        protected void HandleSharedStateChanged (object sender, SharedStateChangeEventArgs<T> e)
+        {
+            lock(_ValueLock)
+                _Value = e.CurrentState;
+        }
 		public void OnChange (object sender, T state)
 		{
 			lock (_ValueLock) {

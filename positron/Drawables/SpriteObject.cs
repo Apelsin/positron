@@ -34,16 +34,18 @@ namespace positron
 		#region Hell
 		private static void noop() { }
 		public Vector3d PositionWorld {
-			get { return new Vector3d(Body.Position.X, Body.Position.Y, _Position.Z / Configuration.MeterInPixels); }
-			set { Body.Position = new Microsoft.Xna.Framework.Vector2((float)value.X, (float)value.Y); _Position.Z = value.Z * Configuration.MeterInPixels; }
+            get { if(Body == null) return Vector3d.Zero; return new Vector3d(Body.Position.X, Body.Position.Y, _Position.Z / Configuration.MeterInPixels); }
+			set {
+                if(Body == null) return;
+                Body.Position = new Microsoft.Xna.Framework.Vector2((float)value.X, (float)value.Y); _Position.Z = value.Z * Configuration.MeterInPixels; }
 		}
 		public double PositionWorldX {
-			get { return Body.Position.X; }
-			set { Body.Position = new Microsoft.Xna.Framework.Vector2((float)value, Body.Position.Y); }
+            get { if(Body == null) return 0.0; return Body.Position.X; }
+            set { if(Body == null) return; Body.Position = new Microsoft.Xna.Framework.Vector2((float)value, Body.Position.Y); }
 		}
 		public double PositionWorldY {
-			get { return Body.Position.Y; }
-			set { Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)value); }
+            get { if(Body == null) return 0.0; return Body.Position.Y; }
+            set { if(Body == null) return; Body.Position = new Microsoft.Xna.Framework.Vector2(Body.Position.X, (float)value); }
 		}
 		public override Vector3d Position {
 			get { return PositionWorld * Configuration.MeterInPixels; }
@@ -93,8 +95,8 @@ namespace positron
 		}
 
 		public override double Theta {
-			get { return Body.Rotation; }
-			set { Body.Rotation = (float)value; }
+            get { if(Body == null) return 0.0; return Body.Rotation; }
+            set { if(Body == null) return; Body.Rotation = (float)value; }
 		}
 		#endregion
 
@@ -153,7 +155,8 @@ namespace positron
 		}
 		protected virtual void EnteredRenderSet (object sender, RenderSetChangeEventArgs e)
 		{
-			Body.Enabled = (RenderSet.Scene == e.To.Scene);
+            if(Body != null)
+			    Body.Enabled = (Set.Scene == e.To.Scene);
 		}
 		public void Debug(string context)
 		{
@@ -228,7 +231,8 @@ namespace positron
 		public override void Dispose()
 		{
 			DerezEvent = null;
-			Body.Dispose();
+            if(Body != null)
+			    Body.Dispose();
 			base.Dispose();
 		}
 		#endregion

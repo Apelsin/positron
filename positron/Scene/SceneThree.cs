@@ -176,7 +176,6 @@ namespace positron
                     bool bstate_bs_lower_2 = bs_lower2.State != SwitchState.Open;
                     gw_lower1.OnAction (e.Self, new ActionEventArgs (bstate || bstate_bs_lower_2, gw_lower1));
                 }, 5.0);
-
                 var ep1 = new ExtenderPlatform (Rear, x0 + TileSize * 57, y1 + 0.5 * TileSize, false);
                 new ExtenderPlatform (Rear, x0 + TileSize * 58, y1 + 2.0 * TileSize, ep1);
                 new ExtenderPlatform (Rear, x0 + TileSize * 60, y1 + 3.5 * TileSize, ep1);
@@ -195,7 +194,6 @@ namespace positron
                 bs_lower2.CenterShift ();
                 bs_lower2.Theta = MathHelper.Pi;
             }
-
             for (int j = 1; j < 5; j++) {
                 if(j == 2)
                     continue;

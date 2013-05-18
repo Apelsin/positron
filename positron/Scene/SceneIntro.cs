@@ -17,7 +17,7 @@ namespace positron
                 var dialog = new Dialog(e.To.HUD, "Dialog", stanzas);
                 dialog.DialogEnd += (sender2, e2) =>
                 {
-                    _Game.ChangeScene((Scene)_Game.Scenes["SceneOne"]);
+                    _Game.CurrentScene = ((Scene)_Game.Scenes["SceneOne"]);
                 };
                 dialog.Begin();
 			};

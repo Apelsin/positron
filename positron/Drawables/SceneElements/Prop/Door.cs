@@ -48,11 +48,16 @@ namespace positron
 					// TODO: make this work
 					player.Position = _Destination.Position;
 				}
-                _RenderSet.Scene.Game.ChangeScene(_Destination == null ? _NextScene == null ?  null : _NextScene : _Destination.RenderSet.Scene);
+                _RenderSet.Scene.Game.CurrentScene = (_Destination == null ? _NextScene == null ?  null : _NextScene : _Destination.Set.Scene);
 			}
 			if(Action != null)
 				Action(sender, e);
 		}
+        public override void Dispose()
+        {
+            Action = null;
+            base.Dispose();
+        }
 	}
 }
 

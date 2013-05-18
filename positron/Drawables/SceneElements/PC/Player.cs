@@ -150,6 +150,7 @@ namespace positron
 			AnimationPreJump = 		new SpriteAnimation(texture, "protag jumping 2");
 			AnimationJumping = 		new SpriteAnimation(texture, "protag jumping 2");
 			AnimationEndJump = 		new SpriteAnimation(texture, "protag jumping 4");
+            AnimationEndJump.Sound = Sound.Get ("sfx_player_land_two_feet");
 
 			AnimationAimGunFwd = 		new SpriteAnimation(texture, true, "protag aiming gun");
 			AnimationAimGunFwdUp = 		new SpriteAnimation(texture, true, "protag aiming gun up");
@@ -359,6 +360,7 @@ namespace positron
                         _AnimationCurrent == AnimationAimGunFwdDown ? -0.4 :
                         _AnimationCurrent == AnimationAimGunFwdUp ? 0.8 : 0.25);
 
+                    Sound.Play ("sfx_shoot_gun");
 					var bullet = new BasicBullet (this._RenderSet.Scene,
 					                             this.PositionX + shot_offset_x,
                                                   this.PositionY + shot_offset_y,

@@ -11,7 +11,8 @@ namespace positron
 	{
 		protected int Lifespan;
 		protected Stopwatch Timer = new Stopwatch();
-		protected RenderSet RenderSet;
+        protected RenderSet _RenderSet;
+        public RenderSet Set { get { return _RenderSet; } }
 		public Vector3d A, B;
 		public BlueprintLine (Vector3d a, Vector3d b, RenderSet render_set):
 			this(a, b, render_set, 100)
@@ -19,8 +20,8 @@ namespace positron
 		}
 		public BlueprintLine (Vector3d a, Vector3d b, RenderSet render_set, int millis)
 		{
-			RenderSet = render_set;
-			RenderSet.Add(this);
+			_RenderSet = render_set;
+			_RenderSet.Add(this);
 			Lifespan = millis;
 			A = a;
 			B = b;
@@ -38,7 +39,7 @@ namespace positron
  			GL.Vertex3 (B);
 			GL.End ();
 			if (Timer.ElapsedMilliseconds > Lifespan) {
-				RenderSet.Remove(this);
+				_RenderSet.Remove(this);
 			}
 		}
 		public double RenderSizeX()
@@ -51,6 +52,7 @@ namespace positron
 		}
 		public virtual void Dispose()
 		{
+            _RenderSet = null;
 		}
 	}
 }

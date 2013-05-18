@@ -15,14 +15,17 @@ namespace positron
             SceneEntry += (sender, e) => {
                 if(_Game.Player1 != null)
                 {
+                    Follow(null);
                     _Game.Player1.Derez();	
                 }
+                WinThing.StartAnimation(WinThing.AnimationDefault);
                 DerpTimer.Start();
             };
         }
         public override void InitializeScene()
         {
             WinThing = new SpriteBase(HUD, ViewWidth / 2.0, ViewHeight / 2.0, Texture.Get ("sprite_win")).CenterShift();
+            //WinThing.AnimationDefault.Sound = Sound.Get("win");
             base.InitializeScene();
         }
         public override void Update(double time)
@@ -33,8 +36,12 @@ namespace positron
             WinThing.Theta = gx;
             base.Update(time);
 			if (DerpTimer.Elapsed.TotalSeconds > 5.0) {
-                lock(_Game.UpdateLock)
-                    _Game.SetupScenes ();
+                _Game.AddUpdateEventHandler(this, (sender, e) => {
+                    _Game.SetupScenes (typeof(ISceneGameplay));
+                    DerpTimer.Reset();
+                    return true;
+                });
+                _Game.CurrentScene = (Scene)_Game.Scenes["SceneFirstMenu"];
 			}
         }
     }

@@ -103,11 +103,8 @@ namespace positron
 			double recess_switch = -4.0;
 			double recess_gw = -2.0;
 			
-			for (int i = 0; i < 12; i++) {
-				var spidey = new Spidey (Stage, ep2x + (5 + i) * TileSize, ep2y + TileSize * 6);
-				spidey.Body.BodyType = BodyType.Dynamic;
-			}
-
+			for (int i = 0; i < 12; i++)
+				new Spidey (Stage, ep2x + (5 + i) * TileSize, ep2y + TileSize * 6);
 
 			// Gateways
 			var gw1 = new Gateway (Front, xp - TileSize * 3, yp + 3 * TileSize, false);
@@ -166,10 +163,8 @@ namespace positron
 			//yp += 2 * TileSize;
 			//xp += 4 * TileSize;
 
-			for (int i = 0; i < 6; i++) {
-				var spidey = new Spidey (Stage, xp + (5 + i) * TileSize, yp + TileSize * (3));
-				spidey.Body.BodyType = BodyType.Dynamic;
-			}
+			for (int i = 0; i < 6; i++)
+				new Spidey (Stage, xp + (5 + i) * TileSize, yp + TileSize * (3));
 
 			ExtenderPlatform last_platform_0 = null;
 			ExtenderPlatform last_platform_1 = null;

@@ -54,7 +54,7 @@ namespace positron
 			var direction = new Microsoft.Xna.Framework.Vector2(
 				(float)(_Direction.X / Configuration.MeterInPixels),
 				(float)(_Direction.Y / Configuration.MeterInPixels));
-			_LineBody = BodyFactory.CreateBody(RenderSet.Scene.World, start);
+			_LineBody = BodyFactory.CreateBody(Set.Scene.World, start);
 			FixtureFactory.AttachEdge(Microsoft.Xna.Framework.Vector2.Zero, direction, _LineBody);
 			_LineBody.BodyType = BodyType.Static;
 		}

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Reflection; // I'm a horrible person
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -13,7 +14,7 @@ namespace positron
 	public class SpriteBase : Drawable, IColorable
 	{
 		#region SpriteAnimation
-		public class SpriteAnimation
+		public class SpriteAnimation : IDisposable
 		{
             protected static int _FrameTimeDefault = 200;
 			protected SpriteFrame[] _Frames;
@@ -99,11 +100,21 @@ namespace positron
 				_Looping = looping;
 				_PingPong = ping_pong;
 			}
+            public virtual void Dispose ()
+            {
+                if (_Frames != null) {
+                    for (int i = 0; i < _Frames.Length; i++) {
+                        _Frames [i].Dispose ();
+                        _Frames [i] = null;
+                    }
+                    _Frames = null;
+                }
+                _Sound = null;
+            }
 		}
 		#endregion
 		#region SpriteFrame
-		// Like a struct
-		public class SpriteFrame
+		public class SpriteFrame : IDisposable
 		{
 			protected Color _Color;
 			protected Texture _Texture;
@@ -202,18 +213,26 @@ namespace positron
 				}
 				w_half = w * 0.5;
 				h_half = h * 0.5;
-				var A = new Vertex(corner_x - w_half, corner_y - h_half, 1.0, x0, -y0);
-				var B = new Vertex(corner_x + w_half, corner_y - h_half, 1.0, x1, -y0);
-				var C = new Vertex(corner_x + w_half, corner_y + h_half, 1.0, x1, -y1);
-				var D = new Vertex(corner_x - w_half, corner_y + h_half, 1.0, x0, -y1);
+				var A = new VertexLite(corner_x - w_half, corner_y - h_half, 1.0, x0, -y0);
+                var B = new VertexLite(corner_x + w_half, corner_y - h_half, 1.0, x1, -y0);
+                var C = new VertexLite(corner_x + w_half, corner_y + h_half, 1.0, x1, -y1);
+                var D = new VertexLite(corner_x - w_half, corner_y + h_half, 1.0, x0, -y1);
 				_VBO = new VertexBuffer(A, B, C, D);
 				//BPVBO = new VertexBuffer(A, B, C, D);
 			}
+            public virtual void Dispose ()
+            {
+                if (_VBO != null) {
+                    _VBO.Dispose ();
+                    _VBO = null;
+                }
+                _Texture = null;
+            }
 		}
 		#endregion
 		#region State
 		#region Member Variables
-		protected Color _Color;
+		protected Color4 _Color;
 		protected double _TileX;
 		protected double _TileY;
 
@@ -225,9 +244,9 @@ namespace positron
 		protected SpriteAnimation _AnimationCurrent;
 		protected Lazy<SpriteAnimation> _AnimationNext;
 
-		protected SpriteFrame _FrameStatic;
+		//protected SpriteFrame _FrameStatic;
 
-        protected bool _FirstUpdate = false;
+        protected bool _FirstUpdate = true;
 
         /// <summary>
         /// The blueprint vertex buffer object
@@ -245,7 +264,7 @@ namespace positron
 			get { return _AnimationNext; }
 		}
 		public SpriteFrame FrameCurrent {
-			get { return _AnimationCurrent == null ? _FrameStatic : _AnimationCurrent.Frames[_AnimationFrameIndex]; }
+			get { return _AnimationCurrent == null ? _AnimationDefault.Frames[0] : _AnimationCurrent.Frames[_AnimationFrameIndex]; }
 		}
 //		public bool Animate {
 //			get { return _FrameTimer != null && _FrameTimer.IsRunning; }
@@ -291,7 +310,6 @@ namespace positron
 			get { return _Scale.Y * FrameCurrent.SizeY; }
 		}
 
-		public VertexBuffer VBO { get { return FrameCurrent.VBO; } }
 		//public VertexBuffer BPVBO { get { return FrameCurrent.BPVBO; } }
 
 		#endregion
@@ -326,7 +344,7 @@ namespace positron
 			_AnimationFrameIndex = 0;
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
-			_FrameStatic = _AnimationDefault.Frames[0];
+			//_FrameStatic = _AnimationDefault.Frames[0];
             
 			// Position for world objects is handled differently
 			if(!(this is IWorldObject))
@@ -360,7 +378,7 @@ namespace positron
 			}
             GL.Color4(_Color);
             Texture.Bind(); // Bind to (current) sprite texture
-            VBO.Render(); // Render the vertex buffer object
+            FrameCurrent.VBO.Render(); // Render the vertex buffer object
             if (Configuration.DrawBlueprints /*&& BPVBO != null*/)
             {
                 GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
@@ -410,10 +428,10 @@ namespace positron
 		/// <summary>
 		/// Starts a sprite animation if it is not already playing
 		/// </summary>
-		protected void PlayAnimation(SpriteAnimation animation)
+		public void PlayAnimation(SpriteAnimation animation)
 		{
 			if(animation != _AnimationCurrent)
-				StartAnimation(animation);
+ 				StartAnimation(animation);
 		}
         public void LoopSound__HACK(object sound_key)
         {
@@ -431,7 +449,7 @@ namespace positron
             PlayAnimation(new SpriteAnimation(Texture, region_label));
             return this;
         }
-		protected void StartAnimation (SpriteAnimation animation)
+		public void StartAnimation (SpriteAnimation animation)
 		{
 			if (animation == null) {
 				if (_AnimationNext != null)
@@ -446,8 +464,17 @@ namespace positron
 		}
 		public override void Dispose()
 		{
-			//_RenderSet.Remove(this);
-			VBO.Dispose();
+            BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            FieldInfo[] fields = this.GetType().GetFields(flags);
+            for(int i = 0; i < fields.Length; i++)
+            {
+                var o = fields[i].GetValue(this);
+                if(o is SpriteAnimation)
+                {
+                    ((SpriteAnimation)o).Dispose();
+                    fields[i].SetValue(this, null);
+                }
+            }
 			base.Dispose();
 		}
 		#endregion

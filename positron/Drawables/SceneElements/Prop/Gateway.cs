@@ -36,7 +36,8 @@ namespace positron
 		}
 		protected override void EnteredRenderSet (object sender, RenderSetChangeEventArgs e)
 		{
-			Body.Enabled = (RenderSet.Scene == e.To.Scene) && !_State;
+            if(Body != null)
+			    Body.Enabled = (Set.Scene == e.To.Scene) && !_State;
 			PlayAnimation (_State ? Open : Close);
 		}
 		public void OnAction (object sender, ActionEventArgs e)
@@ -50,6 +51,12 @@ namespace positron
 			if(Action != null)
 				Action(sender, e);
 		}
+        public override void Dispose()
+        {
+            Action = null;
+            _State = null;
+            base.Dispose();
+        }
 	}
 }
 

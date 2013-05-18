@@ -38,9 +38,13 @@ namespace positron
                     Alc.GetError(AudioDevice);
                     if(Alc.MakeContextCurrent( AudioCtx ))
                     {
-                        LoadWaveFile ("camprespite_loop", "camprespite_loop.wav");
-                        LoadWaveFile ("last_human_loop", "last_human_loop.wav");
+                        //LoadWaveFile ("camprespite_loop", "camprespite_loop.wav");
+                        LoadWaveFile ("last_human_loop", "last_human_loop_limited.wav");//.DurationAdjust(0.01);
                         LoadWaveFile ("induction_loop", "induction_loop.wav");
+                        LoadWaveFile ("sfx_bullet_impact", "sfx_bullet_impact.wav");
+                        LoadWaveFile ("sfx_player_land_two_feet", "sfx_player_land_two_feet.wav");
+                        LoadWaveFile ("sfx_shoot_gun", "sfx_shoot_gun.wav");
+                        LoadWaveFile ("win", "win.wav");
                     }
                     else
                         throw new Exception("Failed to set current audio context");
@@ -79,6 +83,10 @@ namespace positron
             if(Sounds.ContainsKey(key))
                 return (Sound)Sounds[key];
             return DefaultSound;
+        }
+        public void DurationAdjust (double dt)
+        {
+            _Duration += dt;
         }
         public void Play ()
         {

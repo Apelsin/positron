@@ -208,6 +208,11 @@ namespace positron
             _DoorToNextScene.PositionX = ft_door.PositionX;
             _DoorToNextScene.CornerY = ft_door.CornerY + ft_door.SizeY;
             _DoorToNextScene.NextScene = (Scene)_Game.Scenes["SceneWin"];
+
+            // DEBUGGING:
+            //_DoorToPreviousScene.Corner = _DoorToNextScene.Corner;
+            //_DoorToPreviousScene.CornerX -= _DoorToPreviousScene.SizeX;
+
 //            _DoorToNextScene.Action += (sender, e) => {
 //                Program.MainGame.AddUpdateEventHandler(this, (sender1, e1) =>
 //                {

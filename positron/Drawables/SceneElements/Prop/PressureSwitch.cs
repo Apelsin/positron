@@ -106,7 +106,7 @@ namespace positron
 			_SpriteBody.OnSeparation += HandleOnSeparation;
 
 			// HACK: Only enable bodies for which the object is in the current scene
-            Body.Enabled = this.RenderSet.Scene == _RenderSet.Scene.Game.CurrentScene;
+            Body.Enabled = this.Set.Scene == _RenderSet.Scene.Game.CurrentScene;
 
 			InitBlueprints ();
 		}
@@ -190,6 +190,13 @@ namespace positron
 				}
 			}
 		}
+        public override void Dispose()
+        {
+            Action = null;
+            _State = null;
+            _LatchExpiration = null;
+            base.Dispose();
+        }
 	}
 }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Reflection; // Please kill me.
 
@@ -37,7 +38,7 @@ namespace positron
 		}
 	}
 	#endregion
-	public delegate void SceneEntryEventHandler(object sender, SceneChangeEventArgs e);
+    public delegate void SceneEntryEventHandler(object sender, SceneChangeEventArgs e);
 	public delegate void SceneExitEventHandler(object sender, SceneChangeEventArgs e);
 	public class Scene : IDisposable
 	{
@@ -242,18 +243,17 @@ namespace positron
         }
 
 		public virtual void Update (double time)
-		{
-			// Update the world!
-			// TODO: Make this good
-			if (Configuration.AdaptiveTimeStep) {
-				AdaptiveTimeSteps[ATSIndex] = Math.Min ((float)time, Configuration.MaxWorldTimeStep);
-				ATSIndex = (ATSIndex + 1) % AdaptiveTimeSteps.Length;
-				float t = AdaptiveTimeSteps[ATSIndex];
-				World.Step(t);
-			}
-			else
-				World.Step(Math.Min ((float)time, Configuration.MaxWorldTimeStep));
-            UpdateHUDStats();
+        {
+            //lock (_RenderLock) {
+                if (Configuration.AdaptiveTimeStep) {
+                    AdaptiveTimeSteps [ATSIndex] = Math.Min ((float)time, Configuration.MaxWorldTimeStep);
+                    ATSIndex = (ATSIndex + 1) % AdaptiveTimeSteps.Length;
+                    float t = AdaptiveTimeSteps [ATSIndex];
+                    World.Step (t);
+                } else
+                    World.Step (Math.Min ((float)time, Configuration.MaxWorldTimeStep));
+                UpdateHUDStats ();
+            //}
 		}
 		public void Render (double time)
 		{
@@ -262,12 +262,8 @@ namespace positron
 				GL.PushMatrix ();
 				{
                     if (_FollowTarget != null)
-                    {
 						CalculatePan((float)time);
-
-                        GL.Translate(Math.Round(_ViewPosition.X), Math.Round(_ViewPosition.Y), Math.Round(_ViewPosition.Z));
-                        //GL.Translate(_ViewPosition.X, _ViewPosition.Y, _ViewPosition.Z);
-                    }
+                    GL.Translate(Math.Round(_ViewPosition.X), Math.Round(_ViewPosition.Y), Math.Round(_ViewPosition.Z));
 					Background.Render (time);
 					Rear.Render (time);
 					Stage.Render (time);
@@ -331,14 +327,14 @@ namespace positron
 		public void Follow (Drawable follow_target, bool cut)
 		{
 			_FollowTarget = follow_target;
-			if (cut)
+			if (cut && _FollowTarget != null)
 				CalculatePan (1.0f);
 		}
 		public void RayCast (RayCastCallback callback, Microsoft.Xna.Framework.Vector2 point1, Microsoft.Xna.Framework.Vector2 point2)
 		{
 			World.RayCast (callback, point1, point2);
 			if (Configuration.DrawBlueprints) {
-				lock(RenderLock)
+				lock(_RenderLock)
 				{
 					new BlueprintLine (
 					new Vector3d (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0),
@@ -351,7 +347,7 @@ namespace positron
 		{
 			List<Fixture> hit_fixture = World.TestPointAll (point);
 			if (Configuration.DrawBlueprints) {
-				lock(RenderLock)
+				lock(_RenderLock)
 				{
 					double cross = 2;
 					new BlueprintLine (
@@ -371,41 +367,40 @@ namespace positron
 			SceneExit += (sender, e) => {
 				if(e.To is ISceneGameplay)
 				{
-					_Game.AddUpdateEventHandler(this, (sender2, e2) => {
-						double start_x = 0, start_y = 0;
-						if(e.To.DoorToPreviousScene != null)
-						{
-							start_x = e.To.DoorToPreviousScene.CornerX;
-							start_y = e.To.DoorToPreviousScene.CornerY;
-						}
-						//new Spidey(e.To.Stage, start_x, start_y);
-
-						//
-						// Setup Player 1
-						//
-
-						Player player_1 = _Game.Player1;
-						if(player_1 != null)
-						{
-							player_1.Derez();
-							//Program.MainGame.RemoveInputAccepters("Player1");
-						}
-						player_1 = _Game.Player1 = new Player(e.To.Stage, start_x, start_y, Texture.Get("sprite_player"));
-						player_1.CornerY += 32;
-						//e.To.Follow(player_1, true);
+                    _Game.AddUpdateEventHandler(this, (sender1, e1) => {
+                        Scene scene_context = e.To;
+                        double start_x = 0, start_y = 0;
+                        if(scene_context.DoorToPreviousScene != null)
+                        {
+                            start_x = scene_context.DoorToPreviousScene.CornerX;
+                            start_y = scene_context.DoorToPreviousScene.CornerY;
+                        }
+                        //new Spidey(e.To.Stage, start_x, start_y);
+                        
+                        //
+                        // Setup Player 1
+                        //
+                        
+                        Player player_1 = _Game.Player1;
+                        if(player_1 != null)
+                        {
+                            player_1.Derez();
+                        }
+                        player_1 = _Game.Player1 = new Player(scene_context.Stage, start_x, start_y, Texture.Get("sprite_player"));
+                        player_1.CornerY += 32;
+                        scene_context.Follow(player_1, true);
                         _Game.SetLastInputAccepters("Player1", new IInputAccepter[] { player_1 });
-						Follow(player_1);
-						
-						var health_meter = new HealthMeter(e.To.HUD, 64, ViewHeight - 64, player_1);
-						health_meter.Preserve = true;
-
+                        Follow(player_1);
+                        
+                        var health_meter = new HealthMeter(scene_context.HUD, 64, ViewHeight - 64, player_1);
+                        health_meter.Preserve = true;
+                        
                         player_1.DerezEvent += (sender3, e3) => {
                             _Game.RemoveInputAccepters("Player1");
-							health_meter.RenderSet.Remove(health_meter);
-						};
-
-						return true;
-					});
+                            health_meter.Set.Remove(health_meter);
+                        };
+                        return true;
+                    });
 				}
 			};
 		}

@@ -13,8 +13,6 @@ namespace positron
 		#region Member Variables
 		protected RenderSet _RenderSet;
 		protected List<IRenderable> _Blueprints;
-        #region OpenGL
-        #endregion
         protected Vector3d _Position = new Vector3d();
 		protected Vector3d _Scale = new Vector3d();
 		protected Vector3d _Velocity = new Vector3d();
@@ -103,7 +101,7 @@ namespace positron
 		/// implies loose render set association and manual
 		/// tracking of the object.
 		/// </summary>
-		public RenderSet RenderSet {
+		public RenderSet Set {
 			get { return _RenderSet; }
 			set { _RenderSet = value; }
 		}
@@ -118,10 +116,12 @@ namespace positron
 			_RenderSet = render_set;
             if(_RenderSet != null)
 			    _RenderSet.Add(this);
-			RenderSetTransfer += (object sender, RenderSetChangeEventArgs e) => {
-				this._RenderSet = e.To;
-			};
+            RenderSetTransfer += HandlerenderSetTransfer;
 		}
+        protected void HandlerenderSetTransfer (object sender, RenderSetChangeEventArgs e)
+        {
+            this._RenderSet = e.To;
+        }
         /// <summary>
         /// Creates geometry information necessary for VBO
         /// This is either called in the constructor or
@@ -154,6 +154,13 @@ namespace positron
         {
             _RenderSet = null;
             if (_Blueprints != null) {
+                for(int i = 0; i < _Blueprints.Count; i++)
+                {
+                    if(_Blueprints[i].Set != null)
+                        _Blueprints[i].Set.Remove(_Blueprints[i]);
+                    _Blueprints[i].Dispose();
+                    _Blueprints[i] = null;
+                }
                 _Blueprints.Clear ();
                 _Blueprints = null;
             }
