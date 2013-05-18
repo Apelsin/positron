@@ -52,8 +52,8 @@ namespace positron
 
             SceneEntry += (sender, e) => {
                 _ViewPosition = Vector3d.Zero;
-                stuff_one.StuffTimer.Restart();
-                stuff_two.StuffTimer.Restart();
+                //stuff_one.StuffTimer.Restart();
+                //stuff_two.StuffTimer.Restart();
             };
 
 		}
