@@ -82,7 +82,7 @@ namespace positron
             FadeUp = Texture.Get("sprite_dialog_fade_up");
 
             SpeakerWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, 24));
-            SpeechWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, (int)ScaleY - 24));
+            SpeechWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, (int)ScaleY));
 		}
 		public override void Render (double time)
 		{
@@ -111,21 +111,24 @@ namespace positron
 			GL.PushMatrix();
 			{
 				GL.Translate(16, 0.0, 0.0);
-				SpeakerWriter.Render(time);
-				GL.Translate (0.0, 24, 0.0);
 				if(CurrentStanza.Speaker != null)
 				{
+                    SpeakerWriter.Render(time);
+                    
 					var picture = CurrentStanza.Speaker.Picture;
 					if(picture != null)
 					{
 
 						picture.Bind();
+                        GL.PushMatrix();
+                        GL.Translate(0.0, 24, 0.0);
 						GL.Begin (BeginMode.Quads);
 						GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 			0.0);
 						GL.TexCoord2(1.0,  0.0);		GL.Vertex2(picture.Width,	0.0);
 						GL.TexCoord2(1.0, -1.0);		GL.Vertex2(picture.Width,	picture.Height);
 						GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 			picture.Height);
 						GL.End ();
+                        GL.PopMatrix();
 						GL.Translate(picture.Width + 16, 0.0, 0.0);
 					}
 				}

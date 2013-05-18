@@ -181,14 +181,21 @@ namespace positron
                         Reset = true;
                     }
 				}
-				else if(e.Key == Configuration.KeyToggleDrawBlueprints)
-				{
-					Configuration.DrawBlueprints ^= true;
-				}
-				else if(e.Key == Configuration.KeyToggleShowDebugVisuals)
-				{
-					Configuration.ShowDebugVisuals ^= true;
-				}
+                else if (e.Key == Key.F4)
+                {
+                    if (KeysPressed.Contains(Key.AltLeft) || KeysPressed.Contains(Key.AltRight))
+                    {
+                        this.Exit();
+                    }
+                }
+                else if (e.Key == Configuration.KeyToggleDrawBlueprints)
+                {
+                    Configuration.DrawBlueprints ^= true;
+                }
+                else if (e.Key == Configuration.KeyToggleShowDebugVisuals)
+                {
+                    Configuration.ShowDebugVisuals ^= true;
+                }
                 if(_Game != null)
                 {
                     lock(_Game.UpdateLock)
@@ -197,8 +204,13 @@ namespace positron
                         bool key_press = true;
     					for(int i = 0; i < accepters.Length; i++)
     						key_press = key_press && accepters[i].KeyDown(this, e);
-                        if(key_press)
-                            KeysPressed.Add (e.Key, DateTime.Now);
+                        if (key_press)
+                        {
+                            if(KeysPressed.Contains(e.Key))
+                                KeysPressed.Remove(e.Key);
+                            else
+                                KeysPressed.Add(e.Key, DateTime.Now);
+                        }
                     }
                 }
 				
@@ -226,8 +238,8 @@ namespace positron
                     {
     					for(int i = 0; i < accepters.Length; i++)
     						key_press = key_press && accepters[i].KeyUp(this, e);
-        				if(key_press)
-        					KeysPressed.Remove (e.Key);
+                        if (key_press && KeysPressed.Contains(e.Key))
+                            KeysPressed.Remove(e.Key);
                     }
                 }
 			};

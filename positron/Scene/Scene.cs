@@ -255,7 +255,7 @@ namespace positron
                 UpdateHUDStats ();
             //}
 		}
-		public void Render (double time)
+		public virtual void Render (double time)
 		{
 			lock (_RenderLock)
 			{
