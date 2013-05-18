@@ -15,8 +15,11 @@ namespace positron
 		protected Stopwatch JumpTimer = new Stopwatch();
 		public Spidey (RenderSet render_set, double x, double y):
 			base(render_set, x, y, Texture.Get ("sprite_spidey_0"))
-		{
-			this.Body.OnCollision += HandleOnCollision;
+        {
+            if (Body != null) {
+                Body.OnCollision += HandleOnCollision;
+                Body.BodyType = BodyType.Dynamic;
+            }
 			JumpTimer.Start();
 		}
 

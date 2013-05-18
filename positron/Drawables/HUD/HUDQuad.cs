@@ -9,6 +9,7 @@ namespace positron
 {
     public class HUDQuad : IRenderable, IColorable
     {
+        protected RenderSet _RenderSet;
         protected Color _Color;
 		public Vector3d A, B, C, D;
         public Color Color
@@ -16,13 +17,17 @@ namespace positron
             get { return _Color; }
             set { _Color = value; }
         }
+        public RenderSet Set {
+            get { return _RenderSet; }
+        }
 		public HUDQuad(RenderSet render_set, Vector3d a, Vector3d b, Vector3d c, Vector3d d)
 		{
 			A = a;
 			B = b;
 			C = c;
 			D = d;
-			render_set.Add(this);
+            _RenderSet = render_set;
+            _RenderSet.Add(this);
 		}
 		public HUDQuad(RenderSet render_set, Vector3d p, Vector3d s) :
 			this(render_set, p,
@@ -46,6 +51,7 @@ namespace positron
         }
 		public virtual void Dispose()
 		{
+            _RenderSet = null;
 		}
     }
 }

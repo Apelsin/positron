@@ -5,6 +5,7 @@ namespace positron
 {
 	public class RenderSet : List<IRenderable>, IRenderable
 	{
+        public RenderSet Set { get { return null; } }
 		protected Scene _Scene;
 		public Scene Scene { get { return _Scene; } }
 		public RenderSet (Scene scene, params IRenderable[] renderables):

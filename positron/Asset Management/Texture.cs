@@ -101,6 +101,7 @@ namespace positron
 			LoadTexture ("sprite_indicator_gloss", "sprite_indicator_gloss.png");
 			LoadTexture ("sprite_spidey_0", "sprite_spidey_0.png");
 			LoadTexture ("sprite_spidey_1", "sprite_spidey_1.png");
+            PsdLoader.LoadSpriteSheet ("sprite_ripples", "sprite_ripples.psd");
 			
 			// Scene Elements
 			LoadTexture ("sprite_doorway", 			"scene_element",	"sprite_doorway.png");

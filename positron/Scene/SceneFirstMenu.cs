@@ -12,11 +12,13 @@ namespace positron
 	public class SceneFirstMenu : Scene
 	{
 		protected UIElementGroup UIGroup;
+        protected StuffOne stuff_one;
+        protected StuffTwo stuff_two;
         protected SceneFirstMenu (PositronGame game):
             base(game)
 		{
 			UIGroup = new UIElementGroup();
-			this.SceneEntry += (sender, e) => {
+			SceneEntry += (sender, e) => {
                 _Game.SetInputAccepters("Main Menu",  new IInputAccepter[] { UIGroup });
 			};
 			SceneExit += (sender, e) => {
@@ -44,27 +46,20 @@ namespace positron
                 _Game.CurrentScene = (Scene)_Game.Scenes["SceneCredits"];
 			};
 
-            var looper = new MusicLooper_LessHackish(this, "last_human_loop");
-            looper.Preserve = true;
-            looper.RenderSetTransfer += (sender, e) => {
-                _Game.AddUpdateEventHandler(this, (sender1, e1)=> {
-                    if(!(e.From.Scene is ISceneGameplay) && (e.To.Scene is ISceneGameplay))
-                    {
-                        looper.SetLoop("induction_loop");
-                    }
-                    else if((e.From.Scene is ISceneGameplay) && !(e.To.Scene is ISceneGameplay))
-                    {
-                        looper.SetLoop("last_human_loop");
-                    }
-                    return true;
-                });
+            var looper = new MusicLooper_LessHackish(this);
+            stuff_one = new StuffOne(Background, 0.5 * ViewWidth, 0, -100, (int)ViewWidth / 20 + 1, (int)ViewHeight / 30 + 1);
+            stuff_two = new StuffTwo(Background, 0.5 * ViewWidth, 0, -200, (int)ViewWidth / 20 + 1, (int)ViewHeight / 30 + 1);
+
+            SceneEntry += (sender, e) => {
+                _ViewPosition = Vector3d.Zero;
+                stuff_one.StuffTimer.Restart();
+                stuff_two.StuffTimer.Restart();
             };
-            new StuffOne(Background, 0.5 * ViewWidth, 0, -100, (int)ViewWidth / 20 + 1, (int)ViewHeight / 30 + 1);
-            new StuffTwo(Background, 0.5 * ViewWidth, 0, -200, (int)ViewWidth / 20 + 1, (int)ViewHeight / 30 + 1);
+
 		}
         protected class StuffOne : Drawable
         {
-            protected Stopwatch StuffTimer = new Stopwatch();
+            public Stopwatch StuffTimer = new Stopwatch();
             protected Texture _Texture;
             protected int _Wide, _High;
             public StuffOne(RenderSet render_set, double x, double y, double z, int wide, int high):
@@ -116,7 +111,7 @@ namespace positron
                         GL.Rotate(r, 0.0, 0.0, 1.0);
                         GL.Translate(5 * g, 5 * f, 50 * r * h);
                         GL.Scale(h, h, h);
-                        GL.Color4 (0.2, 0.4, 1.0, a);
+                        GL.Color4 (0.2, 0.3 + 0.3 * r, 1.0, a);
                         GL.Rotate(h, 0.0, 1.0, 0);
                         GL.Begin (BeginMode.Quads);
                         {

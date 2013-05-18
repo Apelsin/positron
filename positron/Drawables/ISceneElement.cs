@@ -11,7 +11,7 @@ namespace positron
 		void OnRenderSetEntry (object sender, RenderSetChangeEventArgs e);
 		void OnRenderSetTransfer (object sender, RenderSetChangeEventArgs e);
 		bool Preserve { get; set; }
-		RenderSet RenderSet { get; }
+		RenderSet Set { get; }
 		List<IRenderable> Blueprints { get; }
 		void Dispose();
 	}

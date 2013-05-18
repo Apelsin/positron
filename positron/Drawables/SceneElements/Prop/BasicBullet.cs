@@ -24,23 +24,25 @@ namespace positron
 			_Velocity.X = vx;
 			_Velocity.Y = vy;
 			InitPhysicsLate();
+
 		}
 		protected override void InitPhysics()
 		{
 			base.InitPhysics();
 			Body.BodyType = BodyType.Dynamic;
 			Body.IsBullet = true;
-			Body.OnCollision += (Fixture fixtureA, Fixture fixtureB, Contact contact) =>
-			{
-                _RenderSet.Scene.Game.AddUpdateEventHandler(this, (sender, e) =>
-                {
-                    new BulletCollisionParticle(RenderSet.Scene, PositionX, PositionY).CenterShift();
-                    Derez();
-					return true;
-                });
-				return true;
-			};
+            Body.OnCollision += HandleCollision;
 		}
+        bool HandleCollision(Fixture fixtureA, Fixture fixtureB, Contact contact)
+        {
+            WeakReference scene_wr = new WeakReference(Set.Scene);
+            _RenderSet.Scene.Game.AddUpdateEventHandler(this, (sender, e) => {
+                new BulletCollisionParticle((Scene)scene_wr.Target, PositionX, PositionY).CenterShift();
+                Derez();
+                return true;
+            });
+            return true;
+        }
 		protected void InitPhysicsLate()
 		{
 			Body.LinearVelocity = new Microsoft.Xna.Framework.Vector2(
@@ -63,10 +65,13 @@ namespace positron
             base(scene.Stage, x, y, Texture.Get("sprite_bullet_collision_particle"))
         {
             Hit = new SpriteAnimation(Texture, 10, false, "f1", "f2", "f3", "f4");
+            Hit.Sound = Sound.Get ("sfx_bullet_impact");
+            WeakReference game_wr = new WeakReference(Set.Scene.Game);
+            WeakReference render_set_wr = new WeakReference(Set);
             _AnimationNext = new Lazy<SpriteAnimation>(() => { 
-                _RenderSet.Scene.Game.AddUpdateEventHandler(this, (sender, e) =>
+                ((PositronGame)game_wr.Target).AddUpdateEventHandler(this, (sender, e) =>
                 {
-                    RenderSet.Remove (this);
+                    ((RenderSet)render_set_wr.Target).Remove (this);
                     this.Dispose();
                     return true;
                 });

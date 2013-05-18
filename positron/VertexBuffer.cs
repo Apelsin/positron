@@ -122,6 +122,7 @@ namespace positron
 
             GL.BindBuffer (BufferTarget.ArrayBuffer, Id);
             GL.BufferData (BufferTarget.ArrayBuffer, new IntPtr (data.Length * _Size), data, BufferUsageHint.StaticDraw);
+            GL.BindBuffer (BufferTarget.ArrayBuffer, 0);
         }
 
         public void SetData (params VertexLite[] data)
@@ -135,6 +136,7 @@ namespace positron
             
             GL.BindBuffer (BufferTarget.ArrayBuffer, Id);
             GL.BufferData (BufferTarget.ArrayBuffer, new IntPtr (data.Length * _Size), data, BufferUsageHint.StaticDraw);
+            GL.BindBuffer (BufferTarget.ArrayBuffer, 0);
         }
 
         public void Render ()
@@ -145,11 +147,11 @@ namespace positron
             GL.TexCoordPointer (2, TexCoordPointerType.Double, _Size, TexCoordPtr);
             //GL.ColorPointer (4, ColorPointerType.Float, _Size, ColorPtr);
             if (_ColorBufferUsed) {
-                //GL.EnableClientState(ArrayCap.ColorArray);
+                GL.EnableClientState(ArrayCap.ColorArray);
                 GL.ColorPointer (4, ColorPointerType.Float, _Size, ColorPtr);
             }
-            //else
-            //    GL.DisableClientState(ArrayCap.ColorArray);
+            else
+                GL.DisableClientState(ArrayCap.ColorArray);
             GL.DrawArrays(BeginMode.Quads, 0, _DataLength); // TODO: Make this part not-hardcoded
         }
 		public void Dispose()

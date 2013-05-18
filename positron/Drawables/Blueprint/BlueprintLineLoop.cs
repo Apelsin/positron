@@ -10,6 +10,7 @@ namespace positron
 {
 	public class BlueprintLineLoop : IRenderable
 	{
+        public RenderSet Set { get { return null; } }
 		protected int Lifespan;
 		protected Stopwatch Timer;
 		protected ISceneElement _Instance;
@@ -68,6 +69,7 @@ namespace positron
 		}
 		public virtual void Dispose()
 		{
+            _Instance = null;
 		}
 	}
 }

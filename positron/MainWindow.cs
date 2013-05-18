@@ -70,26 +70,7 @@ namespace positron
 		/// Height scale of FBO textured quad
 		/// </summary>
 		float FBOScaleY;
-		/// <summary>
-		/// Signifies that the window position changed
-		/// </summary>
-		bool PositionChanged = true;
-		/// <summary>
-		/// The main window's X-position in pixels
-		/// </summary>
-		int PositionX;
-		/// <summary>
-		/// The main window's Y-position in pixels
-		/// </summary>
-		int PositionY;
-		/// <summary>
-		/// The main window's X-position rate of change
-		/// </summary>
-		float PositiondX;
-		/// <summary>
-		/// The main window's Y-position rate of change
-		/// </summary>
-		float PositiondY;
+
 		/// <summary>
 		/// Ordered dictionary containing the current keyboard keys being pressed in time order
 		/// </summary>
@@ -132,11 +113,6 @@ namespace positron
 
         double _LastFrameTime, _LastUpdateTime, _LastRenderTime;
         double _LastRenderDrawingTime;
-        
-        /// <summary>
-        /// Lock to synchronize user input controls
-        /// </summary>
-        public readonly object UserInputLock = new object();
 
 		#endregion
 		#region Accessors
@@ -169,8 +145,7 @@ namespace positron
 		public event KeysUpdateEventHandler KeysUpdate;
 		protected virtual void OnKeysUpdate (double time)
 		{
-			//TODO: Not sure if this respects UpdateLock (verify)
-			lock(UserInputLock)
+			lock(_Game.UpdateLock)
 			{
 				KeysUpdateEventArgs args = new KeysUpdateEventArgs (KeysPressed, time);
                 if (KeysUpdate != null)
@@ -187,7 +162,7 @@ namespace positron
 		public ThreadedRendering ()
 			: base()
 		{
-
+            this.Title = "A n d r o i d   N o w";
 			//lock (_Game.UpdateLock)
 			{
 				this.Width = _CanvasWidth;
@@ -214,44 +189,47 @@ namespace positron
 				{
 					Configuration.ShowDebugVisuals ^= true;
 				}
-                lock(UserInputLock)
-				{
-                    IInputAccepter[] accepters = _Game.InputAccepterGroup;
-                    bool key_press = true;
-					for(int i = 0; i < accepters.Length; i++)
-						key_press = key_press && accepters[i].KeyDown(this, e);
-                    if(key_press)
-                    {
-                        KeysPressed.Add (e.Key, DateTime.Now);
+                if(_Game != null)
+                {
+                    lock(_Game.UpdateLock)
+    				{
+                        IInputAccepter[] accepters = _Game.InputAccepterGroup;
+                        bool key_press = true;
+    					for(int i = 0; i < accepters.Length; i++)
+    						key_press = key_press && accepters[i].KeyDown(this, e);
+                        if(key_press)
+                            KeysPressed.Add (e.Key, DateTime.Now);
                     }
                 }
 				
 			};
 			Keyboard.KeyUp += delegate(object sender, KeyboardKeyEventArgs e)
 			{
-				if (e.Key == Configuration.KeyToggleFullScreen)
-				{
-					lock(_Game.UpdateLock)
-					{
-						if (this.WindowState == WindowState.Fullscreen)
-							this.WindowState = WindowState.Normal;
-						else
-							this.WindowState = WindowState.Fullscreen;
-						OnResize(null);
-					}
-				}
-				IInputAccepter[] accepters = _Game.InputAccepterGroup;
-				bool key_press = true;
-                lock(UserInputLock)
-				{
-					for(int i = 0; i < accepters.Length; i++)
-						key_press = key_press && accepters[i].KeyUp(this, e);
-				}
-				if(key_press)
-				{
-					lock(UserInputLock)
-						KeysPressed.Remove (e.Key);
-				}
+                if(_Game == null)
+                    return;
+                lock(_Game.UpdateLock)
+                {
+    				if (e.Key == Configuration.KeyToggleFullScreen)
+    				{
+                        if(_Game != null)
+                        {
+    						if (this.WindowState == WindowState.Fullscreen)
+    							this.WindowState = WindowState.Normal;
+    						else
+    							this.WindowState = WindowState.Fullscreen;
+    						OnResize(null);
+                        }
+    				}
+    				IInputAccepter[] accepters = _Game.InputAccepterGroup;
+    				bool key_press = true;
+                    if(_Game != null)
+                    {
+    					for(int i = 0; i < accepters.Length; i++)
+    						key_press = key_press && accepters[i].KeyUp(this, e);
+        				if(key_press)
+        					KeysPressed.Remove (e.Key);
+                    }
+                }
 			};
 			Resize += delegate(object sender, EventArgs e)
 			{
@@ -271,22 +249,6 @@ namespace positron
 					FBOScaleY = multi * _CanvasHeight;
 				}
 			};
-			Move += delegate(object sender, EventArgs e)
-			{
-				// Note that we cannot call any OpenGL methods directly. What we can do is set
-				// a flag and respond to it from the rendering thread.
-                lock (_Game.UpdateLock)
-				{
-					PositionChanged = true;
-					PositiondX = (PositionX - X) / (float)Width;
-					PositiondY = (PositionY - Y) / (float)Height;
-					PositionX = X;
-					PositionY = Y;
-				}
-			};	
-			// Make sure initial position are correct, otherwise there will be a great initial velocity
-			PositionX = X;
-			PositionY = Y;
 		}
 		
 		#region OnLoad

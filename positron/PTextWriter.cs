@@ -16,6 +16,7 @@ namespace positron
 	/// </summary>
 	public class PTextWriter : IRenderable
 	{
+        public RenderSet Set { get { return null; } }
 		protected Font TextFont = new Font(FontFamily.GenericMonospace, 11);
 		protected Bitmap TextBitmap;
 		protected List<PointF> Positions;

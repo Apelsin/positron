@@ -125,6 +125,7 @@
     <Compile Include="Scene\SceneWin.cs" />
     <Compile Include="IGLContextLateUpdate.cs" />
     <Compile Include="Drawables\SceneElements\Prop\MusicLooper_LessHackish.cs" />
+    <Compile Include="WR.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">

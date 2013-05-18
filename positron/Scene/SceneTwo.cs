@@ -70,7 +70,6 @@ namespace positron
 
 			for (int i = 0; i < 5; i++) {
 				var spidey = new Spidey (Stage, xp - (5 + 0.25 * i) * TileSize, yp);
-				spidey.Body.BodyType = BodyType.Dynamic;
 			}
 
 			// Gateways
