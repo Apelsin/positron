@@ -45,6 +45,7 @@ namespace positron
 			{
                 _Game.CurrentScene = (Scene)_Game.Scenes["SceneCredits"];
 			};
+            new SpriteBase(HUD, x_center, y_center - 128, Texture.Get ("sprite_infogfx_start")).CenterShift();
 
             var looper = new MusicLooper_LessHackish(this);
             stuff_one = new StuffOne(Background, 0.5 * ViewWidth, 0, -100, (int)ViewWidth / 20 + 1, (int)ViewHeight / 30 + 1);

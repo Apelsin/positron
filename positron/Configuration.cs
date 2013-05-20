@@ -35,6 +35,7 @@ namespace positron
             _KeyDoAction,
             _KeyCrouch,
             _KeyReset,
+            _KeyResetModifier,
             _KeyToggleFullScreen,
             _KeyToggleShowDebugVisuals,
             _KeyToggleDrawBlueprints;
@@ -79,7 +80,7 @@ namespace positron
 			_MaxWorldTimeStep = 0.05f;
 			_AdaptiveTimeStep = false;
 			_CanvasWidth = 1280 / 2;
-			_CanvasHeight = 720 / 2;
+			_CanvasHeight = 800 / 2;
 			//_CanvasWidth = 1280 ;
 			//_CanvasHeight = 640;
 			_DrawBlueprints = false;
@@ -93,9 +94,10 @@ namespace positron
             _KeyDoAction = Key.H;
             _KeyCrouch = Key.C;
             _KeyReset = Key.Number1;
+            _KeyResetModifier = Key.Number2;
             _KeyToggleFullScreen = Key.BackSlash;
-            _KeyToggleShowDebugVisuals = Key.V;
-            _KeyToggleDrawBlueprints = Key.B;
+            _KeyToggleShowDebugVisuals = Key.Semicolon;
+            _KeyToggleDrawBlueprints = Key.Quote;
 		}
 		#region Alias Accessors
 		public static string ArtworkPath {
@@ -177,6 +179,7 @@ namespace positron
         public static Key KeyDoAction { get { return _KeyDoAction; } }
         public static Key KeyCrouch { get { return _KeyCrouch; } }
         public static Key KeyReset { get { return _KeyReset; } }
+        public static Key KeyResetModifier { get { return _KeyResetModifier; } }
         public static Key KeyToggleFullScreen { get { return _KeyToggleFullScreen; } }
         public static Key KeyToggleShowDebugVisuals { get { return _KeyToggleShowDebugVisuals; } }
         public static Key KeyToggleDrawBlueprints { get { return _KeyToggleDrawBlueprints; } }
@@ -213,6 +216,7 @@ namespace positron
             yield return new KeyValuePair<String, object>("_KeyDoAction", _KeyDoAction);
             yield return new KeyValuePair<String, object>("_KeyCrouch", _KeyCrouch);
             yield return new KeyValuePair<String, object>("_KeyReset", _KeyReset);
+            yield return new KeyValuePair<String, object>("_KeyResetModifier", _KeyResetModifier);
             yield return new KeyValuePair<String, object>("_KeyToggleFullScreen", _KeyToggleFullScreen);
             yield return new KeyValuePair<String, object>("_KeyToggleShowDebugVisuals", _KeyToggleShowDebugVisuals);
             yield return new KeyValuePair<String, object>("_KeyToggleDrawBlueprints", _KeyToggleDrawBlueprints);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using OpenTK.Input;
+using positron.Input;
 
 namespace positron
 {
@@ -14,7 +15,7 @@ namespace positron
 			base()
 		{
 		}
-		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
+		public bool KeyDown (object sender, KeyEventArgs e)
 		{
 			if (e.Key == Configuration.KeyUp || e.Key == Configuration.KeyLeft) {
 				_ElementFocusedIndex = (_ElementFocusedIndex + Count - 1) % Count;
@@ -36,7 +37,7 @@ namespace positron
 				((UIButton)ElementFocused).OnAction(this, new ActionEventArgs(true, ElementFocused));
 			}
 		}
-		public bool KeyUp(object sender, KeyboardKeyEventArgs e)
+        public bool KeyUp(object sender, KeyEventArgs e)
 		{
 			return true;
 		}

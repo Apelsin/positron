@@ -6,7 +6,10 @@ using System.Drawing;
 using FarseerPhysics.Dynamics;
 
 using OpenTK;
+
 using OpenTK.Input;
+using positron.Input;
+
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
@@ -190,7 +193,7 @@ namespace positron
 			if(DialogEnd != null)
 				DialogEnd(this, new DialogEndEventArgs());
 		}
-		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
+		public bool KeyDown (object sender, KeyEventArgs e)
 		{
             if (e.Key == Configuration.KeyDoAction || e.Key == Configuration.KeyUseEquippedItem || e.Key == Configuration.KeyJump) {
 				Next();
@@ -198,7 +201,7 @@ namespace positron
 			}
 			return true;
 		}
-		public bool KeyUp(object sender, KeyboardKeyEventArgs e)
+		public bool KeyUp(object sender, KeyEventArgs e)
 		{
 			return true;
 		}

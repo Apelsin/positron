@@ -7,6 +7,7 @@ using System.Threading;
 
 using OpenTK;
 using OpenTK.Input;
+using positron.Input;
 
 using FarseerPhysics.Common;
 using FarseerPhysics.Collision;
@@ -326,7 +327,7 @@ namespace positron
 				}
 			}
 		}
-		public bool KeyDown (object sender, KeyboardKeyEventArgs e)
+        public bool KeyDown (object sender, KeyEventArgs e)
         {
 			
             if (e.Key == Configuration.KeyDoAction && !_WieldingGun) {
@@ -341,7 +342,7 @@ namespace positron
 			}
 			return true;
 		}
-		public bool KeyUp (object sender, KeyboardKeyEventArgs e)
+        public bool KeyUp (object sender, KeyEventArgs e)
 		{
 			if (e.Key == Configuration.KeyUseEquippedItem && _WieldingGun) {
 				UpdateEventHandler late;

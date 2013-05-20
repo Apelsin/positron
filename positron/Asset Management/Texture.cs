@@ -189,6 +189,7 @@ namespace positron
 			var bg_pipes = LoadTexture("sprite_bg_pipes", "background", "sprite_bg_pipes.png");
 			
             var infogfx_cabinet = PsdLoader.LoadSpriteSheet("sprite_infogfx_cabinet_buttons", "user_interface", "sprite_infogfx_cabinet_buttons.psd");
+            var infogfx_start = LoadTexture("sprite_infogfx_start", "user_interface", "sprite_infogfx_start.png");
 			
 			// TEST PSDLOADER
 			//PsdLoader.LoadSpriteSheet("sprite_dumbo", "sprite_dumbo.psd");

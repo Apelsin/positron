@@ -13,7 +13,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>True</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -40,7 +40,7 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="AfterBuild" command="${ProjectDir}/makebundle.sh ${TargetName} ${ProjectName}" workingdir="${TargetDir}" />
-        <Command type="BeforeBuild" command="cp ../lib/OpenAL/OpenAL32.dll ." workingdir="${TargetDir}" />
+        <Command type="BeforeBuild" command="cp ../../../lib/OpenAL/OpenAL32.dll ./" workingdir="${TargetDir}" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
@@ -126,6 +126,7 @@
     <Compile Include="IGLContextLateUpdate.cs" />
     <Compile Include="Drawables\SceneElements\Prop\MusicLooper_LessHackish.cs" />
     <Compile Include="WR.cs" />
+    <Compile Include="KeyEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
