@@ -10,6 +10,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using positron.Input;
 
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
@@ -167,32 +168,46 @@ namespace positron
 			{
 				this.Width = _CanvasWidth;
 				this.Height = _CanvasHeight;
+                this.WindowState = OpenTK.WindowState.Fullscreen; // Hard-coded quik-fix
 			}
 			Keyboard.KeyDown += delegate(object sender, KeyboardKeyEventArgs e)
 			{
-				if (e.Key == Configuration.KeyReset)
+                KeyEventArgs key_args = new KeyEventArgs();
+                key_args.Key = e.Key;
+                if (key_args.Key == Configuration.KeyReset)
 				{
-					if(KeysPressed.Contains (Key.ShiftLeft) || KeysPressed.Contains (Key.ShiftRight) )
+					if(KeysPressed.Contains (Configuration.KeyResetModifier))
 					{
                         this.Exit();
 					}
 					else
                     {
-                        Reset = true;
+                        // Hard-coded quik-fix crap; don't leave this here too long...
+                        //if(_Game != null)
+                        //{
+                        //    lock(_Game.UpdateLock)
+                        //    {
+                        //        if(_Game.CurrentScene.Name == "SceneFirstMenu")
+                        //            key_args.Key = Configuration.KeyDoAction; // HACK: change the meaning of "game start" button (i.e. reset)
+                        //        else
+                                    Reset = true;
+                        //    }
+                        //}
                     }
 				}
-                else if (e.Key == Key.F4)
+                // Hard-coded classic Alt-F4 because we're cool
+                else if (key_args.Key == Key.F4)
                 {
                     if (KeysPressed.Contains(Key.AltLeft) || KeysPressed.Contains(Key.AltRight))
                     {
                         this.Exit();
                     }
                 }
-                else if (e.Key == Configuration.KeyToggleDrawBlueprints)
+                else if (key_args.Key == Configuration.KeyToggleDrawBlueprints)
                 {
                     Configuration.DrawBlueprints ^= true;
                 }
-                else if (e.Key == Configuration.KeyToggleShowDebugVisuals)
+                else if (key_args.Key == Configuration.KeyToggleShowDebugVisuals)
                 {
                     Configuration.ShowDebugVisuals ^= true;
                 }
@@ -203,13 +218,13 @@ namespace positron
                         IInputAccepter[] accepters = _Game.InputAccepterGroup;
                         bool key_press = true;
     					for(int i = 0; i < accepters.Length; i++)
-    						key_press = key_press && accepters[i].KeyDown(this, e);
+                            key_press = key_press && accepters[i].KeyDown(this, key_args);
                         if (key_press)
                         {
-                            if(KeysPressed.Contains(e.Key))
-                                KeysPressed.Remove(e.Key);
+                            if(KeysPressed.Contains(key_args.Key))
+                                KeysPressed.Remove(key_args.Key);
                             else
-                                KeysPressed.Add(e.Key, DateTime.Now);
+                                KeysPressed.Add(key_args.Key, DateTime.Now);
                         }
                     }
                 }
@@ -217,11 +232,13 @@ namespace positron
 			};
 			Keyboard.KeyUp += delegate(object sender, KeyboardKeyEventArgs e)
 			{
+                KeyEventArgs key_args = new KeyEventArgs();
+                key_args.Key = e.Key;
                 if(_Game == null)
                     return;
                 lock(_Game.UpdateLock)
                 {
-    				if (e.Key == Configuration.KeyToggleFullScreen)
+                    if (key_args.Key == Configuration.KeyToggleFullScreen)
     				{
                         if(_Game != null)
                         {
@@ -237,9 +254,9 @@ namespace positron
                     if(_Game != null)
                     {
     					for(int i = 0; i < accepters.Length; i++)
-    						key_press = key_press && accepters[i].KeyUp(this, e);
-                        if (key_press && KeysPressed.Contains(e.Key))
-                            KeysPressed.Remove(e.Key);
+                            key_press = key_press && accepters[i].KeyUp(this, key_args);
+                        if (key_press && KeysPressed.Contains(key_args.Key))
+                            KeysPressed.Remove(key_args.Key);
                     }
                 }
 			};
