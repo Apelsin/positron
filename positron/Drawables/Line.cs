@@ -14,7 +14,7 @@ namespace positron
 	{
 		public event DerezEventHandler DerezEvent;
 		private Color _Color;
-		private Vector3d _Direction;
+		private Vector3 _Direction;
 
 		private Body _LineBody;
 
@@ -27,17 +27,17 @@ namespace positron
 			get { return _Color; }
 			set { _Color = value; }
 		}
-		public Vector3d Direction {
+		public Vector3 Direction {
 			get { return _Direction; }
 			set { _Direction = value; }
 		}
 		public float Thickness { get; set; }
 
-		public Line (Vector3d start, Vector3d end, RenderSet scene):
+		public Line (Vector3 start, Vector3 end, RenderSet scene):
 			this(start, end, 1.0f, scene)
 		{
 		}
-		public Line (Vector3d start, Vector3d end, float thickness, RenderSet render_set):
+		public Line (Vector3 start, Vector3 end, float thickness, RenderSet render_set):
 			base(render_set)
 		{
 			_Position = start;
@@ -58,7 +58,7 @@ namespace positron
 			FixtureFactory.AttachEdge(Microsoft.Xna.Framework.Vector2.Zero, direction, _LineBody);
 			_LineBody.BodyType = BodyType.Static;
 		}
-		public override void Render (double time)
+		public override void Render (float time)
 		{
 			// Unbind any texture that was previously bound
 			GL.BindTexture (TextureTarget.Texture2D, 0);
@@ -67,16 +67,16 @@ namespace positron
 			{
 				GL.Translate (_LineBody.Position.X * Configuration.MeterInPixels,
 				              _LineBody.Position.Y * Configuration.MeterInPixels, 0.0);
-				GL.Rotate (_Theta + (double)OpenTK.MathHelper.RadiansToDegrees (_LineBody.Rotation), 0.0, 0.0, 1.0);
+				GL.Rotate (_Theta + (float)OpenTK.MathHelper.RadiansToDegrees (_LineBody.Rotation), 0.0, 0.0, 1.0);
 				GL.Begin (BeginMode.Lines);
 				GL.Color4 (_Color);
-				GL.Vertex3 (Vector3d.Zero);
+				GL.Vertex3 (Vector3.Zero);
 				GL.Vertex3 (_Direction.X, _Direction.Y, _Direction.Z);
 				GL.End ();
 			}
 			GL.PopMatrix ();
 		}
-		public void Update(double time)
+		public void Update(float time)
 		{
 			// Do something!
 		}

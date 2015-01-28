@@ -22,10 +22,10 @@ namespace positron
 			Color = Color.Black;
 			Radius = radius;
 		}
-		public override void Render(double time)
+		public override void Render(float time)
 		{
 			GL.PointSize(Radius);
-			GL.Begin(BeginMode.Points);
+			GL.Begin(PrimitiveType.Points);
 			GL.Color4(Color);
 			GL.Vertex2(PositionX, PositionY);
 			GL.End();

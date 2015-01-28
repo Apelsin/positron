@@ -11,40 +11,40 @@ namespace positron
     public class TextureRegion
     {
 		private string _Label;
-		private Vector2d _Low, _High, _OriginOffset = Vector2d.Zero;
+		private Vector2 _Low, _High, _OriginOffset = Vector2.Zero;
 
-		public TextureRegion(Vector2d l, Vector2d h):
+		public TextureRegion(Vector2 l, Vector2 h):
 			this("Region", l, h)
 		{
 		}
-		public TextureRegion(double x, double y, double w, double h):
+		public TextureRegion(float x, float y, float w, float h):
 			this("Region", x, y, w, h)
 		{
 		}
-		public TextureRegion(string label, double x, double y, double w, double h)
+		public TextureRegion(string label, float x, float y, float w, float h)
 		{
 			_Label = label;
-			_Low = new Vector2d(x, y);
-			_High = _Low + new Vector2d(w, h);
+			_Low = new Vector2(x, y);
+			_High = _Low + new Vector2(w, h);
 		}
-		public TextureRegion(string label, Vector2d l, Vector2d h)
+		public TextureRegion(string label, Vector2 l, Vector2 h)
 		{
 			_Label = label;
 			_Low = l;
 			_High = h;
 		}
 		public string Label { get { return _Label; } set { _Label = value; } }
-		public Vector2d Low { get { return _Low; } set { _Low = value; } }
-		public Vector2d High { get { return _High; } set { _High = value; } }
-		public Vector2d OriginOffset { get { return _OriginOffset; } set { _OriginOffset = value; } }
-		public double OriginOffsetX { get { return _OriginOffset.X; } set { _OriginOffset.X = value; } }
-		public double OriginOffsetY { get { return _OriginOffset.Y; } set { _OriginOffset.Y = value; } }
-		public Vector2d Center { get { return 0.5 * (_Low + _High); } }
-		public double CenterX { get { return 0.5 * (_Low.X + _High.X); } }
-		public double CenterY { get { return 0.5 * (_Low.Y + _High.Y); } }
-        public Vector2d Size { get { return _High - _Low; } }
-		public double SizeX { get { return _High.X - _Low.X; } }
-		public double SizeY { get { return _High.Y -  _Low.Y; } }
+		public Vector2 Low { get { return _Low; } set { _Low = value; } }
+		public Vector2 High { get { return _High; } set { _High = value; } }
+		public Vector2 OriginOffset { get { return _OriginOffset; } set { _OriginOffset = value; } }
+		public float OriginOffsetX { get { return _OriginOffset.X; } set { _OriginOffset.X = value; } }
+		public float OriginOffsetY { get { return _OriginOffset.Y; } set { _OriginOffset.Y = value; } }
+		public Vector2 Center { get { return 0.5f * (_Low + _High); } }
+		public float CenterX { get { return 0.5f * (_Low.X + _High.X); } }
+		public float CenterY { get { return 0.5f * (_Low.Y + _High.Y); } }
+        public Vector2 Size { get { return _High - _Low; } }
+		public float SizeX { get { return _High.X - _Low.X; } }
+		public float SizeY { get { return _High.Y -  _Low.Y; } }
 		public override string ToString ()
 		{
 			return string.Format ("[TextureRegion: Label={0}, Low={1}, High={2}, Size={3}]", Label, Low, High, Size);

@@ -8,7 +8,7 @@ namespace positron
 	public interface IWorldObject : ISceneElement
 	{
 		event DerezEventHandler DerezEvent;
-		void Update(double time);
+		void Update(float time);
 
 		/// <summary>
 		/// Connects the Body object with this IWorldObject by
@@ -19,23 +19,23 @@ namespace positron
 
 		Body Body { get; set; }
 
-		double PositionX { get; set; }
-		double PositionY { get; set; }
-		//double PositionZ { get; set; }
-		Vector3d Position { get; set; }
+		float PositionX { get; set; }
+		float PositionY { get; set; }
+		//float PositionZ { get; set; }
+		Vector3 Position { get; set; }
 		
-		double ScaleX { get; set; }
-		double ScaleY { get; set; }
-		//double ScaleZ { get; set; }
-		Vector3d Scale { get; set; }
+		float ScaleX { get; set; }
+		float ScaleY { get; set; }
+		//float ScaleZ { get; set; }
+		Vector3 Scale { get; set; }
 		
-		double VelocityX { get; set; }
-		double VelocityY { get; set; }
-		//double VelocityZ { get; set; }
-		Vector3d Velocity { get; set; }
+		float VelocityX { get; set; }
+		float VelocityY { get; set; }
+		//float VelocityZ { get; set; }
+		Vector3 Velocity { get; set; }
 
 
-		double Theta { get; set; }
+		float Theta { get; set; }
 		//quaternion Rotation { get; set; }
 	}
 }

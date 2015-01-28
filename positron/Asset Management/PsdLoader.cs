@@ -130,8 +130,8 @@ namespace positron
 				if (slice.Name != "") {
 					TextureRegion region =
 						new TextureRegion (slice.Name,
-						                  new Vector2d (slice.Left, psd.RowCount - slice.Bottom),
-						                  new Vector2d (slice.Right, psd.RowCount - slice.Top)); // Vertical axis (Y) is flipped
+						                  new Vector2 (slice.Left, psd.RowCount - slice.Bottom),
+						                  new Vector2 (slice.Right, psd.RowCount - slice.Top)); // Vertical axis (Y) is flipped
 
 					if (slice.Target.ToLower () == "default")
 						texture.DefaultRegionIndex = tr.Count;
@@ -147,7 +147,7 @@ namespace positron
 			// Set the origin of these regions to a position that aligns its
 			// lower left corner with the default region
 			for (int i = 0; i < set_corner.Count; i++) {
-				Vector2d origin_offset = 0.5 * (set_corner[i].Size - texture.DefaultRegion.Size);
+				Vector2 origin_offset = 0.5f * (set_corner[i].Size - texture.DefaultRegion.Size);
 				//Console.WriteLine("Expected: {0}", origin);
 				set_corner[i].OriginOffset = origin_offset;
 				//Console.WriteLine("Result: {0}", set_corner[i].OriginOffset);

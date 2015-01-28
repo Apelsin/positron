@@ -33,7 +33,6 @@ namespace positron
         Stopwatch TestWatch = new Stopwatch();
 		Random rand = new Random();
 		//public List<BooleanIndicator> TestIndicators = new List<BooleanIndicator>();
-		public Player Player1;
 		int IncrementTest = 0;
 		#endregion
         protected ThreadedRendering _Window;
@@ -133,7 +132,7 @@ namespace positron
 //		{
 //			TestWatch.Start();
 //		}
-		protected void ProcessUpdateEventList (double time)
+		protected void ProcessUpdateEventList (float time)
 		{
 			lock (_UpdateEventList)
 			{
@@ -146,10 +145,10 @@ namespace positron
 				}
 			}
 		}
-		public void Update (double time)
+		public void Update (float time)
 		{
 			//BackgroundTiles.RandomMap();
-			time = Math.Round(time, 4);
+			time = (float)Math.Round(time, 4);
 			_CurrentScene.Update (time * TimeStepCoefficient);
 			ProcessUpdateEventList(time);
 			foreach(RenderSet render_set in _CurrentScene.UpdateRenderSetsInOrder())
@@ -314,7 +313,7 @@ namespace positron
             _CurrentScene = next_scene; // Update the scene reference
             GC.Collect();
 		}
-		public void Draw(double time)
+		public void Draw(float time)
 		{
 			_CurrentScene.Render (time);
 		}

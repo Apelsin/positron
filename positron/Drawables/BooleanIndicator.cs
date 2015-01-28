@@ -12,12 +12,12 @@ namespace positron
 	{
 		public bool State { get; set; }
 		// Main constructor:
-		public BooleanIndicator (RenderSet render_set, double x, double y):
-			base(render_set, x, y, 1.0, 1.0, null, Texture.Get("sprite_indicator"))
+		public BooleanIndicator (RenderSet render_set, float x, float y):
+			base(render_set, x, y, 1.0f, 1.0f, null, Texture.Get("sprite_indicator"))
 		{
 			State = false;
 			_Color = new Color4(Color.SkyBlue);
-			_NextLayer = new LayeredSprite(render_set, x, y, 1.0, 1.0, null, Texture.Get ("sprite_indicator_gloss"));
+			_NextLayer = new LayeredSprite(render_set, x, y, 1.0f, 1.0f, null, Texture.Get ("sprite_indicator_gloss"));
 		}
 		protected override void Draw ()
 		{

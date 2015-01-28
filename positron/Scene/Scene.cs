@@ -50,17 +50,14 @@ namespace positron
 		#region Member Variables
 		protected string _Name;
         protected PositronGame _Game;
-		protected Vector2d _ViewSize;
-		protected Vector3d _ViewOffset;
-		protected Vector3d _ViewPosition;
+		protected Vector2 _ViewSize;
+		protected Vector3 _ViewOffset;
+		protected Vector3 _ViewPosition;
 		protected Drawable _FollowTarget;
         protected HUDQuad FrameTimeMeter;
         protected HUDQuad UpdateTimeMeter;
         protected HUDQuad RenderTimeMeter;
         protected HUDQuad RenderDrawingMeter;
-		protected Door _DoorToNextScene;
-		protected Door _DoorToPreviousScene;
-		protected Object _RenderLock = new Object();
 		/// <summary>
 		/// All of the render sets
 		/// </summary>
@@ -116,29 +113,27 @@ namespace positron
 		#endregion
 		#region Member Accessors
 		public string Name { get { return _Name; } }
-		public Vector2d ViewSize { get { return _ViewSize; } }
-		public double ViewWidth {
+
+		public Vector2 ViewSize { get { return _ViewSize; } }
+		public float ViewWidth {
 			get { return _ViewSize.X; }
 			protected set { _ViewSize.X = value; }
 		}
-		public double ViewHeight {
+		public float ViewHeight {
 			get { return _ViewSize.Y; }
 			protected set { _ViewSize.Y = value; }
 		}
-		public Vector3d ViewOffset {
+		public Vector3 ViewOffset {
 			get { return _ViewOffset; }
 			set { _ViewOffset = value; }
 		}
-		public Vector3d ViewPosition {
+		public Vector3 ViewPosition {
 			get { return _ViewPosition; }
 			//set { _ViewPosition = value; }
 		}
         public PositronGame Game { get { return _Game; } }
 		public World World { get { return Game.WorldMain; } }
-		public Object RenderLock { get { return _RenderLock; } }
 		public Drawable FollowTarget { get { return _FollowTarget; } }
-		public Door DoorToNextScene { get { return _DoorToNextScene; } }
-		public Door DoorToPreviousScene { get { return _DoorToPreviousScene; } }
 		#endregion
 		#endregion
 		#region Behavior
@@ -206,8 +201,8 @@ namespace positron
 		}
         protected void SetupHUD()
         {
-            var p = new Vector3d(5.0, 5.0, 0.0);
-            var s = new Vector3d(5.0, 12, 0.0);
+            var p = new Vector3(5.0f, 5.0f, 0.0f);
+            var s = new Vector3(5.0f, 12f, 0.0f);
 			FrameTimeMeter = new HUDQuad(HUDDebug, p, s);
             FrameTimeMeter.Color = Color.DarkSlateBlue;
 			UpdateTimeMeter = new HUDQuad(HUDDebug, p, s);
@@ -219,7 +214,7 @@ namespace positron
         }
         protected void UpdateHUDStats()
         {
-            double w_x, w = 4000.0;
+            float w_x, w = 4000.0f;
             w_x = w * _Game.Window.LastFrameTime;
             FrameTimeMeter.B.X = FrameTimeMeter.A.X + w_x;
             FrameTimeMeter.C.X = FrameTimeMeter.D.X + w_x;
@@ -242,22 +237,20 @@ namespace positron
             RenderDrawingMeter.C.X = RenderDrawingMeter.D.X + w_x;
         }
 
-		public virtual void Update (double time)
+		public virtual void Update (float time)
         {
-            //lock (_RenderLock) {
-                if (Configuration.AdaptiveTimeStep) {
-                    AdaptiveTimeSteps [ATSIndex] = Math.Min ((float)time, Configuration.MaxWorldTimeStep);
-                    ATSIndex = (ATSIndex + 1) % AdaptiveTimeSteps.Length;
-                    float t = AdaptiveTimeSteps [ATSIndex];
-                    World.Step (t);
-                } else
-                    World.Step (Math.Min ((float)time, Configuration.MaxWorldTimeStep));
-                UpdateHUDStats ();
-            //}
+            if (Configuration.AdaptiveTimeStep) {
+                AdaptiveTimeSteps [ATSIndex] = Math.Min ((float)time, Configuration.MaxWorldTimeStep);
+                ATSIndex = (ATSIndex + 1) % AdaptiveTimeSteps.Length;
+                float t = AdaptiveTimeSteps [ATSIndex];
+                World.Step (t);
+            } else
+                World.Step (Math.Min ((float)time, Configuration.MaxWorldTimeStep));
+            UpdateHUDStats ();
 		}
-		public virtual void Render (double time)
+		public virtual void Render (float time)
 		{
-			lock (_RenderLock)
+			lock (_Game.UpdateLock)
 			{
 				GL.PushMatrix ();
 				{
@@ -282,18 +275,18 @@ namespace positron
 		}
 		protected void CalculatePan (float time)
 		{
-			double view_size_scaled_x = _ViewSize.X * 0.2;
-			double view_size_scaled_y = _ViewSize.Y * 0.2;
-			Vector3d pan = new Vector3d (0.5 * ViewWidth, 0.4 * ViewHeight, 0.0) - _FollowTarget.Position;
+			float view_size_scaled_x = _ViewSize.X * 0.2f;
+			float view_size_scaled_y = _ViewSize.Y * 0.2f;
+			Vector3 pan = new Vector3 (0.5f * ViewWidth, 0.4f * ViewHeight, 0.0f) - _FollowTarget.Position;
 			if (time > 0.0f) {
-				double a = Math.Abs (_ViewPosition.X - pan.X);
-				double b = Math.Abs (_ViewPosition.Y - pan.Y);
+				float a = Math.Abs (_ViewPosition.X - pan.X);
+				float b = Math.Abs (_ViewPosition.Y - pan.Y);
 				a = Helper.SmootherStep (view_size_scaled_x - 128, view_size_scaled_x, a);
 				b = Helper.SmootherStep (view_size_scaled_y - 128, view_size_scaled_y, b);
 				pan.X = _ViewPosition.X + (pan.X - _ViewPosition.X) * a;
 				pan.Y = _ViewPosition.Y + (pan.Y - _ViewPosition.Y) * b;
 				float alpha = Math.Min (1.0f, (2000f * (float)time) / (float)Math.Max (50f, (pan - _ViewPosition).Length));
-				pan = Vector3d.Lerp (_ViewPosition, pan, alpha);
+				pan = Vector3.Lerp (_ViewPosition, pan, alpha);
 				//if(typeof(Player) == typeof(Player))
 				//	pan -= ((Player)_FollowTarget).DampVeloNormal * 50;
 			}
@@ -330,15 +323,15 @@ namespace positron
 			if (cut && _FollowTarget != null)
 				CalculatePan (1.0f);
 		}
-		public void RayCast (RayCastCallback callback, Microsoft.Xna.Framework.Vector2 point1, Microsoft.Xna.Framework.Vector2 point2)
+		public void RayCast (Physics.RayCastCallback callback, Microsoft.Xna.Framework.Vector2 point1, Microsoft.Xna.Framework.Vector2 point2)
 		{
-			World.RayCast (callback, point1, point2);
+			World.RayCast (callback.Invoke, point1, point2);
 			if (Configuration.DrawBlueprints) {
-				lock(_RenderLock)
+                lock (_Game.UpdateLock)
 				{
 					new BlueprintLine (
-					new Vector3d (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0),
-					new Vector3d (point2.X * Configuration.MeterInPixels, point2.Y * Configuration.MeterInPixels, 0.0),
+					new Vector3 (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0f),
+					new Vector3 (point2.X * Configuration.MeterInPixels, point2.Y * Configuration.MeterInPixels, 0.0f),
 						WorldBlueprint);
 				}
 			}
@@ -347,62 +340,20 @@ namespace positron
 		{
 			List<Fixture> hit_fixture = World.TestPointAll (point);
 			if (Configuration.DrawBlueprints) {
-				lock(_RenderLock)
+                lock (_Game.UpdateLock)
 				{
-					double cross = 2;
+					float cross = 2;
 					new BlueprintLine (
-						new Vector3d (point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels - cross, 0.0),
-						new Vector3d (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels + cross, 0.0),
+						new Vector3 (point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels - cross, 0.0f),
+						new Vector3 (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels + cross, 0.0f),
 						WorldBlueprint);
 					new BlueprintLine (
-						new Vector3d (point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels + cross, 0.0),
-						new Vector3d (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels - cross, 0.0),
+						new Vector3 (point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels + cross, 0.0f),
+						new Vector3 (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels - cross, 0.0f),
 						WorldBlueprint);
 				}
 			}
 			return hit_fixture;
-		}
-		protected void SetupPlayerOnExit()
-		{
-			SceneExit += (sender, e) => {
-				if(e.To is ISceneGameplay)
-				{
-                    _Game.AddUpdateEventHandler(this, (sender1, e1) => {
-                        Scene scene_context = e.To;
-                        double start_x = 0, start_y = 0;
-                        if(scene_context.DoorToPreviousScene != null)
-                        {
-                            start_x = scene_context.DoorToPreviousScene.CornerX;
-                            start_y = scene_context.DoorToPreviousScene.CornerY;
-                        }
-                        //new Spidey(e.To.Stage, start_x, start_y);
-                        
-                        //
-                        // Setup Player 1
-                        //
-                        
-                        Player player_1 = _Game.Player1;
-                        if(player_1 != null)
-                        {
-                            player_1.Derez();
-                        }
-                        player_1 = _Game.Player1 = new Player(scene_context.Stage, start_x, start_y, Texture.Get("sprite_player"));
-                        player_1.CornerY += 32;
-                        scene_context.Follow(player_1, true);
-                        _Game.SetLastInputAccepters("Player1", new IInputAccepter[] { player_1 });
-                        Follow(player_1);
-                        
-                        var health_meter = new HealthMeter(scene_context.HUD, 64, ViewHeight - 64, player_1);
-                        health_meter.Preserve = true;
-                        
-                        player_1.DerezEvent += (sender3, e3) => {
-                            _Game.RemoveInputAccepters("Player1");
-                            health_meter.Set.Remove(health_meter);
-                        };
-                        return true;
-                    });
-				}
-			};
 		}
 		public virtual void Dispose ()
         {

@@ -27,12 +27,12 @@ namespace positron
                 S.G + (byte)((C.G - S.G) * alpha),
                 S.B + (byte)((C.B - S.B) * alpha));
         }
-        public static void BuildTiledRegions(this TextureRegion[] regions, int count_x, double w, double h)
+        public static void BuildTiledRegions(this TextureRegion[] regions, int count_x, float w, float h)
         {
             for (int i = 0; i < regions.Length; i++)
             {
-                var low = new Vector2d(w * (i % count_x), h * (i / count_x));
-                var high = new Vector2d(low.X + w, low.Y + h);
+                var low = new Vector2(w * (i % count_x), h * (i / count_x));
+                var high = new Vector2(low.X + w, low.Y + h);
                 regions[i] = new TextureRegion(low, high);
             }
         }
@@ -67,9 +67,9 @@ namespace positron
 		{
 			return (IWorldObject)body.UserData;
 		}
-		public static double SmootherStep(double edge0, double edge1, double x)
+		public static float SmootherStep(float edge0, float edge1, float x)
 		{
-			x = MathUtil.Clamp(((x - edge0)/(edge1 - edge0)), 1.0, 0.0);
+			x = MathUtil.Clamp(((x - edge0)/(edge1 - edge0)), 1.0f, 0.0f);
 			return x*x*x*(x*(x*6 - 15) + 10);
 		}
 		public static IEnumerable<Type> FindAllEndClasses(this Type self)

@@ -14,12 +14,12 @@ namespace positron
 		protected int Lifespan;
 		protected Stopwatch Timer;
 		protected ISceneElement _Instance;
-		public Vector3d[] Vertices;
-		public BlueprintLineLoop (ISceneElement instance, params Vector3d[] vertices):
+		public Vector3[] Vertices;
+		public BlueprintLineLoop (ISceneElement instance, params Vector3[] vertices):
 			this(instance, 0, vertices)
 		{
 		}
-		public BlueprintLineLoop (ISceneElement instance, int millis, params Vector3d[] vertices)
+		public BlueprintLineLoop (ISceneElement instance, int millis, params Vector3[] vertices)
 		{
 			_Instance = instance;
 			Vertices = vertices;
@@ -38,7 +38,7 @@ namespace positron
 
 			}
 		}
-		public virtual void Render (double time)
+		public virtual void Render (float time)
 		{
             if (Lifespan > 0 && Timer.ElapsedMilliseconds > Lifespan)
 				_Instance.Blueprints.Remove(this);
@@ -59,11 +59,11 @@ namespace positron
                 GL.End();
             }
 		}
-		public double RenderSizeX()
+		public float RenderSizeX()
 		{
 			return 0;
 		}
-		public double RenderSizeY()
+		public float RenderSizeY()
 		{
 			return 0;
 		}

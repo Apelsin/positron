@@ -11,7 +11,7 @@ namespace positron
     {
         protected RenderSet _RenderSet;
         protected Color _Color;
-		public Vector3d A, B, C, D;
+		public Vector3 A, B, C, D;
         public Color Color
         {
             get { return _Color; }
@@ -20,7 +20,7 @@ namespace positron
         public RenderSet Set {
             get { return _RenderSet; }
         }
-		public HUDQuad(RenderSet render_set, Vector3d a, Vector3d b, Vector3d c, Vector3d d)
+		public HUDQuad(RenderSet render_set, Vector3 a, Vector3 b, Vector3 c, Vector3 d)
 		{
 			A = a;
 			B = b;
@@ -29,19 +29,19 @@ namespace positron
             _RenderSet = render_set;
             _RenderSet.Add(this);
 		}
-		public HUDQuad(RenderSet render_set, Vector3d p, Vector3d s) :
+		public HUDQuad(RenderSet render_set, Vector3 p, Vector3 s) :
 			this(render_set, p,
-                 p + new Vector3d(s.X, 0.0, 0.0),
-                 p + new Vector3d(s.X, s.Y, 0.0),
-                 p + new Vector3d(0.0, s.Y, 0.0))
+                 p + new Vector3(s.X, 0f,  0f),
+                 p + new Vector3(s.X, s.Y, 0f),
+                 p + new Vector3(0f,  s.Y, 0f))
         {
         }
-        public virtual void Render(double time)
+        public virtual void Render(float time)
         {
             // Unbind any texture that was previously bound
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.LineWidth(1);
-            GL.Begin(BeginMode.Quads);
+            GL.Begin(PrimitiveType.Quads);
             GL.Color4(_Color);
             GL.Vertex3(A);
             GL.Vertex3(B);

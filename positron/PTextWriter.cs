@@ -124,7 +124,7 @@ namespace positron
 			}
 			return have_lines;
 		}
-		public void Render (double time)
+		public void Render (float time)
 		{
 			GL.PushMatrix ();
 			{

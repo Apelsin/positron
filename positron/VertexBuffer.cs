@@ -9,62 +9,62 @@ namespace positron
 {
     public struct VertexLite
     {
-        public Vector3d Position;
-        public Vector2d TexCoord;
-        public VertexLite(Vector3d p, Vector2d tc)
+        public Vector3 Position;
+        public Vector2 TexCoord;
+        public VertexLite(Vector3 p, Vector2 tc)
         {
             Position = p;
             TexCoord = tc;
         }
-        public VertexLite(Vector3d p, Vector2d tc, Vector4 c)
+        public VertexLite(Vector3 p, Vector2 tc, Vector4 c)
         {
             Position = p;
             TexCoord = tc;
         }
-        public VertexLite(double px, double py, double pz, double tcx, double tcy)
+        public VertexLite(float px, float py, float pz, float tcx, float tcy)
         {
-            Position = new Vector3d(px, py, pz);
-            TexCoord = new Vector2d(tcx, tcy);
+            Position = new Vector3(px, py, pz);
+            TexCoord = new Vector2(tcx, tcy);
         }
-        public VertexLite(double px, double py, double pz, double tcx, double tcy, float r, float b, float g, float a)
+        public VertexLite(float px, float py, float pz, float tcx, float tcy, float r, float b, float g, float a)
         {
-            Position = new Vector3d(px, py, pz);
-            TexCoord = new Vector2d(tcx, tcy);
+            Position = new Vector3(px, py, pz);
+            TexCoord = new Vector2(tcx, tcy);
         }
         public static readonly int Stride = Marshal.SizeOf(typeof(VertexLite));
     }
     public struct Vertex
     {
-        public Vector3d Position;
-        //public Vector3d Normal;
-        public Vector2d TexCoord;
+        public Vector3 Position;
+        //public Vector3 Normal;
+        public Vector2 TexCoord;
         public Vector4 Color;
-        public Vertex(Vector3d p, /*Vector3d n,*/ Vector2d tc)
+        public Vertex(Vector3 p, /*Vector3 n,*/ Vector2 tc)
         {
             Position = p;
             //Normal = n;
             TexCoord = tc;
             Color = Vector4.One;
         }
-        public Vertex(Vector3d p, /*Vector3d n,*/ Vector2d tc, Vector4 c)
+        public Vertex(Vector3 p, /*Vector3 n,*/ Vector2 tc, Vector4 c)
         {
             Position = p;
             //Normal = n;
             TexCoord = tc;
             Color = c;
         }
-        public Vertex(double px, double py, double pz, /*double nx, double ny, double nz,*/ double tcx, double tcy)
+        public Vertex(float px, float py, float pz, /*float nx, float ny, float nz,*/ float tcx, float tcy)
         {
-            Position = new Vector3d(px, py, pz);
-            //Normal = new Vector3d(nx, ny, nz);
-            TexCoord = new Vector2d(tcx, tcy);
+            Position = new Vector3(px, py, pz);
+            //Normal = new Vector3(nx, ny, nz);
+            TexCoord = new Vector2(tcx, tcy);
             Color = Vector4.One;
         }
-        public Vertex(double px, double py, double pz, /*double nx, double ny, double nz,*/ double tcx, double tcy, float r, float b, float g, float a)
+        public Vertex(float px, float py, float pz, /*float nx, float ny, float nz,*/ float tcx, float tcy, float r, float b, float g, float a)
         {
-            Position = new Vector3d(px, py, pz);
-            //Normal = new Vector3d(nx, ny, nz);
-            TexCoord = new Vector2d(tcx, tcy);
+            Position = new Vector3(px, py, pz);
+            //Normal = new Vector3(nx, ny, nz);
+            TexCoord = new Vector2(tcx, tcy);
             Color = new Vector4(r, g, b, a);
         }
         public static readonly int Stride = Marshal.SizeOf(typeof(Vertex));
@@ -72,9 +72,9 @@ namespace positron
     public sealed class VertexBuffer : IDisposable // Sealed for performance boost
     {
         private static readonly IntPtr VertexPtr = new IntPtr(0);
-        //private static IntPtr NormalPtr = new IntPtr(Vector3d.SizeInBytes + VertexPtr.ToInt64());
-        private static readonly IntPtr TexCoordPtr = new IntPtr(Vector3d.SizeInBytes + VertexPtr.ToInt64());
-        private static readonly IntPtr ColorPtr = new IntPtr(Vector2d.SizeInBytes + TexCoordPtr.ToInt64());
+        //private static IntPtr NormalPtr = new IntPtr(Vector3.SizeInBytes + VertexPtr.ToInt64());
+        private static readonly IntPtr TexCoordPtr = new IntPtr(Vector3.SizeInBytes + VertexPtr.ToInt64());
+        private static readonly IntPtr ColorPtr = new IntPtr(Vector2.SizeInBytes + TexCoordPtr.ToInt64());
         
 
         protected int _Id;
@@ -142,9 +142,9 @@ namespace positron
         public void Render ()
         {
             GL.BindBuffer (BufferTarget.ArrayBuffer, Id);
-            GL.VertexPointer (3, VertexPointerType.Double, _Size, VertexPtr);
-            //GL.NormalPointer(NormalPointerType.Double, _Size, NormalPtr);
-            GL.TexCoordPointer (2, TexCoordPointerType.Double, _Size, TexCoordPtr);
+            GL.VertexPointer (3, VertexPointerType.Float, _Size, VertexPtr);
+            //GL.NormalPointer(NormalPointerType.float, _Size, NormalPtr);
+            GL.TexCoordPointer (2, TexCoordPointerType.Float, _Size, TexCoordPtr);
             //GL.ColorPointer (4, ColorPointerType.Float, _Size, ColorPtr);
             if (_ColorBufferUsed) {
                 GL.EnableClientState(ArrayCap.ColorArray);

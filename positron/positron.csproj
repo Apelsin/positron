@@ -6,7 +6,7 @@
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{40C952E1-700B-46D1-A2B5-D6B3C7E46048}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>positron</RootNamespace>
     <AssemblyName>positron</AssemblyName>
   </PropertyGroup>
@@ -44,6 +44,9 @@
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="System" />
@@ -54,9 +57,7 @@
   <ItemGroup>
     <Compile Include="Drawables\HUD\HUDQuad.cs" />
     <Compile Include="Drawables\IUpdateSync.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\ProjectileSwitch.cs" />
     <Compile Include="IRenderable.cs" />
-    <Compile Include="Main.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="IWorldObject.cs" />
     <Compile Include="Drawables\Drawable.cs" />
@@ -74,7 +75,6 @@
     <Compile Include="Drawables\SpriteBase.cs" />
     <Compile Include="Drawables\Blueprint\BlueprintLine.cs" />
     <Compile Include="VertexBuffer.cs" />
-    <Compile Include="Drawables\HUD\HealthMeter.cs" />
     <Compile Include="PositronGame.cs" />
     <Compile Include="Drawables\IVariant.cs" />
     <Compile Include="SharedState.cs" />
@@ -93,60 +93,29 @@
     <Compile Include="IShooter.cs" />
     <Compile Include="Drawables\ISceneElement.cs" />
     <Compile Include="PTextWriter.cs" />
-    <Compile Include="Drawables\SceneElements\Baddie\BaddieRobotCrawlerShooter.cs" />
-    <Compile Include="Drawables\SceneElements\Baddie\Spidey.cs" />
-    <Compile Include="Drawables\SceneElements\PC\Player.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\Gateway.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\Door.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\BasicBullet.cs" />
-    <Compile Include="Drawables\SceneElements\Environment\BunkerFloor.cs" />
-    <Compile Include="Drawables\SceneElements\Environment\BunkerWall.cs" />
-    <Compile Include="Drawables\SceneElements\Environment\FloorTile.cs" />
-    <Compile Include="Drawables\SceneElements\Misc\PsdSpriteTest.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\ExtenderPlatform.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\SmallGateway.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\PressureSwitch.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\RadioProp.cs" />
     <Compile Include="Asset Management\Sound.cs" />
-    <Compile Include="Scene\SceneThree.cs" />
-    <Compile Include="Scene\SceneOne.cs" />
     <Compile Include="Scene\Scene.cs" />
-    <Compile Include="Scene\SceneTwo.cs" />
-    <Compile Include="Scene\SceneBasicBox.cs" />
-    <Compile Include="Scene\SceneFirstMenu.cs" />
-    <Compile Include="Scene\SceneIntro.cs" />
     <Compile Include="Scene\ISceneGameplay.cs" />
-    <Compile Include="Scene\SceneFour.cs" />
-    <Compile Include="Scene\SceneFive.cs" />
-    <Compile Include="Scene\SceneCredits.cs" />
-    <Compile Include="Scene\SceneSix.cs" />
-    <Compile Include="Scene\SceneSeven.cs" />
-    <Compile Include="Scene\SceneEight.cs" />
-    <Compile Include="Scene\SceneWin.cs" />
     <Compile Include="IGLContextLateUpdate.cs" />
-    <Compile Include="Drawables\SceneElements\Prop\MusicLooper_LessHackish.cs" />
     <Compile Include="WR.cs" />
     <Compile Include="KeyEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
-      <Project>{A37A7E14-0000-0000-0000-000000000000}</Project>
-      <Name>OpenTK</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Farseer-Physics\Branches\Class\Farseer Physics.csproj">
-      <Project>{A4610E4C-DD34-428B-BABB-779CA0B5993A}</Project>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Farseer-Physics\SourceFiles\Farseer Physics.csproj">
+      <Project>{a4610e4c-dd34-428b-babb-779ca0b5993a}</Project>
       <Name>Farseer Physics</Name>
     </ProjectReference>
+    <ProjectReference Include="..\opentk\Source\OpenTK\OpenTK.csproj">
+      <Project>{a37a7e14-0000-0000-0000-000000000000}</Project>
+      <Name>OpenTK</Name>
+    </ProjectReference>
     <ProjectReference Include="..\psdplugin\PsdFile\PsdFile.csproj">
-      <Project>{8AE43567-4988-4E3E-84A4-8258167EBDEA}</Project>
+      <Project>{8ae43567-4988-4e3e-84a4-8258167ebdea}</Project>
       <Name>PsdFile</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Drawables\SceneElements\NPC\" />
-  </ItemGroup>
-  <ItemGroup />
 </Project>

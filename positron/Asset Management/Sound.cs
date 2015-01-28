@@ -18,10 +18,10 @@ namespace positron
 
         protected int BufferId;
         protected int SourceId;
-        protected double _Duration;
-        public double Duration { get { return _Duration; } }
+        protected float _Duration;
+        public float Duration { get { return _Duration; } }
 
-        protected Sound (int buffer, int source, double duration)
+        protected Sound (int buffer, int source, float duration)
         {
             BufferId = buffer;
             SourceId = source;
@@ -84,7 +84,7 @@ namespace positron
                 return (Sound)Sounds[key];
             return DefaultSound;
         }
-        public void DurationAdjust (double dt)
+        public void DurationAdjust (float dt)
         {
             _Duration += dt;
         }
@@ -121,7 +121,7 @@ namespace positron
             byte[] sound_data = LoadWave(File.Open(file_path, FileMode.Open), out channels, out bits_per_sample, out sample_rate);
             AL.BufferData(buffer_id, GetSoundFormat(channels, bits_per_sample), sound_data, sound_data.Length, sample_rate);
             AL.Source(source_id, ALSourcei.Buffer, buffer_id);
-            double duration = (double)sound_data.Length / (double)(sample_rate * channels * bits_per_sample / 8);
+            float duration = (float)sound_data.Length / (float)(sample_rate * channels * bits_per_sample / 8);
             return (Sound)(Sounds[title] = new Sound(buffer_id, source_id, duration));
         }
 

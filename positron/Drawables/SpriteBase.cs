@@ -122,8 +122,8 @@ namespace positron
 			protected int _TextureRegionIndex;
 			protected VertexBuffer _VBO;
 			//protected VertexBuffer _BPVBO;
-			protected double _TileX;
-			protected double _TileY;
+			protected float _TileX;
+			protected float _TileY;
 			public Color Color {
 				get { return _Color; }
 				set { _Color = value; }
@@ -132,11 +132,11 @@ namespace positron
 				get { return _Texture; }
 				set { _Texture = value; }
 			}
-			public double TileX {
+			public float TileX {
 				get { return _TileX; }
 				set { _TileX = value; }
 			}
-			public double TileY {
+			public float TileY {
 				get { return _TileY; }
 				set { _TileY = value; }
 			}
@@ -147,11 +147,11 @@ namespace positron
 			public int TextureRegionIndex {
 				get { return _TextureRegionIndex; }
 			}
-			public double SizeX {
+			public float SizeX {
 				get { return _Texture.Regions == null || _Texture.Regions.Length == 0 ?
                     _Texture.Width : _Texture.Regions [_TextureRegionIndex].SizeX; }
 			}
-			public double SizeY {
+			public float SizeY {
                 get { return _Texture.Regions == null || _Texture.Regions.Length == 0 ?
                     _Texture.Height : _Texture.Regions[_TextureRegionIndex].SizeY; }
 			}
@@ -171,13 +171,13 @@ namespace positron
 				_TextureRegionIndex = idx;
 				_Color = color;
 				_FrameTime = frame_time;
-				_TileX = 1.0;
-				_TileY = 1.0;
+				_TileX = 1.0f;
+				_TileY = 1.0f;
 				Build();
 			}
 			public void Build()
 			{
-				double w, h, w_half, h_half, x0, y0, x1, y1, xx, yy, corner_x, corner_y;
+				float w, h, w_half, h_half, x0, y0, x1, y1, xx, yy, corner_x, corner_y;
 				if (_Texture.Regions != null && _Texture.Regions.Length > 0)
 				{
 					TextureRegion region = _Texture.Regions[_TextureRegionIndex];
@@ -189,10 +189,10 @@ namespace positron
 					h = y1 - y0;
 					xx = x0 + x1;
 					yy = y0 + y1;
-					x0 = (xx - w * _TileX) * 0.5;
-					y0 = (yy - h * _TileY) * 0.5;
-					x1 = (xx + w * _TileX) * 0.5;
-					y1 = (yy + h * _TileY) * 0.5;
+					x0 = (xx - w * _TileX) * 0.5f;
+					y0 = (yy - h * _TileY) * 0.5f;
+					x1 = (xx + w * _TileX) * 0.5f;
+					y1 = (yy + h * _TileY) * 0.5f;
 					x0 /= _Texture.Width;
 					x1 /= _Texture.Width;
 					y0 /= _Texture.Height;
@@ -204,19 +204,19 @@ namespace positron
 				{
 					w = _Texture.Width;
 					h = _Texture.Height;
-					x0 = 0.0;
-					y0 = 0.0;
+					x0 = 0.0f;
+					y0 = 0.0f;
 					x1 = _TileX;
 					y1 = _TileY;
 					corner_x = 0;
 					corner_y = 0;
 				}
-				w_half = w * 0.5;
-				h_half = h * 0.5;
-				var A = new VertexLite(corner_x - w_half, corner_y - h_half, 1.0, x0, -y0);
-                var B = new VertexLite(corner_x + w_half, corner_y - h_half, 1.0, x1, -y0);
-                var C = new VertexLite(corner_x + w_half, corner_y + h_half, 1.0, x1, -y1);
-                var D = new VertexLite(corner_x - w_half, corner_y + h_half, 1.0, x0, -y1);
+				w_half = w * 0.5f;
+				h_half = h * 0.5f;
+				var A = new VertexLite(corner_x - w_half, corner_y - h_half, 1.0f, x0, -y0);
+                var B = new VertexLite(corner_x + w_half, corner_y - h_half, 1.0f, x1, -y0);
+                var C = new VertexLite(corner_x + w_half, corner_y + h_half, 1.0f, x1, -y1);
+                var D = new VertexLite(corner_x - w_half, corner_y + h_half, 1.0f, x0, -y1);
 				_VBO = new VertexBuffer(A, B, C, D);
 				//BPVBO = new VertexBuffer(A, B, C, D);
 			}
@@ -233,8 +233,8 @@ namespace positron
 		#region State
 		#region Member Variables
 		protected Color4 _Color;
-		protected double _TileX;
-		protected double _TileY;
+		protected float _TileX;
+		protected float _TileY;
 
 		//protected Dictionary<string, SpriteAnimation> _Animations;
 		protected Stopwatch _FrameTimer;
@@ -294,18 +294,18 @@ namespace positron
 			get { return FrameCurrent.Texture; }
 			//set { FrameCurrent.Texture = value; }
 		}
-		public double TileX {
+		public float TileX {
 			get { return _TileX; }
 			set { _TileX = value; }
 		}
-		public double TileY {
+		public float TileY {
 			get { return _TileY; }
 			set { _TileY = value; }
 		}
-		public override double SizeX {
+		public override float SizeX {
 			get { return _Scale.X * FrameCurrent.SizeX; }
 		}
-        public override double SizeY
+        public override float SizeY
         {
 			get { return _Scale.Y * FrameCurrent.SizeY; }
 		}
@@ -316,31 +316,31 @@ namespace positron
 		#endregion
 		#region Behavior
 		public SpriteBase(RenderSet render_set):
-			this(render_set, 0.0, 0.0, 1.0, 1.0, Texture.DefaultTexture)
+			this(render_set, 0.0f, 0.0f, 1.0f, 1.0f, Texture.DefaultTexture)
 		{
 		}
 		public SpriteBase(RenderSet render_set, Texture texture):
-			this(render_set, 0.0, 0.0, 1.0, 1.0, texture)
+			this(render_set, 0.0f, 0.0f, 1.0f, 1.0f, texture)
 		{
 		}
-		public SpriteBase (RenderSet render_set, double x, double y):
-			this(render_set, x, y, 1.0, 1.0, Texture.DefaultTexture)
+		public SpriteBase (RenderSet render_set, float x, float y):
+			this(render_set, x, y, 1.0f, 1.0f, Texture.DefaultTexture)
 		{		
 		}
 		// Main constructor:
-		public SpriteBase (RenderSet render_set, double x, double y, Texture texture):
-			this(render_set, x, y, 1.0, 1.0, texture)
+		public SpriteBase (RenderSet render_set, float x, float y, Texture texture):
+			this(render_set, x, y, 1.0f, 1.0f, texture)
 		{
 		}
-		public SpriteBase (RenderSet render_set, double x, double y, double scalex, double scaley, Texture texture):
+		public SpriteBase (RenderSet render_set, float x, float y, float scalex, float scaley, Texture texture):
 			base(render_set)
 		{
 			// Size will scale _Texture width and height
 			_Color = Color.White;
 			_Scale.X = scalex;
 			_Scale.Y = scaley;
-			_TileX = 1.0;
-			_TileY = 1.0;
+			_TileX = 1.0f;
+			_TileY = 1.0f;
 			_AnimationFrameIndex = 0;
 			_FrameTimer = new Stopwatch();
 			_AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
@@ -348,21 +348,21 @@ namespace positron
             
 			// Position for world objects is handled differently
 			if(!(this is IWorldObject))
-				Corner = new Vector3d(x, y, 0.0);
+				Corner = new Vector3(x, y, 0.0f);
 		}
 		public SpriteBase CenterShift ()
 		{
-			PositionX -= FrameCurrent.SizeX * 0.5;
-			PositionY -= FrameCurrent.SizeY * 0.5;
+			PositionX -= FrameCurrent.SizeX * 0.5f;
+			PositionY -= FrameCurrent.SizeY * 0.5f;
 			return this;
 		}
-		public override void Render (double time)
+		public override void Render (float time)
 		{
 			GL.PushMatrix();
 			{
 				GL.Translate (_Position + CalculateMovementParallax());
                 //GL.Translate(_Position);
-				GL.Rotate(_Theta, 0.0, 0.0, 1.0);
+				GL.Rotate(_Theta, 0.0f, 0.0f, 1.0f);
                 GL.Scale(_Scale);
                 Draw();
             }
@@ -385,14 +385,14 @@ namespace positron
 				//BPVBO.Render(); // Render blueprint objects
 				if(_Blueprints != null)
 					foreach(IRenderable r in _Blueprints)
-						r.Render(0.0);
+						r.Render(0.0f);
             }
         }
         public override void Build()
         {
 			// SpriteFrame handles Build() for frames
 		}
-		public virtual void Update (double time)
+		public virtual void Update (float time)
         {
             if (_FirstUpdate) {
                 _FirstUpdate = false;

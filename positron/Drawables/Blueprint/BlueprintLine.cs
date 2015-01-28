@@ -13,12 +13,12 @@ namespace positron
 		protected Stopwatch Timer = new Stopwatch();
         protected RenderSet _RenderSet;
         public RenderSet Set { get { return _RenderSet; } }
-		public Vector3d A, B;
-		public BlueprintLine (Vector3d a, Vector3d b, RenderSet render_set):
+		public Vector3 A, B;
+		public BlueprintLine (Vector3 a, Vector3 b, RenderSet render_set):
 			this(a, b, render_set, 100)
 		{
 		}
-		public BlueprintLine (Vector3d a, Vector3d b, RenderSet render_set, int millis)
+		public BlueprintLine (Vector3 a, Vector3 b, RenderSet render_set, int millis)
 		{
 			_RenderSet = render_set;
 			_RenderSet.Add(this);
@@ -27,7 +27,7 @@ namespace positron
 			B = b;
 			Timer.Start();
 		}
-		public void Render (double time)
+		public void Render (float time)
 		{
 			// Unbind any texture that was previously bound
 			GL.BindTexture (TextureTarget.Texture2D, 0);
@@ -42,11 +42,11 @@ namespace positron
 				_RenderSet.Remove(this);
 			}
 		}
-		public double RenderSizeX()
+		public float RenderSizeX()
 		{
 			return 0;
 		}
-		public double RenderSizeY()
+		public float RenderSizeY()
 		{
 			return 0;
 		}

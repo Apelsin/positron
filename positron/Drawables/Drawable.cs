@@ -13,82 +13,82 @@ namespace positron
 		#region Member Variables
 		protected RenderSet _RenderSet;
 		protected List<IRenderable> _Blueprints;
-        protected Vector3d _Position = new Vector3d();
-		protected Vector3d _Scale = new Vector3d();
-		protected Vector3d _Velocity = new Vector3d();
-		protected double _Theta = 0.0;
-        protected double _Parallax = 0.0;
+        protected Vector3 _Position = new Vector3();
+		protected Vector3 _Scale = new Vector3();
+		protected Vector3 _Velocity = new Vector3();
+		protected float _Theta = 0.0f;
+        protected float _Parallax = 0.0f;
 		protected bool _Preserve = false;
 		#endregion
 		#region Accessors
-		public virtual Vector3d Position {
+		public virtual Vector3 Position {
 			get { return _Position; }
 			set { _Position = value; }
 		}
-		public virtual double PositionX {
+		public virtual float PositionX {
 			get { return _Position.X; }
 			set { _Position.X = value; }
 		}
-		public virtual double PositionY {
+		public virtual float PositionY {
 			get { return _Position.Y; }
 			set { _Position.Y = value; }
 		}
-		public virtual double PositionZ {
+		public virtual float PositionZ {
 			get { return _Position.Z; }
 			set { _Position.Z = value; }
 		}
-        public virtual double Parallax {
+        public virtual float Parallax {
             get { return _Parallax; }
             set { _Parallax = value; }
         }
-        public virtual Vector3d Corner
+        public virtual Vector3 Corner
         {
-			get { return Position - new Vector3d(0.5 * SizeX, 0.5 * SizeY, PositionZ); }
-            set { Position = value + new Vector3d(0.5 * SizeX, 0.5 * SizeY, PositionZ); }
+			get { return Position - new Vector3(0.5f * SizeX, 0.5f * SizeY, PositionZ); }
+            set { Position = value + new Vector3(0.5f * SizeX, 0.5f * SizeY, PositionZ); }
         }
-        public virtual double CornerX
+        public virtual float CornerX
         {
-            get { return PositionX - 0.5 * SizeX; }
-            set { PositionX = value + 0.5 * SizeX; }
+            get { return PositionX - 0.5f * SizeX; }
+            set { PositionX = value + 0.5f * SizeX; }
         }
-        public virtual double CornerY
+        public virtual float CornerY
         {
-            get { return PositionY - 0.5 * SizeY; }
-            set { PositionY = value + 0.5 * SizeY; }
+            get { return PositionY - 0.5f * SizeY; }
+            set { PositionY = value + 0.5f * SizeY; }
         }
-        public virtual double SizeX
+        public virtual float SizeX
         {
             get { return ScaleX; }
         }
-        public virtual double SizeY
+        public virtual float SizeY
         {
             get { return ScaleY; }
         }
-		public virtual Vector3d Velocity {
+		public virtual Vector3 Velocity {
 			get { return _Velocity; }
 			set { _Velocity = value; }
 		}
-		public virtual double VelocityX {
+		public virtual float VelocityX {
 			get { return _Velocity.X; }
 			set { _Velocity.X = value; }
 		}
-		public virtual double VelocityY {
+		public virtual float VelocityY {
 			get { return _Velocity.Y; }
 			set { _Velocity.Y = value; }
 		}
-		public virtual Vector3d Scale {
+		public virtual Vector3 Scale {
 			get { return _Scale; }
 			set { _Scale = value; }
 		}
-		public virtual double ScaleX {
+		public virtual float ScaleX {
 			get { return _Scale.X; }
 			set { _Scale.X = value; }
 		}
-		public virtual double ScaleY {
+		public virtual float ScaleY {
 			get { return _Scale.Y; }
 			set { _Scale.Y = value; }
 		}
-		public virtual double Theta {
+		public virtual float Theta {
 			get { return _Theta; }
 			set { _Theta = value; }
 		}
@@ -142,12 +142,12 @@ namespace positron
 			if(RenderSetTransfer != null)
 				RenderSetTransfer(sender, e);
 		}
-		public abstract void Render(double time);
-		protected virtual Vector3d CalculateMovementParallax ()
+		public abstract void Render(float time);
+		protected virtual Vector3 CalculateMovementParallax ()
 		{
 			if(_Parallax == 0.0 || this._RenderSet == this._RenderSet.Scene.HUD)
-				return Vector3d.Zero;
-			double depth = 10.0 / MathUtil.Clamp(_Parallax + 10.0, 1000.0, 0.1) - 1.0;
+				return Vector3.Zero;
+			float depth = 10.0f / MathUtil.Clamp(_Parallax + 10.0f, 1000.0f, 0.1f) - 1.0f;
 			return this._RenderSet.Scene.ViewPosition * (depth);
 		}
 		public virtual void Dispose ()

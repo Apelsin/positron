@@ -9,7 +9,7 @@ namespace positron
 		protected UIElementGroup _Group;
 		public UIElementGroup Group { get { return _Group; } }
 		protected SpriteBase.SpriteAnimation _ToFree, _ToSelected;
-		public UIButton (Scene scene, double x, double y, SpriteBase.SpriteFrame free, SpriteBase.SpriteFrame selected, UIElementGroup grp):
+		public UIButton (Scene scene, float x, float y, SpriteBase.SpriteFrame free, SpriteBase.SpriteFrame selected, UIElementGroup grp):
 			base(scene.HUD, x, y, free.Texture)
 		{
 			_Group = grp;
@@ -23,11 +23,11 @@ namespace positron
 			};
 			OnRefresh(this, new EventArgs());
 		}
-		public UIButton (Scene scene, double x, double y, SpriteBase.SpriteFrame free, SpriteBase.SpriteFrame selected):
+		public UIButton (Scene scene, float x, float y, SpriteBase.SpriteFrame free, SpriteBase.SpriteFrame selected):
 			this(scene, x, y, free, selected, new UIElementGroup())
 		{
 		}
-		public UIButton (Scene scene, double x, double y, SpriteBase.SpriteFrame free):
+		public UIButton (Scene scene, float x, float y, SpriteBase.SpriteFrame free):
 			this(scene, x, y, free, free)
 		{
 		}

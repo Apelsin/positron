@@ -15,7 +15,7 @@ namespace positron
 			foreach(IRenderable renderable in renderables)
 				Add (renderable);
 		}
-		public void Render (double time)
+		public void Render (float time)
 		{
 			for(int i = 0; i < Count; i++)
 				this[i].Render(time);

@@ -21,8 +21,8 @@ namespace positron
 	public class KeysUpdateEventArgs : EventArgs
 	{
 		public OrderedDictionary KeysPressedWhen;
-		public double Time { get; set; }
-		public KeysUpdateEventArgs(OrderedDictionary keys_and_times, double time)
+		public float Time { get; set; }
+		public KeysUpdateEventArgs(OrderedDictionary keys_and_times, float time)
 		{
 			KeysPressedWhen = keys_and_times;
 			Time = time;
@@ -110,10 +110,10 @@ namespace positron
 
         Stopwatch TestWatch = new Stopwatch();
 
-		double FrameLimitTime = 1.0 / Configuration.FrameRateCap;
+		float FrameLimitTime = 1.0f / Configuration.FrameRateCap;
 
-        double _LastFrameTime, _LastUpdateTime, _LastRenderTime;
-        double _LastRenderDrawingTime;
+        float _LastFrameTime, _LastUpdateTime, _LastRenderTime;
+        float _LastRenderDrawingTime;
 
 		#endregion
 		#region Accessors
@@ -131,11 +131,11 @@ namespace positron
 			get { return _CanvasHeight; }
 		}
 
-        public double LastFrameTime { get { return _LastFrameTime; } }
-        public double LastUpdateTime { get { return _LastUpdateTime; } }
-        public double LastRenderTime { get { return _LastRenderTime; } }
+        public float LastFrameTime { get { return _LastFrameTime; } }
+        public float LastUpdateTime { get { return _LastUpdateTime; } }
+        public float LastRenderTime { get { return _LastRenderTime; } }
 
-        public double LastRenderDrawingTime { get { return _LastRenderDrawingTime; } }
+        public float LastRenderDrawingTime { get { return _LastRenderDrawingTime; } }
 
         public Thread RenderingThread { get { return _RenderingThread; } }
         public Thread UpdatingThread { get { return _UpdatingThread; } }
@@ -144,7 +144,7 @@ namespace positron
 		#endregion
 		#region Event
 		public event KeysUpdateEventHandler KeysUpdate;
-		protected virtual void OnKeysUpdate (double time)
+		protected virtual void OnKeysUpdate (float time)
 		{
 			lock(_Game.UpdateLock)
 			{
@@ -163,7 +163,6 @@ namespace positron
 		public ThreadedRendering ()
 			: base()
 		{
-            this.Title = "A n d r o i d   N o w";
 			//lock (_Game.UpdateLock)
 			{
 				this.Width = _CanvasWidth;
@@ -182,17 +181,7 @@ namespace positron
 					}
 					else
                     {
-                        // Hard-coded quik-fix crap; don't leave this here too long...
-                        //if(_Game != null)
-                        //{
-                        //    lock(_Game.UpdateLock)
-                        //    {
-                        //        if(_Game.CurrentScene.Name == "SceneFirstMenu")
-                        //            key_args.Key = Configuration.KeyDoAction; // HACK: change the meaning of "game start" button (i.e. reset)
-                        //        else
-                                    Reset = true;
-                        //    }
-                        //}
+                        Reset = true;
                     }
 				}
                 // Hard-coded classic Alt-F4 because we're cool
@@ -338,7 +327,7 @@ namespace positron
             GL.BindTexture (TextureTarget.Texture2D, 0);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
-            Context.VSync = true; // Because reasons
+            Context.SwapInterval = 1;
 
 			Context.MakeCurrent (null); // Release the OpenGL context so it can be used on the new thread.
             //lock (_Game.UpdateLock)
@@ -512,25 +501,25 @@ namespace positron
                         // Bear with me...this will get a bit tricky to explain pefrectly...
         			
                         // Sleep the thread for the most milliseconds less than the frame limit time
-                        double time_until = FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001;
+                        float time_until = (float)FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001f;
                         while (FrameWatch.Elapsed.TotalSeconds < time_until)
                             Thread.Sleep (Configuration.ThreadSleepTimeStep); // Does this help?
                         // Hard-loop the remainder
                         while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime);
 
-                        _LastFrameTime = FrameWatch.Elapsed.TotalSeconds;
+                        _LastFrameTime = (float)FrameWatch.Elapsed.TotalSeconds;
                         //Console.WriteLine(_LastFrameTime);
                         FrameWatch.Restart ();
                         UpdateWatch.Restart ();
                         lock (_Game.UpdateLock)
                             Update (_LastFrameTime);
-                        _LastUpdateTime = UpdateWatch.Elapsed.TotalSeconds;
+                        _LastUpdateTime = (float)UpdateWatch.Elapsed.TotalSeconds;
                         RenderWatch.Restart ();
                         lock (_Game.UpdateLock)
                             RenderView (_LastFrameTime);
                         // TODO: Figure out why this does wild shit if FPS > 60
                         SwapBuffers ();
-                        _LastRenderTime = UpdateWatch.Elapsed.TotalSeconds;
+                        _LastRenderTime = (float)UpdateWatch.Elapsed.TotalSeconds;
                     }
                     Sound.KillTheNoise (); // I don't know where a better place for this could be...
                     Reset = false;
@@ -543,7 +532,7 @@ namespace positron
 		
 		#region Update
 
-		void Update (double time)
+		void Update (float time)
 		{
 			OnKeysUpdate (time);
 			_Game.Update (time);
@@ -556,7 +545,7 @@ namespace positron
 		/// <summary>
 		/// This is our main rendering function, which executes on the rendering thread.
 		/// </summary>
-		public void RenderView(double time)
+		public void RenderView(float time)
 		{
 			#region Render Frame Buffer
 
@@ -569,16 +558,16 @@ namespace positron
                 GL.ClearColor (Color.Black);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
                 // TODO: pre-calculate these
-                double p = 1.0;
-                double distance = -0.5 * _CanvasHeight / Math.Tan (0.5 * p); // -0.5 * h * cot(0.5 * p)
-                double ratio = (double)_CanvasWidth / (double)_CanvasHeight;
+                float p = 1.0f;
+                float distance = -0.5f * _CanvasHeight / (float)Math.Tan (0.5f * p); // -0.5 * h * cot(0.5 * p)
+                float ratio = (float)_CanvasWidth / (float)_CanvasHeight;
                 Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView((float)p, (float)ratio, 0.01f, 9999.0f);
 				GL.MatrixMode(MatrixMode.Projection);
 				GL.LoadMatrix(ref perspective);
-                GL.Translate ((double)_CanvasWidth / -2.0, (double)_CanvasHeight / -2.0, distance);
+                GL.Translate ((float)_CanvasWidth / -2.0f, (float)_CanvasHeight / -2.0f, distance);
                 RenderDrawingWatch.Restart();
 				_Game.Draw(time);
-                _LastRenderDrawingTime = RenderDrawingWatch.Elapsed.TotalSeconds;
+                _LastRenderDrawingTime = (float)RenderDrawingWatch.Elapsed.TotalSeconds;
                 GL.Color4(1.0, 1.0, 1.0, 1.0);
 
 			}

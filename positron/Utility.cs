@@ -127,13 +127,17 @@ namespace positron
 {
     public static class P_GL
     {
-        public static void __TranslateHard(double x, double y, double z = 0.0)
+        public static void __TranslateHard(float x, float y, float z = 0.0f)
         {
             GL.Translate((int)x, (int)y, (int)z);
         }
-        public static void __TranslateHard(Vector3d p)
+        public static void __TranslateHard(Vector3 p)
         {
             GL.Translate((int)p.X, (int)p.Y, (int)p.Z);
         }
+    }
+    public static class Physics
+    {
+        public delegate float RayCastCallback(FarseerPhysics.Dynamics.Fixture fixture, Microsoft.Xna.Framework.Vector2  point, Microsoft.Xna.Framework.Vector2 normal, float fraction);
     }
 }

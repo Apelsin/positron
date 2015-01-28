@@ -12,10 +12,10 @@ namespace positron
 		// This exists because dictionaries can be slow, and that's nooo gooood.
 		// GOTTA GO FAST!
 		#region Hard-Coded Settings
-		private static double _MetersInPixels;
-		private static double _ForceDueToGravity;
-		private static double _KeyPressTimeTolerance;
-		private static double _FrameRateCap;
+		private static float _MetersInPixels;
+		private static float _ForceDueToGravity;
+		private static float _KeyPressTimeTolerance;
+		private static float _FrameRateCap;
 		private static int _ThreadSleepTimeStep;
 		//private static int _ThreadSleepToleranceStep;
 		private static float _MaxWorldTimeStep;
@@ -72,10 +72,10 @@ namespace positron
 			Set("ArtworkPath", Path.Combine(assets_path, "Artwork"));
             Set("AudioPath", Path.Combine(assets_path, "Audio"));
 			Set ("SceneBeginning", "SceneIntro");
-			_MetersInPixels = 96.0;
-			_ForceDueToGravity = -9.8;
-			_KeyPressTimeTolerance = 0.1;
-			_FrameRateCap = 30.0;
+			_MetersInPixels = 96.0f;
+			_ForceDueToGravity = -9.8f;
+			_KeyPressTimeTolerance = 0.1f;
+			_FrameRateCap = 30.0f;
 			_ThreadSleepTimeStep = 1;
 			_MaxWorldTimeStep = 0.05f;
 			_AdaptiveTimeStep = false;
@@ -110,13 +110,13 @@ namespace positron
 		/// Meters in pixels scalar for FarseerPhysics to use
 		/// Protip: don't muck with this
 		/// </summary>
-		public static double MeterInPixels {
+		public static float MeterInPixels {
 			get { return _MetersInPixels; }
 		}
 		/// <summary>
 		/// The acceleration due to gravity to use for most scenes
 		/// </summary>
-		public static double ForceDueToGravity {
+		public static float ForceDueToGravity {
 			get { return _ForceDueToGravity; }
 		}
 		/// <summary>
@@ -125,13 +125,13 @@ namespace positron
 		/// Think of this as "buffer timeframe" in which you can press
 		/// a button and have an action happen as soon as it can.
 		/// </summary>
-		public static double KeyPressTimeTolerance {
+		public static float KeyPressTimeTolerance {
 			get { return _KeyPressTimeTolerance; }
 		}
 		/// <summary>
 		/// Maximum frame rate to work at
 		/// </summary>
-		public static double FrameRateCap {
+		public static float FrameRateCap {
 			get { return _FrameRateCap; }
 		}
 		/// <summary>

@@ -87,7 +87,7 @@ namespace positron
             SpeakerWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, 24));
             SpeechWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, (int)ScaleY));
 		}
-		public override void Render (double time)
+		public override void Render (float time)
 		{
 			GL.PushMatrix();
 			{
