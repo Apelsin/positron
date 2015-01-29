@@ -94,7 +94,7 @@ namespace positron
 				GL.Color4(0.0, 0.0, 0.0, 0.75);
 				GL.BindTexture(TextureTarget.Texture2D, 0);
 			    GL.Translate (_Position.X, _Position.Y, 0.0);
-				GL.Begin (BeginMode.Quads);
+                GL.Begin(PrimitiveType.Quads);
 				GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
 				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);
 				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	ScaleY);
@@ -102,7 +102,7 @@ namespace positron
 				GL.End ();
                 GL.Translate (0.0, ScaleY, 0.0);
                 Texture.Bind(FadeUp);
-				GL.Begin (BeginMode.Quads);
+                GL.Begin(PrimitiveType.Quads);
     			GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
 				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);
 				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	FadeUp.Height);
@@ -125,7 +125,7 @@ namespace positron
 						picture.Bind();
                         GL.PushMatrix();
                         GL.Translate(0.0, 24, 0.0);
-						GL.Begin (BeginMode.Quads);
+                        GL.Begin(PrimitiveType.Quads);
 						GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 			0.0);
 						GL.TexCoord2(1.0,  0.0);		GL.Vertex2(picture.Width,	0.0);
 						GL.TexCoord2(1.0, -1.0);		GL.Vertex2(picture.Width,	picture.Height);

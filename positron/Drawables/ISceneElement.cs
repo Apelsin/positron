@@ -13,6 +13,5 @@ namespace positron
 		bool Preserve { get; set; }
 		RenderSet Set { get; }
 		List<IRenderable> Blueprints { get; }
-		void Dispose();
 	}
 }

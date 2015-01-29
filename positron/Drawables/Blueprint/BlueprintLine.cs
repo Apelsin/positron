@@ -32,7 +32,7 @@ namespace positron
 			// Unbind any texture that was previously bound
 			GL.BindTexture (TextureTarget.Texture2D, 0);
 			GL.LineWidth (1);
-			GL.Begin (BeginMode.Lines);
+			GL.Begin (PrimitiveType.Lines);
 			GL.Color4 (Color.Crimson);
 			GL.Vertex3 (A);
 			GL.Color4 (Color.Gold);

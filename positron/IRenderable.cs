@@ -6,6 +6,5 @@ namespace positron
 	{
         RenderSet Set { get; }
         void Render(float time);
-		void Dispose();
 	}
 }

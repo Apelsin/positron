@@ -68,7 +68,7 @@ namespace positron
 				GL.Translate (_LineBody.Position.X * Configuration.MeterInPixels,
 				              _LineBody.Position.Y * Configuration.MeterInPixels, 0.0);
 				GL.Rotate (_Theta + (float)OpenTK.MathHelper.RadiansToDegrees (_LineBody.Rotation), 0.0, 0.0, 1.0);
-				GL.Begin (BeginMode.Lines);
+                GL.Begin(PrimitiveType.Lines);
 				GL.Color4 (_Color);
 				GL.Vertex3 (Vector3.Zero);
 				GL.Vertex3 (_Direction.X, _Direction.Y, _Direction.Z);
@@ -90,6 +90,8 @@ namespace positron
 		}
 		public virtual void Derez ()
 		{
+            if (DerezEvent != null)
+                DerezEvent(this, new EventArgs());
 			this._RenderSet.Scene.World.RemoveBody(Body);
 			this._RenderSet.Remove(this);
 		}

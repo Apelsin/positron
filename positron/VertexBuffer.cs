@@ -69,7 +69,7 @@ namespace positron
         }
         public static readonly int Stride = Marshal.SizeOf(typeof(Vertex));
     }
-    public sealed class VertexBuffer : IDisposable // Sealed for performance boost
+    public class VertexBuffer : IDisposable
     {
         private static readonly IntPtr VertexPtr = new IntPtr(0);
         //private static IntPtr NormalPtr = new IntPtr(Vector3.SizeInBytes + VertexPtr.ToInt64());
@@ -152,7 +152,7 @@ namespace positron
             }
             else
                 GL.DisableClientState(ArrayCap.ColorArray);
-            GL.DrawArrays(BeginMode.Quads, 0, _DataLength); // TODO: Make this part not-hardcoded
+            GL.DrawArrays(PrimitiveType.Quads, 0, _DataLength); // TODO: Make this part not-hardcoded
         }
 		public void Dispose()
 		{

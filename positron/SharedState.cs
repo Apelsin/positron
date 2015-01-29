@@ -41,34 +41,25 @@ namespace positron
 					SharedStateChanged(sender, new SharedStateChangeEventArgs<T>(_Value, state, this));
 			}
 		}
+        public override bool Equals(object o)
+        {
+            return this._Value.Equals(this.Value);
+        }
+        public override int GetHashCode()
+        {
+            return _Value.GetHashCode();
+        }
 		public static bool operator == (SharedState<T> A, SharedState<T> B)
 		{
-			bool test;
-			lock (A._ValueLock) {
-				lock(B._ValueLock)
-				{
-					test = A._Value.Equals(B.Value);
-				}
-			}
-			return test;
+            return A.Equals(B);
 		}
 		public static bool operator != (SharedState<T> A, SharedState<T> B)
 		{
-			bool test;
-			lock (A._ValueLock) {
-				lock(B._ValueLock)
-				{
-					test = !A._Value.Equals(B.Value);
-				}
-			}
-			return test;
+			return !A.Equals(B);
 		}
 		public static implicit operator T(SharedState<T> self)
 		{
-			T self__value;
-			lock(self._ValueLock)
-				self__value = self.Value;
-			return self__value;
+			return self.Value;
 		}
         public virtual void Dispose()
         {

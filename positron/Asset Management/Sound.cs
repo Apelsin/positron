@@ -14,7 +14,6 @@ namespace positron
         private static ContextHandle AudioCtx;
         //private static XRamExtension XRam = new XRamExtension();
         private static Hashtable Sounds = new Hashtable();
-        private static Sound DefaultSound;
 
         protected int BufferId;
         protected int SourceId;
@@ -82,7 +81,7 @@ namespace positron
         {
             if(Sounds.ContainsKey(key))
                 return (Sound)Sounds[key];
-            return DefaultSound;
+            return null;
         }
         public void DurationAdjust (float dt)
         {

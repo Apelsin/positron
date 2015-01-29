@@ -1,9 +1,9 @@
 [submodule "opentk"]
 	path = opentk
-	url = https://github.com/andykorth/opentk.git
+	url = git@github.com:opentk/opentk.git
 [submodule "Farseer-Physics"]
 	path = Farseer-Physics
-	url = https://github.com/d-snp/Farseer-Physics
+	url = git@github.com:d-snp/Farseer-Physics.git
 [submodule "psdplugin"]
 	path = psdplugin
 	url = https://git01.codeplex.com/forks/apelsin/psdplugin

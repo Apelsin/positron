@@ -130,7 +130,7 @@ namespace positron
 			{
 				GL.BindTexture (TextureTarget.Texture2D, TextureID);
 				//GL.Translate (_Position.X, _Position.Y, 0.0);
-				GL.Begin (BeginMode.Quads);
+                GL.Begin(PrimitiveType.Quads);
 				GL.TexCoord2 (0, 0);
 				GL.Vertex2 (0, 0);
 				GL.TexCoord2 (1, 0);

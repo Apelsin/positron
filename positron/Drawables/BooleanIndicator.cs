@@ -16,7 +16,7 @@ namespace positron
 			base(render_set, x, y, 1.0f, 1.0f, null, Texture.Get("sprite_indicator"))
 		{
 			State = false;
-			_Color = new Color4(Color.SkyBlue);
+			_Color = Color.SkyBlue;
 			_NextLayer = new LayeredSprite(render_set, x, y, 1.0f, 1.0f, null, Texture.Get ("sprite_indicator_gloss"));
 		}
 		protected override void Draw ()

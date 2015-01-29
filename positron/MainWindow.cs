@@ -44,10 +44,6 @@ namespace positron
 		/// </summary>
 		uint CanvasFBO;
 		/// <summary>
-		/// Signifies if the vieport needs to be re-instantiated
-		/// </summary>
-		bool VieportChanged = true;
-		/// <summary>
 		/// Width of canvas in pixels
 		/// </summary>
 		int _CanvasWidth { get { return Configuration.CanvasWidth; } }
@@ -258,7 +254,6 @@ namespace positron
 				{
 					Width = Math.Max (Width, _CanvasWidth);
 					Height = Math.Max (Height, _CanvasHeight);
-					VieportChanged = true;
 					ViewportWidth = Width;
 					ViewportHeight = Height;
 					int multi = ViewportWidth / _CanvasWidth;
@@ -282,7 +277,6 @@ namespace positron
 			if (!GL.GetString (StringName.Extensions).Contains ("GL_EXT_framebuffer_object")) {
 				throw new NotSupportedException (
 					"GL_EXT_framebuffer_object extension is required. Please update your drivers.");
-				Exit ();
 			}
 
             FBOSafety (); // Make sure things won't explode!
@@ -592,7 +586,7 @@ namespace positron
 				GL.PushMatrix();
                 {
                     GL.Translate(FBOScaleX / -2.0, FBOScaleY / -2.0, 0);
-    				GL.Begin(BeginMode.Quads);
+                    GL.Begin(PrimitiveType.Quads);
     				GL.TexCoord2(0.0f, 0.0f);
     				GL.Vertex3(0.0f, 0.0f, 0.0f);
     				GL.TexCoord2(1.0f, 0.0f);

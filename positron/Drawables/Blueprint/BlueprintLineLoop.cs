@@ -48,7 +48,7 @@ namespace positron
                 // Unbind any texture that was previously bound
                 GL.BindTexture(TextureTarget.Texture2D, 0);
                 GL.LineWidth(1);
-                GL.Begin(BeginMode.LineLoop);
+                GL.Begin(PrimitiveType.LineLoop);
 				for(int i = 0; i < Vertices.Length; i++)
 				{
 					color_enumerator.MoveNext();

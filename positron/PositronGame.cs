@@ -29,17 +29,10 @@ namespace positron
             lock(_UpdateEventList)
 			    _UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
 		}
-        #region Test stuff
-        Stopwatch TestWatch = new Stopwatch();
-		Random rand = new Random();
-		//public List<BooleanIndicator> TestIndicators = new List<BooleanIndicator>();
-		int IncrementTest = 0;
-		#endregion
         protected ThreadedRendering _Window;
 		protected Hashtable _Scenes = new Hashtable();
 		protected Scene _CurrentScene;
 		protected World _WorldMain;
-
 		public float TimeStepCoefficient = 1.0f;
 		protected OrderedDictionary InputAccepterGroups;
 
