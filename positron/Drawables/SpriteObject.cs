@@ -12,7 +12,7 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 
-namespace positron
+namespace Positron
 {
 	public class SpriteObject: SpriteBase, IWorldObject
 	{

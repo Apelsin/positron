@@ -8,7 +8,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace positron
+namespace Positron
 {
 	/// <summary>
 	/// TextWriter implementation originally by some guy named David

@@ -1,6 +1,6 @@
 using System;
 
-namespace positron
+namespace Positron
 {
 	public class SharedStateChangeEventArgs<T> : EventArgs
 	{

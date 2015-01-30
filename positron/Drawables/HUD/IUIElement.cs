@@ -1,6 +1,6 @@
 using System;
 
-namespace positron
+namespace Positron
 {
 	public delegate void RefreshHandler(object sender, EventArgs e);
 	public interface IUIElement : IRenderable

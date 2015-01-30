@@ -11,7 +11,7 @@ using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 
 
-namespace positron
+namespace Positron
 {
 	public static class Helper
 	{

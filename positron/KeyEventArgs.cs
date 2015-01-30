@@ -31,7 +31,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace positron.Input
+namespace Positron.Input
 {
     /// <summary>
     /// Defines the event data for <see cref="OpenTK.Input.KeyboardDevice"/> events.

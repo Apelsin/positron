@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{40C952E1-700B-46D1-A2B5-D6B3C7E46048}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>positron</RootNamespace>
-    <AssemblyName>positron</AssemblyName>
+    <RootNamespace>Positron</RootNamespace>
+    <AssemblyName>Positron</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>True</DebugSymbols>
@@ -58,7 +58,7 @@
     <Compile Include="Drawables\HUD\HUDQuad.cs" />
     <Compile Include="Drawables\IUpdateSync.cs" />
     <Compile Include="IRenderable.cs" />
-    <Compile Include="MainWindow.cs" />
+    <Compile Include="ThreadedRendering.cs" />
     <Compile Include="IWorldObject.cs" />
     <Compile Include="Drawables\Drawable.cs" />
     <Compile Include="Drawables\Circle.cs" />

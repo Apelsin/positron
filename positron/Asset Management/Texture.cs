@@ -6,7 +6,7 @@ using System.Drawing.Imaging;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-namespace positron
+namespace Positron
 {
     public class TextureRegion
     {

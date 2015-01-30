@@ -15,7 +15,7 @@ using OpenTK.Input;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
 
-namespace positron
+namespace Positron
 {
 	public class PositronGame: IUpdateSync, IDisposable, IGLContextLateUpdate
     {

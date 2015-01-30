@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 
 using OpenTK.Input;
-using positron.Input;
+using Positron.Input;
 
-namespace positron
+namespace Positron
 {
 	public class UIElementGroup : List<IUIElement>, IInputAccepter
 	{

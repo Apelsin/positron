@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace positron
+namespace Positron
 {
     public class UpdateEventArgs : EventArgs
     {

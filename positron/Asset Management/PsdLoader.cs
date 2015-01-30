@@ -12,9 +12,9 @@ using System.Drawing.Imaging;
 
 using PhotoshopFile;
 using OpenTK;
-using positron.Utility;
+using Positron.Utility;
 
-namespace positron
+namespace Positron
 {
 	public static class PsdLoader
 	{

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-namespace positron
+namespace Positron
 {
 	public class BlueprintLineLoop : IRenderable
 	{

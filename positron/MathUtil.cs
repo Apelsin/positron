@@ -1,6 +1,6 @@
 using System;
 
-namespace positron
+namespace Positron
 {
 	public static class MathUtil
 	{

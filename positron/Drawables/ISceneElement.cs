@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace positron
+namespace Positron
 {
 	public delegate void RenderSetChangeEventHandler(object sender, RenderSetChangeEventArgs e);
 	public interface ISceneElement : IDisposable

@@ -1,6 +1,6 @@
 using System;
 
-namespace positron
+namespace Positron
 {
 	/// <summary>
 	/// A scene that requires a Player

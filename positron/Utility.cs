@@ -5,7 +5,7 @@ using System.IO;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-namespace positron.Utility
+namespace Positron.Utility
 {
 	public static class Structure
 	{
@@ -123,7 +123,7 @@ namespace positron.Utility
     }
 }
 
-namespace positron
+namespace Positron
 {
     public static class P_GL
     {

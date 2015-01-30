@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 using OpenTK.Input;
 
-namespace positron
+namespace Positron
 {
 	public static class Configuration
 	{

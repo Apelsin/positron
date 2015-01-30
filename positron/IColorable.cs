@@ -1,7 +1,7 @@
 using System;
 using System.Drawing;
 
-namespace positron
+namespace Positron
 {
 	public interface IColorable
 	{

@@ -8,12 +8,12 @@ using FarseerPhysics.Dynamics;
 using OpenTK;
 
 using OpenTK.Input;
-using positron.Input;
+using Positron.Input;
 
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace positron
+namespace Positron
 {
 	public class DialogSpeaker
 	{

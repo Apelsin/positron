@@ -8,7 +8,7 @@ using OpenTK.Input;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
 
-namespace positron
+namespace Positron
 {
 	public class Line : Drawable, IColorable, IWorldObject
 	{

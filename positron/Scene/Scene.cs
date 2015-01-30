@@ -14,7 +14,7 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Factories;
 
-namespace positron
+namespace Positron
 {
 	#region EventArgs
 	public class RenderSetChangeEventArgs : EventArgs

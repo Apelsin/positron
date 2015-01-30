@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace positron
+namespace Positron
 {
 	/// <summary>
 	/// Specification: http://www.adobe.com/devnet-apps/photoshop/fileformatashtml/PhotoshopFileFormats.htm#50577409_19931

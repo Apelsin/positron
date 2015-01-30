@@ -2,7 +2,7 @@ using System;
 using OpenTK;
 using FarseerPhysics.Dynamics;
 
-namespace positron
+namespace Positron
 {
 	public delegate void DerezEventHandler(object sender, EventArgs e);
 	public interface IWorldObject : ISceneElement

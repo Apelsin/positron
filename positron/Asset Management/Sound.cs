@@ -6,7 +6,7 @@ using OpenTK;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 
-namespace positron
+namespace Positron
 {
     public class Sound
     {

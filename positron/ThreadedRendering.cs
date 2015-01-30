@@ -10,12 +10,12 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-using positron.Input;
+using Positron.Input;
 
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
 
-namespace positron
+namespace Positron
 {
 	#region Event-related
 	public class KeysUpdateEventArgs : EventArgs
