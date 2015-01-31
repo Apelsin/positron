@@ -2,9 +2,18 @@ using System;
 
 namespace Positron
 {
-    public interface IRenderable : IDisposable
+    public delegate void RenderSetChangeEventHandler(object sender, RenderSetChangeEventArgs e);
+    public interface IRenderable
     {
-        RenderSet Set { get; }
         void Render(float time);
+    }
+    public interface IRenderSetElementBase
+    {
+        RenderSet mRenderSet { get; }
+    }
+    public interface IRenderSetElement
+    {
+        bool Preserve { get; set; }
+        event RenderSetChangeEventHandler RenderSetChange;
     }
 }

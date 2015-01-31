@@ -1,18 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+using OpenTK;
 
 namespace Positron
 {
-    public class GameObject
+    public abstract class GameObject
     {
-        public abstract ThreadedRendering Window { get; }
-        public abstract PositronGame Game { get; }
-        public abstract Scene Scene { get; }
-        public abstract RenderSet RenderSet { get; }
-        public abstract FarseerPhysics.Dynamics.Body Body { get; }
-        public abstract Drawable Drawable { get; }
-        public abstract SpriteBase Sprite { get; }
+        public virtual ThreadedRendering mWindow { get { return mGame.Window; } }
+        public virtual PositronGame mGame { get { return mScene.Game; } }
+        public abstract Scene mScene { get; }
+        public abstract RenderSet mRenderSet { get; }
+        public abstract FarseerPhysics.Dynamics.Body mBody { get; }
+        public abstract Drawable mDrawable { get; }
+        public abstract SpriteBase mSprite { get; }
+        protected readonly Xform _Transform;
+        public Xform mTransform {
+            get { return _Transform; }
+        }
     }
 }

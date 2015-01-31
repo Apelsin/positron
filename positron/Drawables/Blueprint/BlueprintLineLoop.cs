@@ -8,18 +8,18 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class BlueprintLineLoop : IRenderable
+    public class BlueprintLineLoop : IRenderable, IRenderSetElementBase
     {
         public RenderSet Set { get { return null; } }
         protected int Lifespan;
         protected Stopwatch Timer;
-        protected ISceneElement _Instance;
+        protected GameObject _Instance;
         public Vector3[] Vertices;
-        public BlueprintLineLoop (ISceneElement instance, params Vector3[] vertices):
+        public BlueprintLineLoop (GameObject instance, params Vector3[] vertices):
             this(instance, 0, vertices)
         {
         }
-        public BlueprintLineLoop (ISceneElement instance, int millis, params Vector3[] vertices)
+        public BlueprintLineLoop (GameObject instance, int millis, params Vector3[] vertices)
         {
             _Instance = instance;
             Vertices = vertices;

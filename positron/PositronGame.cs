@@ -238,8 +238,8 @@ namespace Positron
                     // Process this scene
                     for (int i = 0; i < render_set.Count;) {                        // For each renderable in render set
                         var renderable = render_set [i];
-                        if (renderable is ISceneElement) {                            // If object also implements scene object
-                            ISceneElement scene_object = (ISceneElement)renderable;    // Cast to scene object
+                        if (renderable is GameObject) {                            // If object also implements scene object
+                            GameObject scene_object = (GameObject)renderable;    // Cast to scene object
                             if (scene_object is IWorldObject) {
                                 IWorldObject world_object = (IWorldObject)scene_object;
                                 // Disable the body object is not preserved
@@ -260,7 +260,7 @@ namespace Positron
                         break;
                     // Process next scene, PART 1
                     foreach (IRenderable renderable in render_set) {
-                        if (renderable is ISceneElement) {                            // If object also implements scene object
+                        if (renderable is GameObject) {                            // If object also implements scene object
                             if (renderable is IWorldObject) {
                                 IWorldObject world_object = (IWorldObject)renderable;
                                 // HACK: temporarily enable all bodies in this renderset
@@ -288,8 +288,8 @@ namespace Positron
                 } else
                     rscea = new RenderSetChangeEventArgs (null, render_set);
                 foreach (IRenderable renderable in render_set) {
-                    if (renderable is ISceneElement) {
-                        ISceneElement scene_element = (ISceneElement)renderable;
+                    if (renderable is GameObject) {
+                        GameObject scene_element = (GameObject)renderable;
                         // Body.Enabled should be updated with a RenderSetEntry event handler
                         scene_element.OnRenderSetEntry (this, rscea);
                     }

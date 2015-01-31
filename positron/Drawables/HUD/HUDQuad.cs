@@ -7,7 +7,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class HUDQuad : IRenderable, IColorable
+    public class HUDQuad : IRenderable, IRenderSetElementBase, IColorable
     {
         protected RenderSet _RenderSet;
         protected Color _Color;

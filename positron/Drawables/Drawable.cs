@@ -5,22 +5,32 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public abstract class Drawable : IRenderable, ISceneElement
+    public abstract class Drawable : GameObject, IRenderable, IRenderSetElement
     {
-        public event RenderSetChangeEventHandler RenderSetEntry;
-        public event RenderSetChangeEventHandler RenderSetTransfer;
+        #region GameObject
+        public override Scene mScene { get { return mRenderSet.Scene; } }
+        // TODO: Implement set accessor for mRenderSet with event handling
+        public override RenderSet mRenderSet { get; protected set; }
+        //public abstract FarseerPhysics.Dynamics.Body mBody { get; }
+        public override Drawable mDrawable { get { return this; } }
+        //public abstract SpriteBase mSprite { get; }
+        #endregion
+        #region IRenderSetElement
+        public event RenderSetChangeEventHandler RenderSetChange;
+        public bool Preserve { get; set; }
+        #endregion
         #region State
         #region Member Variables
-        protected RenderSet _RenderSet;
+
         protected List<IRenderable> _Blueprints;
         protected Vector3 _Position = new Vector3();
         protected Vector3 _Scale = new Vector3();
         protected Vector3 _Velocity = new Vector3();
         protected float _Theta = 0.0f;
         protected float _Parallax = 0.0f;
-        protected bool _Preserve = false;
         #endregion
         #region Accessors
+        /*
         public virtual Vector3 Position {
             get { return _Position; }
             set { _Position = value; }
@@ -92,33 +102,21 @@ namespace Positron
             get { return _Theta; }
             set { _Theta = value; }
         }
+        */
         public virtual List<IRenderable> Blueprints {
             get { return _Blueprints; }
-        }
-        /// <summary>
-        /// Gets the render set associated with this drawable.
-        /// Specifying a null render set in the constructor
-        /// implies loose render set association and manual
-        /// tracking of the object.
-        /// </summary>
-        public RenderSet Set {
-            get { return _RenderSet; }
-            set { _RenderSet = value; }
-        }
-        public bool Preserve {
-            get { return _Preserve; }
-            set { _Preserve = value; }
         }
         #endregion
         #endregion
         public Drawable (RenderSet render_set)
         {
-            _RenderSet = render_set;
-            if(_RenderSet != null)
-                _RenderSet.Add(this);
-            RenderSetTransfer += HandlerenderSetTransfer;
+            _Transform = new Xform(this);
+            mRenderSet = render_set;
+            if (mRenderSet != null)
+                mRenderSet.Add(this);
+            RenderSetChange += HandlerenderSetChange;
         }
-        protected void HandlerenderSetTransfer (object sender, RenderSetChangeEventArgs e)
+        protected void HandlerenderSetChange(object sender, RenderSetChangeEventArgs e)
         {
             this._RenderSet = e.To;
         }
@@ -132,16 +130,11 @@ namespace Positron
             // Some inexpensive drawables are built each frame
             // Therefore it is not required to implement Build()
         }
-        public virtual void OnRenderSetEntry(object sender, RenderSetChangeEventArgs e)
+        /*public virtual void OnRenderSetChange(object sender, RenderSetChangeEventArgs e)
         {
             if(RenderSetEntry != null)
                 RenderSetEntry(sender, e);
-        }
-        public virtual void OnRenderSetTransfer(object sender, RenderSetChangeEventArgs e)
-        {
-            if(RenderSetTransfer != null)
-                RenderSetTransfer(sender, e);
-        }
+        }*/
         public abstract void Render(float time);
         protected virtual Vector3 CalculateMovementParallax ()
         {
@@ -156,16 +149,15 @@ namespace Positron
             if (_Blueprints != null) {
                 for(int i = 0; i < _Blueprints.Count; i++)
                 {
-                    if(_Blueprints[i].Set != null)
-                        _Blueprints[i].Set.Remove(_Blueprints[i]);
+                    if(_Blueprints[i].RenderSet != null)
+                        _Blueprints[i].RenderSet.Remove(_Blueprints[i]);
                     _Blueprints[i].Dispose();
                     _Blueprints[i] = null;
                 }
                 _Blueprints.Clear ();
                 _Blueprints = null;
             }
-            RenderSetEntry = null;
-            RenderSetTransfer = null;
+            RenderSetChange = null;
         }
     }
 }

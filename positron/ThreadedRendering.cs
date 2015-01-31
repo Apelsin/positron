@@ -515,7 +515,7 @@ namespace Positron
                         SwapBuffers ();
                         _LastRenderTime = (float)UpdateWatch.Elapsed.TotalSeconds;
                     }
-                    Sound.KillTheNoise (); // I don't know where a better place for this could be...
+                    //Sound.KillTheNoise (); // I don't know where a better place for this could be...
                     Reset = false;
                 }
             }

@@ -352,7 +352,7 @@ namespace Positron
         }
         public SpriteBase CenterShift ()
         {
-            PositionX -= FrameCurrent.SizeX * 0.5f;
+            Xform.PositionX -= FrameCurrent.SizeX * 0.5f;
             PositionY -= FrameCurrent.SizeY * 0.5f;
             return this;
         }
@@ -398,8 +398,8 @@ namespace Positron
                 _FirstUpdate = false;
                 if(_AnimationCurrent != null)
                 {
-                    if(_AnimationCurrent.Sound != null)
-                        _AnimationCurrent.Sound.Play();
+                    //if(_AnimationCurrent.Sound != null)
+                    //    _AnimationCurrent.Sound.Play();
                 }
             }
             if (_AnimationCurrent != null) {

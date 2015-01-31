@@ -5,7 +5,7 @@ using FarseerPhysics.Dynamics;
 namespace Positron
 {
     public delegate void DerezEventHandler(object sender, EventArgs e);
-    public interface IWorldObject : ISceneElement
+    public interface IWorldObject
     {
         event DerezEventHandler DerezEvent;
         void Update(float time);
@@ -17,25 +17,25 @@ namespace Positron
         void InitBlueprints();
         void Derez();
 
-        Body Body { get; set; }
+        Body Body { get; }
 
-        float PositionX { get; set; }
-        float PositionY { get; set; }
+        //float PositionX { get; set; }
+        //float PositionY { get; set; }
         //float PositionZ { get; set; }
-        Vector3 Position { get; set; }
+        //Vector3 Position { get; set; }
         
-        float ScaleX { get; set; }
-        float ScaleY { get; set; }
+        //float ScaleX { get; set; }
+        //float ScaleY { get; set; }
         //float ScaleZ { get; set; }
-        Vector3 Scale { get; set; }
+        //Vector3 Scale { get; set; }
         
-        float VelocityX { get; set; }
-        float VelocityY { get; set; }
+        //float VelocityX { get; set; }
+        //float VelocityY { get; set; }
         //float VelocityZ { get; set; }
-        Vector3 Velocity { get; set; }
+        //Vector3 Velocity { get; set; }
 
 
-        float Theta { get; set; }
+        //float Theta { get; set; }
         //quaternion Rotation { get; set; }
     }
 }

@@ -8,22 +8,19 @@ using OpenTK.Audio.OpenAL;
 
 namespace Positron
 {
-    public class Sound
+    public class Sound : IDisposable
     {
         private static IntPtr AudioDevice;
         private static ContextHandle AudioCtx;
-        //private static XRamExtension XRam = new XRamExtension();
         private static Hashtable Sounds = new Hashtable();
 
         protected int BufferId;
-        protected int SourceId;
         protected float _Duration;
         public float Duration { get { return _Duration; } }
 
-        protected Sound (int buffer, int source, float duration)
+        protected Sound(int buffer, float duration)
         {
             BufferId = buffer;
-            SourceId = source;
             _Duration = duration;
         }
         public static void InitialSetup ()
@@ -52,9 +49,7 @@ namespace Positron
         {
             foreach (object o in Sounds.Keys) {
                 Sound sound = (Sound)Sounds[o];
-                AL.SourceStop(sound.SourceId);
-                AL.DeleteSource(sound.SourceId);
-                AL.DeleteBuffer(sound.BufferId);
+                sound.Dispose();
             }
             if(Alc.MakeContextCurrent( ContextHandle.Zero ))
             {
@@ -64,12 +59,9 @@ namespace Positron
                 }
             }
         }
-        public static void KillTheNoise ()
+        public void Dispose()
         {
-            foreach (object o in Sounds.Keys) {
-                Sound sound = (Sound)Sounds [o];
-                AL.SourceStop (sound.SourceId);
-            }
+            AL.DeleteBuffer(BufferId);
         }
         public static Sound Get (object key)
         {
@@ -80,18 +72,6 @@ namespace Positron
         public void DurationAdjust (float dt)
         {
             _Duration += dt;
-        }
-        public void Play ()
-        {
-            AL.SourcePlay(SourceId);
-        }
-        public void Stop ()
-        {
-            AL.SourceStop(SourceId);
-        }
-        public static void Play (object key)
-        {
-            Get (key).Play();
         }
         public static Sound LoadWaveFile(string title, params string[] path_components)
         {
@@ -106,16 +86,15 @@ namespace Positron
             if(!System.IO.File.Exists(file_path))
                 throw new FileNotFoundException("File missing: ", file_path);
             int buffer_id = AL.GenBuffer();
-            int source_id = AL.GenSource();
-//            if(XRam.IsInitialized)
-//                XRam.SetBufferMode(1, ref buffer_id, XRamExtension.XRamStorage.Hardware);
 
             int channels, bits_per_sample, sample_rate;
             byte[] sound_data = LoadWave(File.Open(file_path, FileMode.Open), out channels, out bits_per_sample, out sample_rate);
             AL.BufferData(buffer_id, GetSoundFormat(channels, bits_per_sample), sound_data, sound_data.Length, sample_rate);
+
+            int source_id = AL.GenSource();
             AL.Source(source_id, ALSourcei.Buffer, buffer_id);
             float duration = (float)sound_data.Length / (float)(sample_rate * channels * bits_per_sample / 8);
-            return (Sound)(Sounds[title] = new Sound(buffer_id, source_id, duration));
+            return (Sound)(Sounds[title] = new Sound(buffer_id, duration));
         }
 
         // Loads a wave/riff audio file.

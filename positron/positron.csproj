@@ -55,11 +55,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attachment.cs" />
+    <Compile Include="Extension.cs" />
     <Compile Include="Drawables\HUD\HUDQuad.cs" />
     <Compile Include="Drawables\IUpdateSync.cs" />
-    <Compile Include="GameObject.cs" />
     <Compile Include="IRenderable.cs" />
+    <Compile Include="SoundPickup.cs" />
     <Compile Include="SoundSource.cs" />
     <Compile Include="ThreadedRendering.cs" />
     <Compile Include="IWorldObject.cs" />
@@ -94,7 +94,7 @@
     <Compile Include="Utility.cs" />
     <Compile Include="IStateShare.cs" />
     <Compile Include="IShooter.cs" />
-    <Compile Include="Drawables\ISceneElement.cs" />
+    <Compile Include="GameObject.cs" />
     <Compile Include="PTextWriter.cs" />
     <Compile Include="Asset Management\Sound.cs" />
     <Compile Include="Scene\Scene.cs" />
@@ -102,6 +102,7 @@
     <Compile Include="IGLContextLateUpdate.cs" />
     <Compile Include="WR.cs" />
     <Compile Include="KeyEventArgs.cs" />
+    <Compile Include="Xform.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

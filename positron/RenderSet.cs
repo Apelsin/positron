@@ -5,6 +5,10 @@ namespace Positron
 {
     public class RenderSet : List<IRenderable>, IRenderable
     {
+        #region IRenderable
+        public event RenderSetChangeEventHandler RenderSetChange;
+        public bool Preserve { get; set; }
+        #endregion
         public RenderSet Set { get { return null; } }
         protected Scene _Scene;
         public Scene Scene { get { return _Scene; } }

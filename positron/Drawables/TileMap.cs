@@ -13,24 +13,7 @@ namespace Positron
         protected int[,] IndexMap;
         public int CountX { get { return _CountX; } }
         public int CountY { get { return _CountY; } }
-        public override Vector3 Corner {
-            get { return _Position; }
-            set { _Position = value; }
-        }
-        public override float CornerX {
-            get { return _Position.X; }
-            set { _Position.X = value; }
-        }
-        public override float CornerY {
-            get { return _Position.Y; }
-            set { _Position.Y = value; }
-        }
-        public override float SizeX {
-            get { return CountX * Texture.Regions[0].Size.X; }
-        }
-        public override float SizeY {
-            get { return CountY * Texture.Regions[0].Size.Y; }
-        }
+        
         protected VertexBuffer VBO;
         public TileMap (RenderSet render_set, int countx, int county, Texture texture):
             base(render_set)

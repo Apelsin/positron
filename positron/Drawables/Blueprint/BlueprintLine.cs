@@ -7,12 +7,12 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class BlueprintLine : IRenderable
+    public class BlueprintLine : IRenderable, IRenderSetElementBase
     {
         protected int Lifespan;
         protected Stopwatch Timer = new Stopwatch();
         protected RenderSet _RenderSet;
-        public RenderSet Set { get { return _RenderSet; } }
+        public RenderSet mRenderSet { get { return _RenderSet; } }
         public Vector3 A, B;
         public BlueprintLine (Vector3 a, Vector3 b, RenderSet render_set):
             this(a, b, render_set, 100)
