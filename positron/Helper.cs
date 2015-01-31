@@ -13,12 +13,12 @@ using FarseerPhysics.Factories;
 
 namespace Positron
 {
-	public static class Helper
-	{
-		public static bool KeyPressedInTime (DateTime pressed, DateTime now)
-		{
-			return (now - pressed).TotalSeconds < Configuration.KeyPressTimeTolerance;
-		}
+    public static class Helper
+    {
+        public static bool KeyPressedInTime (DateTime pressed, DateTime now)
+        {
+            return (now - pressed).TotalSeconds < Configuration.KeyPressTimeTolerance;
+        }
         public static Color Blend(this Color S, Color C, float alpha)
         {
             return Color.FromArgb(
@@ -36,66 +36,66 @@ namespace Positron
                 regions[i] = new TextureRegion(low, high);
             }
         }
-		/// <summary>
-		///	Returns the index of the texture region matching a given label
-		/// </summary>
-		public static int Labeled(this TextureRegion[] regions, string label_seek, int no_match_index = -1)
-		{
-			for (int i = 0; i < regions.Length; i++)
-				if(regions[i].Label == label_seek)
-					return i;
-			return no_match_index;
-		}
-		/// <summary>
-		/// Returns the index of the texture region matching a given label; unoptimized multi-region lookup
-		/// </summary>
-		public static int[] Labeled(this TextureRegion[] regions, int no_match_index, params string[] labels_seek)
-		{
-			int[] region_indices = new int[labels_seek.Length];
-			for(int i = 0; i < labels_seek.Length; i++)
-				region_indices[i] = regions.Labeled(labels_seek[i], no_match_index);
-			return region_indices;
-		}
-		/// <summary>
-		/// Returns the index of the texture region matching a given label; unoptimized multi-region lookup
-		/// </summary>
-		public static int[] Labeled(this TextureRegion[] regions, params string[] labels_seek)
-		{
-			return regions.Labeled(-1, labels_seek);
-		}
-		public static IWorldObject GetWorldObject(this Body body)
-		{
-			return (IWorldObject)body.UserData;
-		}
-		public static float SmootherStep(float edge0, float edge1, float x)
-		{
-			x = MathUtil.Clamp(((x - edge0)/(edge1 - edge0)), 1.0f, 0.0f);
-			return x*x*x*(x*(x*6 - 15) + 10);
-		}
-		public static IEnumerable<Type> FindAllEndClasses(this Type self)
-		{
+        /// <summary>
+        ///    Returns the index of the texture region matching a given label
+        /// </summary>
+        public static int Labeled(this TextureRegion[] regions, string label_seek, int no_match_index = -1)
+        {
+            for (int i = 0; i < regions.Length; i++)
+                if(regions[i].Label == label_seek)
+                    return i;
+            return no_match_index;
+        }
+        /// <summary>
+        /// Returns the index of the texture region matching a given label; unoptimized multi-region lookup
+        /// </summary>
+        public static int[] Labeled(this TextureRegion[] regions, int no_match_index, params string[] labels_seek)
+        {
+            int[] region_indices = new int[labels_seek.Length];
+            for(int i = 0; i < labels_seek.Length; i++)
+                region_indices[i] = regions.Labeled(labels_seek[i], no_match_index);
+            return region_indices;
+        }
+        /// <summary>
+        /// Returns the index of the texture region matching a given label; unoptimized multi-region lookup
+        /// </summary>
+        public static int[] Labeled(this TextureRegion[] regions, params string[] labels_seek)
+        {
+            return regions.Labeled(-1, labels_seek);
+        }
+        public static IWorldObject GetWorldObject(this Body body)
+        {
+            return (IWorldObject)body.UserData;
+        }
+        public static float SmootherStep(float edge0, float edge1, float x)
+        {
+            x = MathUtil.Clamp(((x - edge0)/(edge1 - edge0)), 1.0f, 0.0f);
+            return x*x*x*(x*(x*6 - 15) + 10);
+        }
+        public static IEnumerable<Type> FindAllEndClasses(this Type self)
+        {
             foreach(var asm in AppDomain.CurrentDomain.GetAssemblies())
-			{
-				var types = asm.GetTypes();
-				foreach (var type in types)
-				{
-					if(type.BaseType == self)
-					{
-						int i = 0;
-						IEnumerable<Type> recurse = FindAllEndClasses (type);
-						foreach(Type t in recurse)
-							i++;
-						if(i == 0)
-							yield return type;
-						else
-						{
-							foreach(Type t in recurse)
-								yield return t;
-						}
-					}
-				}
-			}
-		}
+            {
+                var types = asm.GetTypes();
+                foreach (var type in types)
+                {
+                    if(type.BaseType == self)
+                    {
+                        int i = 0;
+                        IEnumerable<Type> recurse = FindAllEndClasses (type);
+                        foreach(Type t in recurse)
+                            i++;
+                        if(i == 0)
+                            yield return type;
+                        else
+                        {
+                            foreach(Type t in recurse)
+                                yield return t;
+                        }
+                    }
+                }
+            }
+        }
         public static bool DescendantOf (this Type self, Type type)
         {
             bool descendant = true;
@@ -114,17 +114,17 @@ namespace Positron
             return descendant;
         }
 
-//		public static Microsoft.Xna.Framework.Vector2 ContactNormalAbsolute(this Contact contact)
-//		{
-//			FarseerPhysics.Collision.Manifold manifold = new Manifold();
-//			FixedArray2<Microsoft.Xna.Framework.Vector2> points = new FixedArray2<Microsoft.Xna.Framework.Vector2 >();
-//			contact.GetWorldManifold(out manifold.LocalNormal, out points); // Oh God why
-//			return manifold.LocalNormal;
-//		}
-		public static float ConactNormalError(this Contact contact, Microsoft.Xna.Framework.Vector2 v2)
-		{
-			return Microsoft.Xna.Framework.Vector2.Distance(contact.Manifold.LocalNormal, v2);
-		}
+//        public static Microsoft.Xna.Framework.Vector2 ContactNormalAbsolute(this Contact contact)
+//        {
+//            FarseerPhysics.Collision.Manifold manifold = new Manifold();
+//            FixedArray2<Microsoft.Xna.Framework.Vector2> points = new FixedArray2<Microsoft.Xna.Framework.Vector2 >();
+//            contact.GetWorldManifold(out manifold.LocalNormal, out points); // Oh God why
+//            return manifold.LocalNormal;
+//        }
+        public static float ConactNormalError(this Contact contact, Microsoft.Xna.Framework.Vector2 v2)
+        {
+            return Microsoft.Xna.Framework.Vector2.Distance(contact.Manifold.LocalNormal, v2);
+        }
         public static void GetEnclosingAABB (this Body body, out AABB aabb_enclosing)
         {
             AABB aabb_fixture;
@@ -142,6 +142,6 @@ namespace Positron
 
             aabb_enclosing = new AABB(lo, hi);
         }
-	}
+    }
 }
 

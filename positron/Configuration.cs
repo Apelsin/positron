@@ -7,23 +7,23 @@ using OpenTK.Input;
 
 namespace Positron
 {
-	public static class Configuration
-	{
-		// This exists because dictionaries can be slow, and that's nooo gooood.
-		// GOTTA GO FAST!
-		#region Hard-Coded Settings
-		private static float _MetersInPixels;
-		private static float _ForceDueToGravity;
-		private static float _KeyPressTimeTolerance;
-		private static float _FrameRateCap;
-		private static int _ThreadSleepTimeStep;
-		//private static int _ThreadSleepToleranceStep;
-		private static float _MaxWorldTimeStep;
-		private static bool _AdaptiveTimeStep;
-		private static int _CanvasWidth;
-		private static int _CanvasHeight;
-		private static bool _DrawBlueprints;
-		private static bool _ShowDebugVisuals;
+    public static class Configuration
+    {
+        // This exists because dictionaries can be slow, and that's nooo gooood.
+        // GOTTA GO FAST!
+        #region Hard-Coded Settings
+        private static float _MetersInPixels;
+        private static float _ForceDueToGravity;
+        private static float _KeyPressTimeTolerance;
+        private static float _FrameRateCap;
+        private static int _ThreadSleepTimeStep;
+        //private static int _ThreadSleepToleranceStep;
+        private static float _MaxWorldTimeStep;
+        private static bool _AdaptiveTimeStep;
+        private static int _CanvasWidth;
+        private static int _CanvasHeight;
+        private static bool _DrawBlueprints;
+        private static bool _ShowDebugVisuals;
 
         private static Key
             _KeyUp,
@@ -39,52 +39,62 @@ namespace Positron
             _KeyToggleFullScreen,
             _KeyToggleShowDebugVisuals,
             _KeyToggleDrawBlueprints;
-		#endregion
+        #endregion
 
-		private static Dictionary<String, object> __dict__ = new Dictionary<String, object>();
-		static Configuration ()
-		{
-			// Development path
-			string assets_path = Path.Combine ("..", "..", "Assets");
-			if (!Directory.Exists (assets_path)) {
-				// Release path
-				assets_path = Path.Combine ("..", "Assets");
-			}
-			if (!Directory.Exists (assets_path)) {
-				// Alternative PWD path
-                assets_path = "Assets";
-			}
+        private static Dictionary<String, object> __dict__ = new Dictionary<String, object>();
+        static Configuration ()
+        {
+            // Positron attempts to locate the Assets directory in three different places
+            // Assets           Default
+            // ../../Assets     Development
+            // ../../../Assets  Development, platform-specific
+            // Release path
+            string assets_path = "Assets";
+#if DEBUG
+            if (!Directory.Exists (assets_path)) {
+                // Development path
+                assets_path = Path.Combine ("..", "..", "Assets");
+                if (!Directory.Exists (assets_path))
+                {
+                    // Platform-specific development path
+                    assets_path = Path.Combine ("..", "..", "..", "Assets");
+                }
+            }
+#endif
+            if (!Directory.Exists(assets_path))
+                throw new FileNotFoundException("Unable to locate Assets directory", assets_path);
+            
 
-			// Absolute executable path
-			// This is not working on OS X, but it would be nice if it were
-			/*
-			if(!Directory.Exists(artwork_path))
-			{
-				string exe_location = System.Reflection.Assembly.GetExecutingAssembly().Location;
-				//Console.WriteLine("Executable location is {0}", exe_location);
-				string exe_directory = Path.GetDirectoryName(exe_location);
-				//Console.WriteLine("Executable directory is {0}", exe_directory);
-				artwork_path = Path.Combine(exe_directory, "Assets", "Artwork");
-				//Console.WriteLine("Using artwork path {0}", artwork_path);
-			}
-			*/
-			Console.WriteLine ("Using assets path {0}", assets_path);
-			Set("ArtworkPath", Path.Combine(assets_path, "Artwork"));
+            // Absolute executable path
+            // This is not working on OS X, but it would be nice if it were
+            /*
+            if(!Directory.Exists(artwork_path))
+            {
+                string exe_location = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                //Console.WriteLine("Executable location is {0}", exe_location);
+                string exe_directory = Path.GetDirectoryName(exe_location);
+                //Console.WriteLine("Executable directory is {0}", exe_directory);
+                artwork_path = Path.Combine(exe_directory, "Assets", "Artwork");
+                //Console.WriteLine("Using artwork path {0}", artwork_path);
+            }
+            */
+            Console.WriteLine ("Using assets path {0}", assets_path);
+            Set("ArtworkPath", Path.Combine(assets_path, "Artwork"));
             Set("AudioPath", Path.Combine(assets_path, "Audio"));
-			Set ("SceneBeginning", "SceneIntro");
-			_MetersInPixels = 96.0f;
-			_ForceDueToGravity = -9.8f;
-			_KeyPressTimeTolerance = 0.1f;
-			_FrameRateCap = 30.0f;
-			_ThreadSleepTimeStep = 1;
-			_MaxWorldTimeStep = 0.05f;
-			_AdaptiveTimeStep = false;
-			_CanvasWidth = 1280 / 2;
-			_CanvasHeight = 800 / 2;
-			//_CanvasWidth = 1280 ;
-			//_CanvasHeight = 640;
-			_DrawBlueprints = false;
-			_ShowDebugVisuals = false;
+            Set ("SceneBeginning", "SceneIntro");
+            _MetersInPixels = 96.0f;
+            _ForceDueToGravity = -9.8f;
+            _KeyPressTimeTolerance = 0.1f;
+            _FrameRateCap = 30.0f;
+            _ThreadSleepTimeStep = 1;
+            _MaxWorldTimeStep = 0.05f;
+            _AdaptiveTimeStep = false;
+            _CanvasWidth = 1280 / 2;
+            _CanvasHeight = 800 / 2;
+            //_CanvasWidth = 1280 ;
+            //_CanvasHeight = 640;
+            _DrawBlueprints = false;
+            _ShowDebugVisuals = false;
             _KeyUp = Key.W;
             _KeyLeft = Key.A;
             _KeyDown = Key.S;
@@ -98,78 +108,78 @@ namespace Positron
             _KeyToggleFullScreen = Key.BackSlash;
             _KeyToggleShowDebugVisuals = Key.Semicolon;
             _KeyToggleDrawBlueprints = Key.Quote;
-		}
-		#region Alias Accessors
-		public static string ArtworkPath {
-			get { return (string)__dict__["ArtworkPath"]; }
-		}
+        }
+        #region Alias Accessors
+        public static string ArtworkPath {
+            get { return (string)__dict__["ArtworkPath"]; }
+        }
         public static string AudioPath {
             get { return (string)__dict__["AudioPath"]; }
         }
-		/// <summary>
-		/// Meters in pixels scalar for FarseerPhysics to use
-		/// Protip: don't muck with this
-		/// </summary>
-		public static float MeterInPixels {
-			get { return _MetersInPixels; }
-		}
-		/// <summary>
-		/// The acceleration due to gravity to use for most scenes
-		/// </summary>
-		public static float ForceDueToGravity {
-			get { return _ForceDueToGravity; }
-		}
-		/// <summary>
-		/// Time in seconds to allow existingly-pressed keystrokes to
-		/// retrigger through the bubbling KeysUpdate event.
-		/// Think of this as "buffer timeframe" in which you can press
-		/// a button and have an action happen as soon as it can.
-		/// </summary>
-		public static float KeyPressTimeTolerance {
-			get { return _KeyPressTimeTolerance; }
-		}
-		/// <summary>
-		/// Maximum frame rate to work at
-		/// </summary>
-		public static float FrameRateCap {
-			get { return _FrameRateCap; }
-		}
-		/// <summary>
-		/// Time in milliseconds to sleep at a time
-		/// during the frame rate cap loop
-		/// </summary>
-		public static int ThreadSleepTimeStep {
-			get { return _ThreadSleepTimeStep; }
-		}
-		/// <summary>
-		/// Maximum time in seconds that the physics solver can
-		/// step through time.
-		/// High values may risk horrible physics lag whereas
-		/// lower values will cause slowness
-		/// </summary>
-		public static float MaxWorldTimeStep {
-			get { return _MaxWorldTimeStep; }
-		}
-		/// <summary>
-		/// Whether the world time step should adapt to the load
-		/// </summary>
-		public static bool AdaptiveTimeStep {
-			get { return _AdaptiveTimeStep; }
-		}
-		public static int CanvasWidth {
-			get { return _CanvasWidth; }
-		}
-		public static int CanvasHeight {
-			get { return _CanvasHeight; }
-		}
-		public static bool DrawBlueprints {
-			get { return _DrawBlueprints; }
-			set { _DrawBlueprints = value; }
-		}
-		public static bool ShowDebugVisuals {
-			get { return _ShowDebugVisuals; }
-			set { _ShowDebugVisuals = value; }
-		}
+        /// <summary>
+        /// Meters in pixels scalar for FarseerPhysics to use
+        /// Protip: don't muck with this
+        /// </summary>
+        public static float MeterInPixels {
+            get { return _MetersInPixels; }
+        }
+        /// <summary>
+        /// The acceleration due to gravity to use for most scenes
+        /// </summary>
+        public static float ForceDueToGravity {
+            get { return _ForceDueToGravity; }
+        }
+        /// <summary>
+        /// Time in seconds to allow existingly-pressed keystrokes to
+        /// retrigger through the bubbling KeysUpdate event.
+        /// Think of this as "buffer timeframe" in which you can press
+        /// a button and have an action happen as soon as it can.
+        /// </summary>
+        public static float KeyPressTimeTolerance {
+            get { return _KeyPressTimeTolerance; }
+        }
+        /// <summary>
+        /// Maximum frame rate to work at
+        /// </summary>
+        public static float FrameRateCap {
+            get { return _FrameRateCap; }
+        }
+        /// <summary>
+        /// Time in milliseconds to sleep at a time
+        /// during the frame rate cap loop
+        /// </summary>
+        public static int ThreadSleepTimeStep {
+            get { return _ThreadSleepTimeStep; }
+        }
+        /// <summary>
+        /// Maximum time in seconds that the physics solver can
+        /// step through time.
+        /// High values may risk horrible physics lag whereas
+        /// lower values will cause slowness
+        /// </summary>
+        public static float MaxWorldTimeStep {
+            get { return _MaxWorldTimeStep; }
+        }
+        /// <summary>
+        /// Whether the world time step should adapt to the load
+        /// </summary>
+        public static bool AdaptiveTimeStep {
+            get { return _AdaptiveTimeStep; }
+        }
+        public static int CanvasWidth {
+            get { return _CanvasWidth; }
+        }
+        public static int CanvasHeight {
+            get { return _CanvasHeight; }
+        }
+        public static bool DrawBlueprints {
+            get { return _DrawBlueprints; }
+            set { _DrawBlueprints = value; }
+        }
+        public static bool ShowDebugVisuals {
+            get { return _ShowDebugVisuals; }
+            set { _ShowDebugVisuals = value; }
+        }
         public static Key KeyUp { get { return _KeyUp; } }
         public static Key KeyLeft { get { return _KeyLeft; } }
         public static Key KeyDown { get { return _KeyDown; } }
@@ -183,30 +193,30 @@ namespace Positron
         public static Key KeyToggleFullScreen { get { return _KeyToggleFullScreen; } }
         public static Key KeyToggleShowDebugVisuals { get { return _KeyToggleShowDebugVisuals; } }
         public static Key KeyToggleDrawBlueprints { get { return _KeyToggleDrawBlueprints; } }
-		public static void Set(String key, object value)
-		{
-			__dict__[key] = value;
-		}
-		public static object Get(String key)
-		{
-			return __dict__[key];
-		}
-		public static void LoadConfigurationFile(string config_file_path)
-		{
-			// Mono's compiler does not like this exception for whatever reason
-			//throw NotImplementedException;
-		}
-		public static IEnumerable<KeyValuePair<String, object>> GetAllSettings()
-		{
-			yield return new KeyValuePair<String, object>("_MetersInPixels", _MetersInPixels);
-			yield return new KeyValuePair<String, object>("_ForceDueToGravity", _ForceDueToGravity);
-			yield return new KeyValuePair<String, object>("_KeyPressTimeTolerance", _KeyPressTimeTolerance);
-			yield return new KeyValuePair<String, object>("_FrameRateCap", _FrameRateCap);
-			yield return new KeyValuePair<String, object>("_ThreadSleepTimeStep", _ThreadSleepTimeStep);
-			yield return new KeyValuePair<String, object>("_MinWorldTimeStep", _MaxWorldTimeStep);
-			yield return new KeyValuePair<String, object>("_AdaptiveTimeStep", _AdaptiveTimeStep);
-			yield return new KeyValuePair<String, object>("_DrawBlueprints", _DrawBlueprints);
-			yield return new KeyValuePair<String, object>("_ShowDebugVisuals", _ShowDebugVisuals);
+        public static void Set(String key, object value)
+        {
+            __dict__[key] = value;
+        }
+        public static object Get(String key)
+        {
+            return __dict__[key];
+        }
+        public static void LoadConfigurationFile(string config_file_path)
+        {
+            // Mono's compiler does not like this exception for whatever reason
+            //throw NotImplementedException;
+        }
+        public static IEnumerable<KeyValuePair<String, object>> GetAllSettings()
+        {
+            yield return new KeyValuePair<String, object>("_MetersInPixels", _MetersInPixels);
+            yield return new KeyValuePair<String, object>("_ForceDueToGravity", _ForceDueToGravity);
+            yield return new KeyValuePair<String, object>("_KeyPressTimeTolerance", _KeyPressTimeTolerance);
+            yield return new KeyValuePair<String, object>("_FrameRateCap", _FrameRateCap);
+            yield return new KeyValuePair<String, object>("_ThreadSleepTimeStep", _ThreadSleepTimeStep);
+            yield return new KeyValuePair<String, object>("_MinWorldTimeStep", _MaxWorldTimeStep);
+            yield return new KeyValuePair<String, object>("_AdaptiveTimeStep", _AdaptiveTimeStep);
+            yield return new KeyValuePair<String, object>("_DrawBlueprints", _DrawBlueprints);
+            yield return new KeyValuePair<String, object>("_ShowDebugVisuals", _ShowDebugVisuals);
             yield return new KeyValuePair<String, object>("_KeyUp", _KeyUp);
             yield return new KeyValuePair<String, object>("_KeyLeft", _KeyLeft);
             yield return new KeyValuePair<String, object>("_KeyDown", _KeyDown);
@@ -220,20 +230,20 @@ namespace Positron
             yield return new KeyValuePair<String, object>("_KeyToggleFullScreen", _KeyToggleFullScreen);
             yield return new KeyValuePair<String, object>("_KeyToggleShowDebugVisuals", _KeyToggleShowDebugVisuals);
             yield return new KeyValuePair<String, object>("_KeyToggleDrawBlueprints", _KeyToggleDrawBlueprints);
-			foreach(KeyValuePair<String, object> e in __dict__)
-				yield return e;
-		}
-		public static void DumpEverything ()
-		{
-			Console.WriteLine("{");
-			Console.WriteLine("\t\"Configuration\": {");
-			foreach (KeyValuePair<String, object> kvp in GetAllSettings()) {
-				Console.WriteLine("\t\t\"{0}\": \"{1}\",", kvp.Key, kvp.Value);
-			}
-			Console.WriteLine("\t}");
-			Console.WriteLine("}");
-		}
-		#endregion
-	}
+            foreach(KeyValuePair<String, object> e in __dict__)
+                yield return e;
+        }
+        public static void DumpEverything ()
+        {
+            Console.WriteLine("{");
+            Console.WriteLine("\t\"Configuration\": {");
+            foreach (KeyValuePair<String, object> kvp in GetAllSettings()) {
+                Console.WriteLine("\t\t\"{0}\": \"{1}\",", kvp.Key, kvp.Value);
+            }
+            Console.WriteLine("\t}");
+            Console.WriteLine("}");
+        }
+        #endregion
+    }
 }
 

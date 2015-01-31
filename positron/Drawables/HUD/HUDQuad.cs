@@ -11,7 +11,7 @@ namespace Positron
     {
         protected RenderSet _RenderSet;
         protected Color _Color;
-		public Vector3 A, B, C, D;
+        public Vector3 A, B, C, D;
         public Color Color
         {
             get { return _Color; }
@@ -20,17 +20,17 @@ namespace Positron
         public RenderSet Set {
             get { return _RenderSet; }
         }
-		public HUDQuad(RenderSet render_set, Vector3 a, Vector3 b, Vector3 c, Vector3 d)
-		{
-			A = a;
-			B = b;
-			C = c;
-			D = d;
+        public HUDQuad(RenderSet render_set, Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        {
+            A = a;
+            B = b;
+            C = c;
+            D = d;
             _RenderSet = render_set;
             _RenderSet.Add(this);
-		}
-		public HUDQuad(RenderSet render_set, Vector3 p, Vector3 s) :
-			this(render_set, p,
+        }
+        public HUDQuad(RenderSet render_set, Vector3 p, Vector3 s) :
+            this(render_set, p,
                  p + new Vector3(s.X, 0f,  0f),
                  p + new Vector3(s.X, s.Y, 0f),
                  p + new Vector3(0f,  s.Y, 0f))
@@ -49,10 +49,10 @@ namespace Positron
             GL.Vertex3(D);
             GL.End();
         }
-		public virtual void Dispose()
-		{
+        public virtual void Dispose()
+        {
             _RenderSet = null;
-		}
+        }
     }
 }
 

@@ -17,135 +17,135 @@ using FarseerPhysics.Factories;
 
 namespace Positron
 {
-	public class PositronGame: IUpdateSync, IDisposable, IGLContextLateUpdate
+    public class PositronGame: IUpdateSync, IDisposable, IGLContextLateUpdate
     {
         #region Event-Related
-		protected List<KeyValuePair<object, UpdateEventHandler>> _UpdateEventList = new List<KeyValuePair<object, UpdateEventHandler>>();
-		public List<KeyValuePair<object, UpdateEventHandler>> UpdateEventList { get { return _UpdateEventList; } }
+        protected List<KeyValuePair<object, UpdateEventHandler>> _UpdateEventList = new List<KeyValuePair<object, UpdateEventHandler>>();
+        public List<KeyValuePair<object, UpdateEventHandler>> UpdateEventList { get { return _UpdateEventList; } }
         #endregion
         #region Member Variables
-		public void AddUpdateEventHandler(object sender, UpdateEventHandler handler)
-		{
+        public void AddUpdateEventHandler(object sender, UpdateEventHandler handler)
+        {
             lock(_UpdateEventList)
-			    _UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
-		}
+                _UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
+        }
         protected ThreadedRendering _Window;
-		protected Hashtable _Scenes = new Hashtable();
-		protected Scene _CurrentScene;
-		protected World _WorldMain;
-		public float TimeStepCoefficient = 1.0f;
-		protected OrderedDictionary InputAccepterGroups;
+        protected Hashtable _Scenes = new Hashtable();
+        protected Scene _CurrentScene;
+        protected World _WorldMain;
+        public float TimeStepCoefficient = 1.0f;
+        protected OrderedDictionary InputAccepterGroups;
 
         /// <summary>
         /// Lock to synchronize rendering and updating
         /// </summary>
         public readonly object UpdateLock = new object();
 
-		#endregion
-		#region Static Variables
-		#endregion
-		#region Member Accessors
+        #endregion
+        #region Static Variables
+        #endregion
+        #region Member Accessors
         public ThreadedRendering Window { get { return _Window; } }
-		public Hashtable Scenes { get { return _Scenes; } }
-		public Scene CurrentScene {
-			get { return _CurrentScene; }
-			set {
+        public Hashtable Scenes { get { return _Scenes; } }
+        public Scene CurrentScene {
+            get { return _CurrentScene; }
+            set {
                 WeakReference value_wr = new WeakReference(value);
                 AddUpdateEventHandler(this, (sender, e) => {
                     ChangeScene ((Scene)value_wr.Target);
                     return true;
                 });
             }
-		}
-		public World WorldMain { get { return _WorldMain; } set { _WorldMain = value; } }
-		// TODO: ensure thread safety here:
-		public IInputAccepter[] InputAccepterGroup {
-			get { 
-				if(InputAccepterGroups != null && InputAccepterGroups.Count > 0)
-					return (IInputAccepter[])InputAccepterGroups[0];
-				else
-					return new IInputAccepter[] { };
-			}
-		}
-		#endregion
-		#region Static Accessors
-		#endregion
+        }
+        public World WorldMain { get { return _WorldMain; } set { _WorldMain = value; } }
+        // TODO: ensure thread safety here:
+        public IInputAccepter[] InputAccepterGroup {
+            get { 
+                if(InputAccepterGroups != null && InputAccepterGroups.Count > 0)
+                    return (IInputAccepter[])InputAccepterGroups[0];
+                else
+                    return new IInputAccepter[] { };
+            }
+        }
+        #endregion
+        #region Static Accessors
+        #endregion
 
-		public PositronGame (ThreadedRendering window)
-		{
+        public PositronGame (ThreadedRendering window)
+        {
             _Window = window;
             // TODO: world objects need to be pending initialization before the world is controlled by the scene
             FarseerPhysics.Settings.VelocityIterations = 1;
             InputAccepterGroups = new OrderedDictionary();
             SetupScenes();
             //_CurrentScene = (Scene)_Scenes["SceneFirstMenu"];
-		}
-		public static void InitialSetup ()
-		{
-			// Load textures into graphics memory space
-			Texture.InitialSetup();
+        }
+        public static void InitialSetup ()
+        {
+            // Load textures into graphics memory space
+            Texture.InitialSetup();
             Sound.InitialSetup();
-			DialogSpeaker.InitialSetup();
-		}
-		public void SetInputAccepters (string name, params IInputAccepter[] input_accepters)
-		{
+            DialogSpeaker.InitialSetup();
+        }
+        public void SetInputAccepters (string name, params IInputAccepter[] input_accepters)
+        {
             lock (InputAccepterGroups) {
-				if(!InputAccepterGroups.Contains(name))
-					InputAccepterGroups.Insert (0, name, input_accepters);
-			}
-		}
-		public void SetLastInputAccepters (string name, params IInputAccepter[] input_accepters)
-		{
+                if(!InputAccepterGroups.Contains(name))
+                    InputAccepterGroups.Insert (0, name, input_accepters);
+            }
+        }
+        public void SetLastInputAccepters (string name, params IInputAccepter[] input_accepters)
+        {
             lock (InputAccepterGroups) {
-				if(!InputAccepterGroups.Contains(name))
-				{
-					InputAccepterGroups.Add (name, input_accepters);
-				}
-			}
-		}
-		public void MixAddInputAccepters (string name, params IInputAccepter[] input_accepters)
-		{
+                if(!InputAccepterGroups.Contains(name))
+                {
+                    InputAccepterGroups.Add (name, input_accepters);
+                }
+            }
+        }
+        public void MixAddInputAccepters (string name, params IInputAccepter[] input_accepters)
+        {
             lock (InputAccepterGroups) {
-				IInputAccepter[] mixed = new IInputAccepter[InputAccepterGroup.Length + input_accepters.Length];
-				int idx = 0;
-				for(int i = 0; i < InputAccepterGroup.Length; i++)
-					mixed[idx++] = InputAccepterGroup[i];
-				for(int i = 0; i < input_accepters.Length; i++)
-					mixed[idx++] = input_accepters[i];
-				InputAccepterGroups.Insert (0, name, mixed);
-			}
-		}
-		public void RemoveInputAccepters (string name)
-		{
+                IInputAccepter[] mixed = new IInputAccepter[InputAccepterGroup.Length + input_accepters.Length];
+                int idx = 0;
+                for(int i = 0; i < InputAccepterGroup.Length; i++)
+                    mixed[idx++] = InputAccepterGroup[i];
+                for(int i = 0; i < input_accepters.Length; i++)
+                    mixed[idx++] = input_accepters[i];
+                InputAccepterGroups.Insert (0, name, mixed);
+            }
+        }
+        public void RemoveInputAccepters (string name)
+        {
             lock (InputAccepterGroups) {
-				InputAccepterGroups.Remove (name);
-			}
-		}
-//		public void SetupTests ()
-//		{
-//			TestWatch.Start();
-//		}
-		protected void ProcessUpdateEventList (float time)
-		{
-			lock (_UpdateEventList)
-			{
-				for(int i = 0; i < _UpdateEventList.Count;)
-				{
-					if(_UpdateEventList[i].Value(_UpdateEventList[i].Key, new UpdateEventArgs(time, i)))
-						_UpdateEventList.RemoveAt(i);
-					else
-						i++;
-				}
-			}
-		}
-		public void Update (float time)
-		{
-			//BackgroundTiles.RandomMap();
-			time = (float)Math.Round(time, 4);
-			_CurrentScene.Update (time * TimeStepCoefficient);
-			ProcessUpdateEventList(time);
-			foreach(RenderSet render_set in _CurrentScene.UpdateRenderSetsInOrder())
-			{
+                InputAccepterGroups.Remove (name);
+            }
+        }
+//        public void SetupTests ()
+//        {
+//            TestWatch.Start();
+//        }
+        protected void ProcessUpdateEventList (float time)
+        {
+            lock (_UpdateEventList)
+            {
+                for(int i = 0; i < _UpdateEventList.Count;)
+                {
+                    if(_UpdateEventList[i].Value(_UpdateEventList[i].Key, new UpdateEventArgs(time, i)))
+                        _UpdateEventList.RemoveAt(i);
+                    else
+                        i++;
+                }
+            }
+        }
+        public void Update (float time)
+        {
+            //BackgroundTiles.RandomMap();
+            time = (float)Math.Round(time, 4);
+            _CurrentScene.Update (time * TimeStepCoefficient);
+            ProcessUpdateEventList(time);
+            foreach(RenderSet render_set in _CurrentScene.UpdateRenderSetsInOrder())
+            {
                 object o;
                 for(int i = 0; i < render_set.Count; i++)
                 {
@@ -153,8 +153,8 @@ namespace Positron
                     if (o is SpriteBase)
                         ((SpriteBase)o).Update (time * TimeStepCoefficient);
                 }
-			}
-		}
+            }
+        }
         /// <summary>
         /// Instantiates and initializes one instnace
         /// of every subclass of Scene in this assembly
@@ -217,7 +217,7 @@ namespace Positron
                 scene.InitializeScene ();
             ChangeScene(next_scene); // Change scenes as necessary
         }
-		protected void ChangeScene (Scene next_scene)
+        protected void ChangeScene (Scene next_scene)
         {
             if (_CurrentScene == next_scene || next_scene == null)
                 return;
@@ -230,24 +230,24 @@ namespace Positron
             if (_CurrentScene != null) {
                 // Get the enumerable for the render sets; these need to be in the same order!
                 current_sets = _CurrentScene.AllRenderSetsInOrder ();
-                current_set_enum = current_sets.GetEnumerator ();					// Enumerate from the beginning of the set enumerable
+                current_set_enum = current_sets.GetEnumerator ();                    // Enumerate from the beginning of the set enumerable
                 foreach (RenderSet render_set in current_sets) {
                     if (!next_set_enum.MoveNext ())
                         break;
                     rscea = new RenderSetChangeEventArgs (render_set, next_set_enum.Current);
                     // Process this scene
-                    for (int i = 0; i < render_set.Count;) {						// For each renderable in render set
+                    for (int i = 0; i < render_set.Count;) {                        // For each renderable in render set
                         var renderable = render_set [i];
-                        if (renderable is ISceneElement) {							// If object also implements scene object
-                            ISceneElement scene_object = (ISceneElement)renderable;	// Cast to scene object
+                        if (renderable is ISceneElement) {                            // If object also implements scene object
+                            ISceneElement scene_object = (ISceneElement)renderable;    // Cast to scene object
                             if (scene_object is IWorldObject) {
                                 IWorldObject world_object = (IWorldObject)scene_object;
                                 // Disable the body object is not preserved
                                 world_object.Body.Enabled &= world_object.Preserve;
                             }
-                            if (scene_object.Preserve) { 							// If scene object is preserved
-                                next_set_enum.Current.Add (renderable);				// Add in this object
-                                render_set.RemoveAt (i);							// Remove from previous 
+                            if (scene_object.Preserve) {                             // If scene object is preserved
+                                next_set_enum.Current.Add (renderable);                // Add in this object
+                                render_set.RemoveAt (i);                            // Remove from previous 
                                 scene_object.OnRenderSetTransfer (this, rscea);
                                 continue;
                             }
@@ -260,7 +260,7 @@ namespace Positron
                         break;
                     // Process next scene, PART 1
                     foreach (IRenderable renderable in render_set) {
-                        if (renderable is ISceneElement) {							// If object also implements scene object
+                        if (renderable is ISceneElement) {                            // If object also implements scene object
                             if (renderable is IWorldObject) {
                                 IWorldObject world_object = (IWorldObject)renderable;
                                 // HACK: temporarily enable all bodies in this renderset
@@ -275,7 +275,7 @@ namespace Positron
 
             if (_CurrentScene != null)
                 _CurrentScene.OnSceneExit (this, scea);
-			
+            
             // Enumerate from the beginning of the set enumerable
             if (_CurrentScene != null)
                 current_set_enum = current_sets.GetEnumerator ();
@@ -305,17 +305,17 @@ namespace Positron
             next_scene.OnSceneEntry (next_scene, scea);
             _CurrentScene = next_scene; // Update the scene reference
             GC.Collect();
-		}
-		public void Draw(float time)
-		{
-			_CurrentScene.Render (time);
-		}
-		public void Dispose ()
-		{
-			lock (UpdateLock) {
+        }
+        public void Draw(float time)
+        {
+            _CurrentScene.Render (time);
+        }
+        public void Dispose ()
+        {
+            lock (UpdateLock) {
                 Demolish();
-				//foreach(Scene scene in Scenes.Values)
-				//	scene.Dispose();
+                //foreach(Scene scene in Scenes.Values)
+                //    scene.Dispose();
                 _Scenes.Clear();
                 _Scenes = null;
                 InputAccepterGroups.Clear();
@@ -324,18 +324,18 @@ namespace Positron
                 _UpdateEventList = null;
                 _WorldMain.Clear();
                 _WorldMain = null;
-			}
-		}
-		public void Demolish()
-		{
-			lock (UpdateLock) {
-				foreach(Scene scene in Scenes.Values)
-				{
-					scene.Dispose();
-				}
-				//Dispose ();
-			}
-		}
-	}
+            }
+        }
+        public void Demolish()
+        {
+            lock (UpdateLock) {
+                foreach(Scene scene in Scenes.Values)
+                {
+                    scene.Dispose();
+                }
+                //Dispose ();
+            }
+        }
+    }
 }
 

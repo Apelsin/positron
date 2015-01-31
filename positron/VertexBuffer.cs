@@ -154,9 +154,9 @@ namespace Positron
                 GL.DisableClientState(ArrayCap.ColorArray);
             GL.DrawArrays(PrimitiveType.Quads, 0, _DataLength); // TODO: Make this part not-hardcoded
         }
-		public void Dispose()
-		{
-			GL.DeleteBuffer(_Id);
-		}
+        public void Dispose()
+        {
+            GL.DeleteBuffer(_Id);
+        }
     }
 }

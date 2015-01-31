@@ -15,201 +15,201 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-	public class DialogSpeaker
-	{
-		public string Name;
-		public Texture Picture;
-		protected static Hashtable DialogSpeakers = new Hashtable();
-		public DialogSpeaker (string name, Texture picture)
-		{
-			Name = name;
-			Picture = picture;
-		}
-		public static void InitialSetup()
-		{
+    public class DialogSpeaker
+    {
+        public string Name;
+        public Texture Picture;
+        protected static Hashtable DialogSpeakers = new Hashtable();
+        public DialogSpeaker (string name, Texture picture)
+        {
+            Name = name;
+            Picture = picture;
+        }
+        public static void InitialSetup()
+        {
             DialogSpeakers.Add ("protagonist", new DialogSpeaker("Volta", Texture.Get ("sprite_protagonist_picture")));
-			DialogSpeakers.Add ("radio", new DialogSpeaker("Radio", Texture.Get ("sprite_radio_picture")));
-		}
-		public static DialogSpeaker Get (object key)
-		{
-			return (DialogSpeaker)DialogSpeakers[key];
-		}
-	}
-	public class DialogStanza
-	{
-		public DialogSpeaker Speaker;
-		public string Message;
-		public DialogStanza(DialogSpeaker speaker, string message)
-		{
-			Speaker = speaker;
-			Message = message;
-		}
-	}
-	public class DialogEndEventArgs : EventArgs
-	{
-	}
-	public delegate void DialogEndEventHandler(object sender, DialogEndEventArgs e);
-	public class Dialog : Drawable, IInputAccepter
-	{
-		public event DialogEndEventHandler DialogEnd;
-		protected PTextWriter SpeakerWriter;
-		protected PTextWriter SpeechWriter;
-		protected string _Title;
-		protected bool _Shown;
-		protected List<DialogStanza> Stanzas;
-		protected int StanzaIndex = 0;
-		protected float _PauseTime = 0.0f;
-		protected float _RevertTime = 1.0f;
-		protected Texture FadeUp;
-		public string Title { get { return _Title; } }
-		public DialogStanza CurrentStanza {
-			get { return Stanzas [StanzaIndex]; }
-		}
-		public float PauseTime {
-			get { return _PauseTime; }
-			set { _PauseTime = value; }
-		}
-		public float RevertTime {
-			get { return _RevertTime; }
-		}
-		public bool Shown { get { return _Shown; } }
-		public Dialog(RenderSet render_set, string title, List<DialogStanza> stanzas):
-			base(null)
-		{
-			_Title = title;
-			Stanzas = stanzas;
-			_RenderSet = render_set;
-			_Shown = false;
-			ScaleX = _RenderSet.Scene.ViewSize.X;
-			ScaleY = (int)(_RenderSet.Scene.ViewSize.Y * 0.25);
+            DialogSpeakers.Add ("radio", new DialogSpeaker("Radio", Texture.Get ("sprite_radio_picture")));
+        }
+        public static DialogSpeaker Get (object key)
+        {
+            return (DialogSpeaker)DialogSpeakers[key];
+        }
+    }
+    public class DialogStanza
+    {
+        public DialogSpeaker Speaker;
+        public string Message;
+        public DialogStanza(DialogSpeaker speaker, string message)
+        {
+            Speaker = speaker;
+            Message = message;
+        }
+    }
+    public class DialogEndEventArgs : EventArgs
+    {
+    }
+    public delegate void DialogEndEventHandler(object sender, DialogEndEventArgs e);
+    public class Dialog : Drawable, IInputAccepter
+    {
+        public event DialogEndEventHandler DialogEnd;
+        protected PTextWriter SpeakerWriter;
+        protected PTextWriter SpeechWriter;
+        protected string _Title;
+        protected bool _Shown;
+        protected List<DialogStanza> Stanzas;
+        protected int StanzaIndex = 0;
+        protected float _PauseTime = 0.0f;
+        protected float _RevertTime = 1.0f;
+        protected Texture FadeUp;
+        public string Title { get { return _Title; } }
+        public DialogStanza CurrentStanza {
+            get { return Stanzas [StanzaIndex]; }
+        }
+        public float PauseTime {
+            get { return _PauseTime; }
+            set { _PauseTime = value; }
+        }
+        public float RevertTime {
+            get { return _RevertTime; }
+        }
+        public bool Shown { get { return _Shown; } }
+        public Dialog(RenderSet render_set, string title, List<DialogStanza> stanzas):
+            base(null)
+        {
+            _Title = title;
+            Stanzas = stanzas;
+            _RenderSet = render_set;
+            _Shown = false;
+            ScaleX = _RenderSet.Scene.ViewSize.X;
+            ScaleY = (int)(_RenderSet.Scene.ViewSize.Y * 0.25);
             FadeUp = Texture.Get("sprite_dialog_fade_up");
 
             SpeakerWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, 24));
             SpeechWriter = new PTextWriter(_RenderSet.Scene.Game, new Size((int)ScaleX, (int)ScaleY));
-		}
-		public override void Render (float time)
-		{
-			GL.PushMatrix();
-			{
-				GL.Color4(0.0, 0.0, 0.0, 0.75);
-				GL.BindTexture(TextureTarget.Texture2D, 0);
-			    GL.Translate (_Position.X, _Position.Y, 0.0);
+        }
+        public override void Render (float time)
+        {
+            GL.PushMatrix();
+            {
+                GL.Color4(0.0, 0.0, 0.0, 0.75);
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GL.Translate (_Position.X, _Position.Y, 0.0);
                 GL.Begin(PrimitiveType.Quads);
-				GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);
-				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	ScaleY);
-				GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	ScaleY);
-				GL.End ();
+                GL.TexCoord2(0.0,  0.0);        GL.Vertex2(0.0,     0.0        );
+                GL.TexCoord2(1.0,  0.0);        GL.Vertex2(ScaleX,    0.0        );
+                GL.TexCoord2(1.0, -1.0);        GL.Vertex2(ScaleX,    ScaleY);
+                GL.TexCoord2(0.0, -1.0);        GL.Vertex2(0.0,     ScaleY);
+                GL.End ();
                 GL.Translate (0.0, ScaleY, 0.0);
                 Texture.Bind(FadeUp);
                 GL.Begin(PrimitiveType.Quads);
-    			GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 	0.0		);
-				GL.TexCoord2(1.0,  0.0);		GL.Vertex2(ScaleX,	0.0		);
-				GL.TexCoord2(1.0, -1.0);		GL.Vertex2(ScaleX,	FadeUp.Height);
-				GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 	FadeUp.Height);
-				GL.End ();
-			}
-			GL.PopMatrix();
+                GL.TexCoord2(0.0,  0.0);        GL.Vertex2(0.0,     0.0        );
+                GL.TexCoord2(1.0,  0.0);        GL.Vertex2(ScaleX,    0.0        );
+                GL.TexCoord2(1.0, -1.0);        GL.Vertex2(ScaleX,    FadeUp.Height);
+                GL.TexCoord2(0.0, -1.0);        GL.Vertex2(0.0,     FadeUp.Height);
+                GL.End ();
+            }
+            GL.PopMatrix();
             GL.Color4 (1.0, 1.0, 1.0, 1.0);
-			GL.PushMatrix();
-			{
-				GL.Translate(16, 0.0, 0.0);
-				if(CurrentStanza.Speaker != null)
-				{
+            GL.PushMatrix();
+            {
+                GL.Translate(16, 0.0, 0.0);
+                if(CurrentStanza.Speaker != null)
+                {
                     SpeakerWriter.Render(time);
                     
-					var picture = CurrentStanza.Speaker.Picture;
-					if(picture != null)
-					{
+                    var picture = CurrentStanza.Speaker.Picture;
+                    if(picture != null)
+                    {
 
-						picture.Bind();
+                        picture.Bind();
                         GL.PushMatrix();
                         GL.Translate(0.0, 24, 0.0);
                         GL.Begin(PrimitiveType.Quads);
-						GL.TexCoord2(0.0,  0.0);		GL.Vertex2(0.0, 			0.0);
-						GL.TexCoord2(1.0,  0.0);		GL.Vertex2(picture.Width,	0.0);
-						GL.TexCoord2(1.0, -1.0);		GL.Vertex2(picture.Width,	picture.Height);
-						GL.TexCoord2(0.0, -1.0);		GL.Vertex2(0.0, 			picture.Height);
-						GL.End ();
+                        GL.TexCoord2(0.0,  0.0);        GL.Vertex2(0.0,             0.0);
+                        GL.TexCoord2(1.0,  0.0);        GL.Vertex2(picture.Width,    0.0);
+                        GL.TexCoord2(1.0, -1.0);        GL.Vertex2(picture.Width,    picture.Height);
+                        GL.TexCoord2(0.0, -1.0);        GL.Vertex2(0.0,             picture.Height);
+                        GL.End ();
                         GL.PopMatrix();
-						GL.Translate(picture.Width + 16, 0.0, 0.0);
-					}
-				}
+                        GL.Translate(picture.Width + 16, 0.0, 0.0);
+                    }
+                }
 
-				SpeechWriter.Render(time);
+                SpeechWriter.Render(time);
 //                GL.Translate (0.75, -0.75, 0.0);
 //                GL.Color4 (0.0, 0.0, 0.0, 1.0);
 //                SpeechWriter.Render(time);
             }
-			GL.PopMatrix();
-		}
-		public override string ToString ()
-		{
-			return string.Format ("[Dialog: Title={0}, Scene={1}]", _Title, _RenderSet);
-		}
-		public void Begin()
-		{
-			_RevertTime = _RenderSet.Scene.Game.TimeStepCoefficient;
+            GL.PopMatrix();
+        }
+        public override string ToString ()
+        {
+            return string.Format ("[Dialog: Title={0}, Scene={1}]", _Title, _RenderSet);
+        }
+        public void Begin()
+        {
+            _RevertTime = _RenderSet.Scene.Game.TimeStepCoefficient;
             _RenderSet.Scene.Game.TimeStepCoefficient = _PauseTime;
-			_RenderSet.Add(this);
-			_Shown = true;
-			StanzaIndex = 0;
-			UpdateContent();
+            _RenderSet.Add(this);
+            _Shown = true;
+            StanzaIndex = 0;
+            UpdateContent();
             _RenderSet.Scene.Game.SetInputAccepters(ToString(), this);
-		}
-		public void Next ()
-		{
-			if (Stanzas == null || StanzaIndex >= Stanzas.Count - 1) {
-				End ();
-			} else {
-				StanzaIndex++;
-				UpdateContent();
-			}
-		}
-		protected void UpdateContent ()
-		{
-			// Update the actual GL Texture with the rendered text in the thread
-			// with the GL context
+        }
+        public void Next ()
+        {
+            if (Stanzas == null || StanzaIndex >= Stanzas.Count - 1) {
+                End ();
+            } else {
+                StanzaIndex++;
+                UpdateContent();
+            }
+        }
+        protected void UpdateContent ()
+        {
+            // Update the actual GL Texture with the rendered text in the thread
+            // with the GL context
             _RenderSet.Scene.Game.AddUpdateEventHandler (this, (sender2, e2) => {
-				SpeakerWriter.Clear();
-				if(CurrentStanza.Speaker != null)
-				{
-					string speaker_text = CurrentStanza.Speaker.Name;
-					SpeakerWriter.AddLine (speaker_text, PointF.Empty, Brushes.LightBlue);
-				}
+                SpeakerWriter.Clear();
+                if(CurrentStanza.Speaker != null)
+                {
+                    string speaker_text = CurrentStanza.Speaker.Name;
+                    SpeakerWriter.AddLine (speaker_text, PointF.Empty, Brushes.LightBlue);
+                }
 
-				string stanza_text = CurrentStanza.Message;
-				SpeechWriter.Clear ();
-				SpeechWriter.AddLine (stanza_text);
-				return true;
-			});
-		}
-		public void End()
-		{
+                string stanza_text = CurrentStanza.Message;
+                SpeechWriter.Clear ();
+                SpeechWriter.AddLine (stanza_text);
+                return true;
+            });
+        }
+        public void End()
+        {
             _RenderSet.Scene.Game.RemoveInputAccepters(ToString());
-			_Shown = false;
-			_RenderSet.Remove(this);
+            _Shown = false;
+            _RenderSet.Remove(this);
             _RenderSet.Scene.Game.TimeStepCoefficient = _RevertTime;
-			if(DialogEnd != null)
-				DialogEnd(this, new DialogEndEventArgs());
-		}
-		public bool KeyDown (object sender, KeyEventArgs e)
-		{
+            if(DialogEnd != null)
+                DialogEnd(this, new DialogEndEventArgs());
+        }
+        public bool KeyDown (object sender, KeyEventArgs e)
+        {
             if (e.Key == Configuration.KeyDoAction || e.Key == Configuration.KeyUseEquippedItem || e.Key == Configuration.KeyJump) {
-				Next();
-				return false;
-			}
-			return true;
-		}
-		public bool KeyUp(object sender, KeyEventArgs e)
-		{
-			return true;
-		}
-		public KeysUpdateEventArgs KeysUpdate(object sender, KeysUpdateEventArgs e)
-		{
-			//e.KeysPressedWhen.Clear();
-			return e;
-		}
-	}
+                Next();
+                return false;
+            }
+            return true;
+        }
+        public bool KeyUp(object sender, KeyEventArgs e)
+        {
+            return true;
+        }
+        public KeysUpdateEventArgs KeysUpdate(object sender, KeysUpdateEventArgs e)
+        {
+            //e.KeysPressedWhen.Clear();
+            return e;
+        }
+    }
 }
 

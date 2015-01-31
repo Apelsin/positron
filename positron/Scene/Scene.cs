@@ -149,15 +149,15 @@ namespace Positron
             ViewWidth = _Game.Window.CanvasWidth;
 			ViewHeight = _Game.Window.CanvasHeight;
 
-			Background = new RenderSet(this);
-			Rear = new RenderSet(this);
-			Stage = new RenderSet(this);
-			Tests = new RenderSet(this);
-			Front = new RenderSet(this);
-			WorldBlueprint = new RenderSet(this);
-			HUD = new RenderSet(this);
-			HUDBlueprint = new RenderSet(this);
-			HUDDebug = new RenderSet(this);
+			Background =        new RenderSet(this);
+			Rear =              new RenderSet(this);
+			Stage =             new RenderSet(this);
+			Tests =             new RenderSet(this);
+			Front =             new RenderSet(this);
+			WorldBlueprint =    new RenderSet(this);
+			HUD =               new RenderSet(this);
+			HUDBlueprint =      new RenderSet(this);
+			HUDDebug =          new RenderSet(this);
 
 			// This should contain everything AllRenderSetsInOrder would contain
 			// This is an optimization over using an enumerable

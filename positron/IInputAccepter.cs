@@ -6,12 +6,12 @@ using Positron.Input;
 
 namespace Positron
 {
-	public interface IInputAccepter
-	{
-		bool KeyUp(object sender, KeyEventArgs e);
-		bool KeyDown(object sender, KeyEventArgs e);
-		KeysUpdateEventArgs KeysUpdate(object sender, KeysUpdateEventArgs e);
-		// TODO: GamePad / Joystick support!
-	}
+    public interface IInputAccepter
+    {
+        bool KeyUp(object sender, KeyEventArgs e);
+        bool KeyDown(object sender, KeyEventArgs e);
+        KeysUpdateEventArgs KeysUpdate(object sender, KeysUpdateEventArgs e);
+        // TODO: GamePad / Joystick support!
+    }
 }
 

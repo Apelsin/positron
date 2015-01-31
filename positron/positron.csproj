@@ -55,9 +55,12 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attachment.cs" />
     <Compile Include="Drawables\HUD\HUDQuad.cs" />
     <Compile Include="Drawables\IUpdateSync.cs" />
+    <Compile Include="GameObject.cs" />
     <Compile Include="IRenderable.cs" />
+    <Compile Include="SoundSource.cs" />
     <Compile Include="ThreadedRendering.cs" />
     <Compile Include="IWorldObject.cs" />
     <Compile Include="Drawables\Drawable.cs" />
