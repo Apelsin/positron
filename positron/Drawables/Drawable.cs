@@ -7,10 +7,14 @@ namespace Positron
 {
     public abstract class Drawable : GameObject, IRenderable, IRenderSetElement
     {
-        #region GameObject
+        #region Abstract Classes and Interfaces
         public override Scene mScene { get { return mRenderSet.Scene; } }
         // TODO: Implement set accessor for mRenderSet with event handling
-        public override RenderSet mRenderSet { get; protected set; }
+        protected RenderSet _RenderSet;
+        public new RenderSet mRenderSet {
+            get { return _RenderSet; }
+            protected set { _RenderSet = value; }
+        }
         //public abstract FarseerPhysics.Dynamics.Body mBody { get; }
         public override Drawable mDrawable { get { return this; } }
         //public abstract SpriteBase mSprite { get; }
@@ -110,7 +114,6 @@ namespace Positron
         #endregion
         public Drawable (RenderSet render_set)
         {
-            _Transform = new Xform(this);
             mRenderSet = render_set;
             if (mRenderSet != null)
                 mRenderSet.Add(this);

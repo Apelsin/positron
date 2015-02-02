@@ -26,18 +26,18 @@ namespace Positron
         {
             get
             {
-                if (GameObject.Body != null)
+                if (GameObject.mBody != null)
                 {
                     // do a little dance
                 }
-                return _Local;
+                return _Local * ParentMatrix;
             }
         }
         public Matrix4 ParentMatrix
         {
             get
             {
-                if (GameObject.Body != null)
+                if (GameObject.mBody != null)
                 {
                     // do a little dance
                 }
@@ -51,22 +51,29 @@ namespace Positron
         {
             get
             {
-                if(GameObject.Body != null)
+                if(GameObject.mBody != null)
                 {
                     // do a little dance
                 }
                 return _Local;
             }
         }
-        public Vector3 Position
+        public Vector3 PositionLocal
         {
             get
             {
-                if (GameObject.Body != null)
-                {
-                    // do a little dance
-                }
-                return _Transform;
+                return LocalMatrix.ExtractTranslation();
+            }
+            set
+            {
+                LocalMatrix.
+            }
+        }
+        public Vector2 PositionLocalXY
+        {
+            get
+            {
+                return LocalMatrix.ExtractTranslation().Xy;
             }
         }
     }

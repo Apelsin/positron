@@ -278,6 +278,7 @@ namespace Positron
 //                }
 //            }
 //        }
+        /*
         public int FrameIndex {
             get { return _AnimationFrameIndex; }
             set { 
@@ -309,6 +310,7 @@ namespace Positron
         {
             get { return _Scale.Y * FrameCurrent.SizeY; }
         }
+        */
 
         //public VertexBuffer BPVBO { get { return FrameCurrent.BPVBO; } }
 
@@ -352,8 +354,7 @@ namespace Positron
         }
         public SpriteBase CenterShift ()
         {
-            Xform.PositionX -= FrameCurrent.SizeX * 0.5f;
-            PositionY -= FrameCurrent.SizeY * 0.5f;
+            mTransform.Position.S = mTransform.Position.Xy - new Vector2(FrameCurrent.SizeX * 0.5f, FrameCurrent.SizeY * 0.5f);
             return this;
         }
         public override void Render (float time)
