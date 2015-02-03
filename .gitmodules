@@ -1,6 +1,6 @@
 [submodule "opentk"]
 	path = opentk
-	url = git@github.com:opentk/opentk.git
+	url = git@github.com:Apelsin/opentk.git
 [submodule "Farseer-Physics"]
 	path = Farseer-Physics
 	url = git@github.com:d-snp/Farseer-Physics.git

@@ -6,10 +6,18 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Positron", "Positron\Positron.csproj", "{40C952E1-700B-46D1-A2B5-D6B3C7E46048}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK", "opentk\Source\OpenTK\OpenTK.csproj", "{A37A7E14-0000-0000-0000-000000000000}"
+	ProjectSection(ProjectDependencies) = postProject
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8} = {75DC22B1-113F-4A66-96B9-2FF8208C10E8}
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB} = {C426C9D1-8857-4E52-BAC7-4C05EE6070AB}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farseer Physics", "Farseer-Physics\SourceFiles\Farseer Physics.csproj", "{A4610E4C-DD34-428B-BABB-779CA0B5993A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PsdFile", "psdplugin\PsdFile\PsdFile.csproj", "{8AE43567-4988-4E3E-84A4-8258167EBDEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Rewrite", "opentk\Source\Generator.Rewrite\Generator.Rewrite.csproj", "{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Build.UpdateVersion", "opentk\Source\Build.UpdateVersion\Build.UpdateVersion.csproj", "{75DC22B1-113F-4A66-96B9-2FF8208C10E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -107,6 +115,46 @@ Global
 		{8AE43567-4988-4E3E-84A4-8258167EBDEA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{8AE43567-4988-4E3E-84A4-8258167EBDEA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8AE43567-4988-4E3E-84A4-8258167EBDEA}.Release|x86.ActiveCfg = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Documentation|Any CPU.ActiveCfg = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Documentation|Any CPU.Build.0 = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Documentation|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Documentation|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Documentation|x86.ActiveCfg = Debug|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Nsis|Any CPU.ActiveCfg = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Nsis|Any CPU.Build.0 = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Nsis|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Nsis|Mixed Platforms.Build.0 = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Nsis|x86.ActiveCfg = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}.Release|x86.ActiveCfg = Release|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Documentation|Any CPU.ActiveCfg = Documentation|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Documentation|Any CPU.Build.0 = Documentation|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Documentation|Mixed Platforms.ActiveCfg = Documentation|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Documentation|Mixed Platforms.Build.0 = Documentation|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Documentation|x86.ActiveCfg = Documentation|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Nsis|Any CPU.ActiveCfg = Nsis|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Nsis|Any CPU.Build.0 = Nsis|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Nsis|Mixed Platforms.ActiveCfg = Nsis|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Nsis|Mixed Platforms.Build.0 = Nsis|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Nsis|x86.ActiveCfg = Nsis|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{75DC22B1-113F-4A66-96B9-2FF8208C10E8}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
