@@ -57,6 +57,14 @@ namespace Positron
                 }
                 return _Local;
             }
+            set
+            {
+                if(GameObject.mBody != null)
+                {
+                    // do a little dance
+                }
+                _Local = value;
+            }
         }
         public Vector3 PositionLocal
         {
@@ -66,7 +74,9 @@ namespace Positron
             }
             set
             {
-                LocalMatrix.
+                _Local.M14 = value.X;
+                _Local.M24 = value.Y;
+                _Local.M34 = value.Z;
             }
         }
         public Vector2 PositionLocalXY
