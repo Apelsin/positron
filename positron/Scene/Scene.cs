@@ -257,27 +257,27 @@ namespace Positron
                     if (_FollowTarget != null)
 						CalculatePan((float)time);
                     GL.Translate(Math.Round(_ViewPosition.X), Math.Round(_ViewPosition.Y), Math.Round(_ViewPosition.Z));
-					Background.Render (time);
-					Rear.Render (time);
-					Stage.Render (time);
-					Tests.Render (time);
-					Front.Render (time);
+					Background.Render ();
+					Rear.Render ();
+					Stage.Render ();
+					Tests.Render ();
+					Front.Render ();
 					if (Configuration.DrawBlueprints)
-						WorldBlueprint.Render (time);
+						WorldBlueprint.Render ();
 				}
 				GL.PopMatrix ();
-				HUD.Render (time);
+				HUD.Render ();
 				if (Configuration.DrawBlueprints)
-					HUDBlueprint.Render (time);
+					HUDBlueprint.Render ();
 				if(Configuration.ShowDebugVisuals)
-					HUDDebug.Render (time);
+					HUDDebug.Render ();
 			}
 		}
 		protected void CalculatePan (float time)
 		{
 			float view_size_scaled_x = _ViewSize.X * 0.2f;
 			float view_size_scaled_y = _ViewSize.Y * 0.2f;
-			Vector3 pan = new Vector3 (0.5f * ViewWidth, 0.4f * ViewHeight, 0.0f) - _FollowTarget.Position;
+			Vector3 pan = new Vector3 (0.5f * ViewWidth, 0.4f * ViewHeight, 0.0f) - _FollowTarget.mTransform.Position;
 			if (time > 0.0f) {
 				float a = Math.Abs (_ViewPosition.X - pan.X);
 				float b = Math.Abs (_ViewPosition.Y - pan.Y);
@@ -326,33 +326,34 @@ namespace Positron
 		public void RayCast (Physics.RayCastCallback callback, Microsoft.Xna.Framework.Vector2 point1, Microsoft.Xna.Framework.Vector2 point2)
 		{
 			World.RayCast (callback.Invoke, point1, point2);
+            /*
 			if (Configuration.DrawBlueprints) {
                 lock (_Game.UpdateLock)
 				{
 					new BlueprintLine (
-					new Vector3 (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0f),
-					new Vector3 (point2.X * Configuration.MeterInPixels, point2.Y * Configuration.MeterInPixels, 0.0f),
-						WorldBlueprint);
+					    new Vector3 (point1.X * Configuration.MeterInPixels, point1.Y * Configuration.MeterInPixels, 0.0f),
+					    new Vector3 (point2.X * Configuration.MeterInPixels, point2.Y * Configuration.MeterInPixels, 0.0f));
 				}
 			}
+            */
 		}
 		public List<Fixture> TestPointAll (Microsoft.Xna.Framework.Vector2 point)
 		{
 			List<Fixture> hit_fixture = World.TestPointAll (point);
+            /*
 			if (Configuration.DrawBlueprints) {
                 lock (_Game.UpdateLock)
 				{
 					float cross = 2;
 					new BlueprintLine (
 						new Vector3 (point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels - cross, 0.0f),
-						new Vector3 (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels + cross, 0.0f),
-						WorldBlueprint);
-					new BlueprintLine (
-						new Vector3 (point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels + cross, 0.0f),
-						new Vector3 (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels - cross, 0.0f),
-						WorldBlueprint);
+						new Vector3 (point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels + cross, 0.0f));
+                    new BlueprintLine(
+                        new Vector3(point.X * Configuration.MeterInPixels - cross, point.Y * Configuration.MeterInPixels + cross, 0.0f),
+                        new Vector3(point.X * Configuration.MeterInPixels + cross, point.Y * Configuration.MeterInPixels - cross, 0.0f));
 				}
 			}
+            */
 			return hit_fixture;
 		}
 		public virtual void Dispose ()
@@ -361,8 +362,6 @@ namespace Positron
             SceneExit = null;
             foreach(RenderSet render_set in AllRenderSetsInOrder())
             {
-                foreach(IRenderable renderable in render_set)
-                    renderable.Dispose();
                 render_set.Dispose();
             }
 		}

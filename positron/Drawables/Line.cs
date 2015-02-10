@@ -10,9 +10,8 @@ using FarseerPhysics.Factories;
 
 namespace Positron
 {
-    public class Line : Drawable, IColorable, IWorldObject
+    public class Line : Drawable, IColorable
     {
-        public event DerezEventHandler DerezEvent;
         private Color _Color;
         private Vector3 _Direction;
 
@@ -54,11 +53,11 @@ namespace Positron
             var direction = new Microsoft.Xna.Framework.Vector2(
                 (float)(_Direction.X / Configuration.MeterInPixels),
                 (float)(_Direction.Y / Configuration.MeterInPixels));
-            _LineBody = BodyFactory.CreateBody(Set.Scene.World, start);
+            _LineBody = BodyFactory.CreateBody(mScene.World, start);
             FixtureFactory.AttachEdge(Microsoft.Xna.Framework.Vector2.Zero, direction, _LineBody);
             _LineBody.BodyType = BodyType.Static;
         }
-        public override void Render (float time)
+        public override void Render ()
         {
             // Unbind any texture that was previously bound
             GL.BindTexture (TextureTarget.Texture2D, 0);
@@ -90,8 +89,6 @@ namespace Positron
         }
         public virtual void Derez ()
         {
-            if (DerezEvent != null)
-                DerezEvent(this, new EventArgs());
             this._RenderSet.Scene.World.RemoveBody(Body);
             this._RenderSet.Remove(this);
         }

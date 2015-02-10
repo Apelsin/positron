@@ -5,17 +5,23 @@ using System.Text;
 
 namespace Positron
 {
-    public abstract class Extension : GameObject
+    public abstract class Extension : GameObjectBase
     {
-        protected GameObject _GameObject;
+        protected readonly GameObject _GameObject;
+        public Extension(GameObjectBase game_object)
+        {
+            _GameObject = game_object;
+        }
         public virtual GameObject mGameObject {
-            get { return _GameObject; } set { _GameObject = value; } }
+            get { return _GameObject; } }
         public override ThreadedRendering mWindow {
             get { return _GameObject != null ? _GameObject.mWindow : null; } }
         public override PositronGame mGame {
             get { return _GameObject != null ? _GameObject.mGame : null; } }
         public override Scene mScene {
             get { return _GameObject != null ? _GameObject.mScene : null; } }
+        public override FarseerPhysics.Dynamics.World mWorld {
+            get { return _GameObject != null ? _GameObject.mWorld : null; } }
         public override RenderSet mRenderSet {
             get { return _GameObject != null ? _GameObject.mRenderSet : null; } }
         public override FarseerPhysics.Dynamics.Body mBody {

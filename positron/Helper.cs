@@ -63,10 +63,6 @@ namespace Positron
         {
             return regions.Labeled(-1, labels_seek);
         }
-        public static IWorldObject GetWorldObject(this Body body)
-        {
-            return (IWorldObject)body.UserData;
-        }
         public static float SmootherStep(float edge0, float edge1, float x)
         {
             x = MathUtil.Clamp(((x - edge0)/(edge1 - edge0)), 1.0f, 0.0f);

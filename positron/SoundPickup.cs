@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Positron
 {
-    public class SoundPickup : Extension
+    public class SoundPickup //: Extension
     {
 
     }

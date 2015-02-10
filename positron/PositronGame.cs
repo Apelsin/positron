@@ -29,6 +29,8 @@ namespace Positron
             lock(_UpdateEventList)
                 _UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
         }
+        protected float _DeltaTime;
+        public float DeltaTime { get { return _DeltaTime; } }
         protected ThreadedRendering _Window;
         protected Hashtable _Scenes = new Hashtable();
         protected Scene _CurrentScene;
@@ -85,7 +87,7 @@ namespace Positron
             // Load textures into graphics memory space
             Texture.InitialSetup();
             Sound.InitialSetup();
-            DialogSpeaker.InitialSetup();
+            //DialogSpeaker.InitialSetup();
         }
         public void SetInputAccepters (string name, params IInputAccepter[] input_accepters)
         {
@@ -138,12 +140,11 @@ namespace Positron
                 }
             }
         }
-        public void Update (float time)
+        public void Update ()
         {
-            //BackgroundTiles.RandomMap();
-            time = (float)Math.Round(time, 4);
-            _CurrentScene.Update (time * TimeStepCoefficient);
-            ProcessUpdateEventList(time);
+            _DeltaTime = TimeStepCoefficient * (float)Math.Round(time, 4);
+            _CurrentScene.Update ();
+            ProcessUpdateEventList();
             foreach(RenderSet render_set in _CurrentScene.UpdateRenderSetsInOrder())
             {
                 object o;
@@ -151,7 +152,7 @@ namespace Positron
                 {
                     o = render_set[i];
                     if (o is SpriteBase)
-                        ((SpriteBase)o).Update (time * TimeStepCoefficient);
+                        ((SpriteBase)o).Update ();
                 }
             }
         }

@@ -266,19 +266,7 @@ namespace Positron
         public SpriteFrame FrameCurrent {
             get { return _AnimationCurrent == null ? _AnimationDefault.Frames[0] : _AnimationCurrent.Frames[_AnimationFrameIndex]; }
         }
-//        public bool Animate {
-//            get { return _FrameTimer != null && _FrameTimer.IsRunning; }
-//            set {
-//                if(_FrameTimer != null)
-//                {
-//                    if(value)
-//                        _FrameTimer.Restart();
-//                    else
-//                        _FrameTimer.Stop();
-//                }
-//            }
-//        }
-        /*
+        
         public int FrameIndex {
             get { return _AnimationFrameIndex; }
             set { 
@@ -303,14 +291,13 @@ namespace Positron
             get { return _TileY; }
             set { _TileY = value; }
         }
-        public override float SizeX {
-            get { return _Scale.X * FrameCurrent.SizeX; }
+        public float SizeX {
+            get { return mTransform.ScaleLocalX * FrameCurrent.SizeX; }
         }
-        public override float SizeY
+        public float SizeY
         {
-            get { return _Scale.Y * FrameCurrent.SizeY; }
+            get { return mTransform.ScaleLocalY * FrameCurrent.SizeY; }
         }
-        */
 
         //public VertexBuffer BPVBO { get { return FrameCurrent.BPVBO; } }
 
@@ -349,20 +336,20 @@ namespace Positron
             //_FrameStatic = _AnimationDefault.Frames[0];
             
             // Position for world objects is handled differently
-            if(!(this is IWorldObject))
-                Corner = new Vector3(x, y, 0.0f);
+            //if(!(this is IWorldObject))
+            //    Corner = new Vector3(x, y, 0.0f);
         }
         public SpriteBase CenterShift ()
         {
-            mTransform.Position.S = mTransform.Position.Xy - new Vector2(FrameCurrent.SizeX * 0.5f, FrameCurrent.SizeY * 0.5f);
+            mTransform.PositionLocalXY = mTransform.PositionLocalXY - new Vector2(FrameCurrent.SizeX * 0.5f, FrameCurrent.SizeY * 0.5f);
             return this;
         }
-        public override void Render (float time)
+        public override void Render ()
         {
             GL.PushMatrix();
             {
-                GL.Translate (_Position + CalculateMovementParallax());
-                //GL.Translate(_Position);
+                //GL.Translate (_Position + CalculateMovementParallax());
+                GL.Translate(_Position);
                 GL.Rotate(_Theta, 0.0f, 0.0f, 1.0f);
                 GL.Scale(_Scale);
                 Draw();
@@ -386,14 +373,14 @@ namespace Positron
                 //BPVBO.Render(); // Render blueprint objects
                 if(_Blueprints != null)
                     foreach(IRenderable r in _Blueprints)
-                        r.Render(0.0f);
+                        r.Render();
             }
         }
         public override void Build()
         {
             // SpriteFrame handles Build() for frames
         }
-        public virtual void Update (float time)
+        public virtual void Update ()
         {
             if (_FirstUpdate) {
                 _FirstUpdate = false;
@@ -433,12 +420,6 @@ namespace Positron
         {
             if(animation != _AnimationCurrent)
                  StartAnimation(animation);
-        }
-        public void LoopSound__HACK(object sound_key)
-        {
-            Sound sound = Sound.Get (sound_key);
-            var sound_anim = new SpriteAnimation(Texture, (int)(1000 * sound.Duration),  true, false, Texture.DefaultRegionIndex);
-            PlayAnimation(sound_anim);
         }
         /// <summary>
         /// Plays a new static animation (oxymoron) with a single frame

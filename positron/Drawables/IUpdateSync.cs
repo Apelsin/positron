@@ -19,6 +19,6 @@ namespace Positron
     {
         //event UpdateEventHandler UpdateEvent;
         List<KeyValuePair<object, UpdateEventHandler>> UpdateEventList { get; }
-        void Update(float time);
+        void Update();
     }
 }

@@ -55,6 +55,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Drawables\Blueprint\BlueprintBase.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="Drawables\HUD\HUDQuad.cs" />
     <Compile Include="Drawables\IUpdateSync.cs" />
@@ -62,13 +63,11 @@
     <Compile Include="SoundPickup.cs" />
     <Compile Include="SoundSource.cs" />
     <Compile Include="ThreadedRendering.cs" />
-    <Compile Include="IWorldObject.cs" />
     <Compile Include="Drawables\Drawable.cs" />
     <Compile Include="Drawables\Circle.cs" />
     <Compile Include="IColorable.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
-    <Compile Include="Drawables\SpriteObject.cs" />
     <Compile Include="IInputAccepter.cs" />
     <Compile Include="RenderSet.cs" />
     <Compile Include="Drawables\Line.cs" />
@@ -82,7 +81,6 @@
     <Compile Include="Drawables\IVariant.cs" />
     <Compile Include="SharedState.cs" />
     <Compile Include="Drawables\TileMap.cs" />
-    <Compile Include="Drawables\Dialog.cs" />
     <Compile Include="Drawables\HUD\UIButton.cs" />
     <Compile Include="Drawables\HUD\UIElementGroup.cs" />
     <Compile Include="Drawables\HUD\IUIElement.cs" />

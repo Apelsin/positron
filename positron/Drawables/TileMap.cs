@@ -58,7 +58,7 @@ namespace Positron
             }
             VBO = new VertexBuffer(vertices);
         }
-        public override void Render(float time)
+        public override void Render()
         {
             GL.PushMatrix();
             {

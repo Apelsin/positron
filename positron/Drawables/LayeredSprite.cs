@@ -39,7 +39,7 @@ namespace Positron
             _NextLayer = next_layer;
         }
         // TODO: rotation stuff here
-        public override void Render (float time)
+        public override void Render ()
         {
             GL.PushMatrix();
             {

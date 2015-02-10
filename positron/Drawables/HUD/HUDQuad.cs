@@ -9,7 +9,16 @@ namespace Positron
 {
     public class HUDQuad : IRenderable, IRenderSetElementBase, IColorable
     {
+        #region Abstract Classes and Interfaces
+        // TODO: Implement set accessor for mRenderSet with event handling
         protected RenderSet _RenderSet;
+        public new RenderSet mRenderSet
+        {
+            get { return _RenderSet; }
+            protected set { _RenderSet = value; }
+        }
+        #endregion
+
         protected Color _Color;
         public Vector3 A, B, C, D;
         public Color Color
@@ -36,7 +45,7 @@ namespace Positron
                  p + new Vector3(0f,  s.Y, 0f))
         {
         }
-        public virtual void Render(float time)
+        public virtual void Render()
         {
             // Unbind any texture that was previously bound
             GL.BindTexture(TextureTarget.Texture2D, 0);

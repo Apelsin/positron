@@ -21,7 +21,7 @@ namespace Positron
         protected Sound _Sound;
         public Sound Sound { get { return _Sound; } set { _Sound = value; }}
 
-        public SoundSource()
+        public SoundSource(GameObject game_object) : base(game_object)
         {
             SourceId = AL.GenSource();
             Sources.Add(this);

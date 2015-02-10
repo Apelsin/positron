@@ -19,10 +19,10 @@ namespace Positron
             foreach(IRenderable renderable in renderables)
                 Add (renderable);
         }
-        public void Render (float time)
+        public void Render ()
         {
             for(int i = 0; i < Count; i++)
-                this[i].Render(time);
+                this[i].Render();
         }
         public virtual void Dispose()
         {

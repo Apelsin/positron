@@ -7,53 +7,26 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class BlueprintLine : IRenderable, IRenderSetElementBase, IDisposable
+    public class BlueprintLine : BlueprintBase, IRenderable
     {
-        protected RenderSet _RenderSet;
-        public RenderSet mRenderSet { get { return _RenderSet; } }
-
-        protected int Lifespan;
-        protected Stopwatch Timer = new Stopwatch();
         public Vector3 A, B;
-        public BlueprintLine (Vector3 a, Vector3 b, RenderSet render_set):
-            this(a, b, render_set, 100)
+        public BlueprintLine (GameObject game_object, Vector3 a, Vector3 b):
+            base(game_object)
         {
-        }
-        public BlueprintLine (Vector3 a, Vector3 b, RenderSet render_set, int millis)
-        {
-            _RenderSet = render_set;
-            _RenderSet.Add(this);
-            Lifespan = millis;
             A = a;
             B = b;
-            Timer.Start();
         }
-        public void Render (float time)
+        public override void Render ()
         {
             // Unbind any texture that was previously bound
             GL.BindTexture (TextureTarget.Texture2D, 0);
             GL.LineWidth (1);
             GL.Begin (PrimitiveType.Lines);
-            GL.Color4 (Color.Crimson);
+            GL.Color4(BlueprintBase.BluePrintColorSequence[0]);
             GL.Vertex3 (A);
-            GL.Color4 (Color.Gold);
-             GL.Vertex3 (B);
+            GL.Color4 (BlueprintBase.BluePrintColorSequence[1]);
+            GL.Vertex3 (B);
             GL.End ();
-            if (Timer.ElapsedMilliseconds > Lifespan) {
-                _RenderSet.Remove(this);
-            }
-        }
-        public float RenderSizeX()
-        {
-            return 0;
-        }
-        public float RenderSizeY()
-        {
-            return 0;
-        }
-        public virtual void Dispose()
-        {
-            _RenderSet = null;
         }
     }
 }

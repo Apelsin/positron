@@ -5,7 +5,7 @@ namespace Positron
     public delegate void RenderSetChangeEventHandler(object sender, RenderSetChangeEventArgs e);
     public interface IRenderable
     {
-        void Render(float time);
+        void Render();
     }
     public interface IRenderSetElementBase
     {

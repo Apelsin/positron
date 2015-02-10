@@ -138,7 +138,7 @@ namespace Positron
             if(RenderSetEntry != null)
                 RenderSetEntry(sender, e);
         }*/
-        public abstract void Render(float time);
+        public abstract void Render();
         protected virtual Vector3 CalculateMovementParallax ()
         {
             if(_Parallax == 0.0 || this._RenderSet == this._RenderSet.Scene.HUD)
@@ -150,13 +150,6 @@ namespace Positron
         {
             _RenderSet = null;
             if (_Blueprints != null) {
-                for(int i = 0; i < _Blueprints.Count; i++)
-                {
-                    if(_Blueprints[i].RenderSet != null)
-                        _Blueprints[i].RenderSet.Remove(_Blueprints[i]);
-                    _Blueprints[i].Dispose();
-                    _Blueprints[i] = null;
-                }
                 _Blueprints.Clear ();
                 _Blueprints = null;
             }
