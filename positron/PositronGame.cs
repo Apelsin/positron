@@ -17,7 +17,7 @@ using FarseerPhysics.Factories;
 
 namespace Positron
 {
-    public class PositronGame: IUpdateSync, IDisposable, IGLContextLateUpdate
+    public class PositronGame: IDisposable, IGLContextLateUpdate
     {
         #region Event-Related
         protected List<KeyValuePair<object, UpdateEventHandler>> _UpdateEventList = new List<KeyValuePair<object, UpdateEventHandler>>();
@@ -127,21 +127,22 @@ namespace Positron
 //        {
 //            TestWatch.Start();
 //        }
-        protected void ProcessUpdateEventList (float time)
+        protected void ProcessUpdateEventList ()
         {
             lock (_UpdateEventList)
             {
                 for(int i = 0; i < _UpdateEventList.Count;)
                 {
-                    if(_UpdateEventList[i].Value(_UpdateEventList[i].Key, new UpdateEventArgs(time, i)))
+                    if(_UpdateEventList[i].Value(_UpdateEventList[i].Key, new UpdateEventArgs(i)))
                         _UpdateEventList.RemoveAt(i);
                     else
                         i++;
                 }
             }
         }
-        public void Update ()
+        public void Update (float time)
         {
+            // Be careful with this line:
             _DeltaTime = TimeStepCoefficient * (float)Math.Round(time, 4);
             _CurrentScene.Update ();
             ProcessUpdateEventList();
@@ -231,24 +232,23 @@ namespace Positron
             if (_CurrentScene != null) {
                 // Get the enumerable for the render sets; these need to be in the same order!
                 current_sets = _CurrentScene.AllRenderSetsInOrder ();
-                current_set_enum = current_sets.GetEnumerator ();                    // Enumerate from the beginning of the set enumerable
+                current_set_enum = current_sets.GetEnumerator ();                       // Enumerate from the beginning of the set enumerable
                 foreach (RenderSet render_set in current_sets) {
                     if (!next_set_enum.MoveNext ())
                         break;
                     rscea = new RenderSetChangeEventArgs (render_set, next_set_enum.Current);
                     // Process this scene
-                    for (int i = 0; i < render_set.Count;) {                        // For each renderable in render set
+                    for (int i = 0; i < render_set.Count;) {                            // For each renderable in render set
                         var renderable = render_set [i];
-                        if (renderable is GameObject) {                            // If object also implements scene object
-                            GameObject scene_object = (GameObject)renderable;    // Cast to scene object
-                            if (scene_object is IWorldObject) {
-                                IWorldObject world_object = (IWorldObject)scene_object;
-                                // Disable the body object is not preserved
-                                world_object.Body.Enabled &= world_object.Preserve;
+                        if (renderable is GameObject) {                                 // If object is a GameObject
+                            GameObject scene_object = (GameObject)renderable;           // Cast to GameObject
+                            if (scene_object.mBody != null) {
+                                // Disable the body if the object is not preserved
+                                scene_object.mBody.Enabled &= scene_object.Preserve;
                             }
-                            if (scene_object.Preserve) {                             // If scene object is preserved
-                                next_set_enum.Current.Add (renderable);                // Add in this object
-                                render_set.RemoveAt (i);                            // Remove from previous 
+                            if (scene_object.Preserve) {                                // If scene object is preserved
+                                next_set_enum.Current.Add (renderable);                 // Add in this object
+                                render_set.RemoveAt (i);                                // Remove from previous 
                                 scene_object.OnRenderSetTransfer (this, rscea);
                                 continue;
                             }
@@ -261,7 +261,7 @@ namespace Positron
                         break;
                     // Process next scene, PART 1
                     foreach (IRenderable renderable in render_set) {
-                        if (renderable is GameObject) {                            // If object also implements scene object
+                        if (renderable is GameObject) {                                 // If object also implements scene object
                             if (renderable is IWorldObject) {
                                 IWorldObject world_object = (IWorldObject)renderable;
                                 // HACK: temporarily enable all bodies in this renderset

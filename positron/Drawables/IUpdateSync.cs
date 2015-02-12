@@ -8,9 +8,8 @@ namespace Positron
         protected float _Time;
         public float Time { get { return _Time; } set { _Time = value; } }
         public int _dbg_list_idx;
-        public UpdateEventArgs(float time, int dbg_list_idx = 0)
+        public UpdateEventArgs(int dbg_list_idx = 0)
         {
-            _Time = time;
             _dbg_list_idx = dbg_list_idx;
         }
     }

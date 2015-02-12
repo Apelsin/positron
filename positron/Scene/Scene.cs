@@ -168,9 +168,9 @@ namespace Positron
 				foreach(RenderSet render_set in AllRenderSetsInOrder())
 				{
 					render_set.ForEach (element => {
-						if(element is IWorldObject)
+						if(element is GameObject)
 						{
-							IWorldObject w_o = (IWorldObject)element;
+							GameObject w_o = (GameObject)element;
 							//Console.WriteLine("Rotation for {0} sprite with rotation {1}", w_o, w_o.Theta);
 						}
 					});
@@ -237,25 +237,25 @@ namespace Positron
             RenderDrawingMeter.C.X = RenderDrawingMeter.D.X + w_x;
         }
 
-		public virtual void Update (float time)
+		public virtual void Update ()
         {
             if (Configuration.AdaptiveTimeStep) {
-                AdaptiveTimeSteps [ATSIndex] = Math.Min ((float)time, Configuration.MaxWorldTimeStep);
+                AdaptiveTimeSteps [ATSIndex] = Math.Min (Game.DeltaTime, Configuration.MaxWorldTimeStep);
                 ATSIndex = (ATSIndex + 1) % AdaptiveTimeSteps.Length;
                 float t = AdaptiveTimeSteps [ATSIndex];
                 World.Step (t);
             } else
-                World.Step (Math.Min ((float)time, Configuration.MaxWorldTimeStep));
+                World.Step(Math.Min(Game.DeltaTime, Configuration.MaxWorldTimeStep));
             UpdateHUDStats ();
 		}
-		public virtual void Render (float time)
+		public virtual void Render ()
 		{
 			lock (_Game.UpdateLock)
 			{
 				GL.PushMatrix ();
 				{
                     if (_FollowTarget != null)
-						CalculatePan((float)time);
+                        CalculatePan(Game.DeltaTime);
                     GL.Translate(Math.Round(_ViewPosition.X), Math.Round(_ViewPosition.Y), Math.Round(_ViewPosition.Z));
 					Background.Render ();
 					Rear.Render ();
