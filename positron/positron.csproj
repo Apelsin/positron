@@ -63,7 +63,6 @@
     <Compile Include="SoundPickup.cs" />
     <Compile Include="SoundSource.cs" />
     <Compile Include="ThreadedRendering.cs" />
-    <Compile Include="Drawables\Drawable.cs" />
     <Compile Include="Drawables\Circle.cs" />
     <Compile Include="IColorable.cs" />
     <Compile Include="Configuration.cs" />

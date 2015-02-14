@@ -6,7 +6,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class TileMap: Drawable
+    public class TileMap: GameObject
     {
         protected Texture Texture;
         protected int _CountX, _CountY;
@@ -59,18 +59,6 @@ namespace Positron
             VBO = new VertexBuffer(vertices);
         }
         public override void Render()
-        {
-            GL.PushMatrix();
-            {
-                // So much for DRY...
-                //GL.Scale(Size);
-                GL.Translate (_Position + CalculateMovementParallax());
-                //GL.Translate (_Position);
-                Draw();
-            }
-            GL.PopMatrix();
-        }
-        public virtual void Draw()
         {
             GL.Color4(Color.White);
             Texture.Bind(); // Bind to (current) sprite texture

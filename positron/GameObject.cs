@@ -5,7 +5,7 @@ using OpenTK;
 
 namespace Positron
 {
-    public abstract class GameObjectBase
+    public abstract class GameObjectBase : IRenderable
     {
         protected bool _Preserve = false;
         protected RenderSet _RenderSet;
@@ -23,7 +23,6 @@ namespace Positron
         public FarseerPhysics.Dynamics.World mWorld { get { return mScene.World; } }
         public RenderSet mRenderSet { get { return _RenderSet; } }
         public virtual FarseerPhysics.Dynamics.Body mBody { get { return null; } }
-        public virtual Drawable mDrawable { get { return null; } }
         public virtual SpriteBase mSprite { get { return null; } }
         
     }
@@ -41,7 +40,7 @@ namespace Positron
             foreach (Extension extension in extensions)
                 Extensions.Remove(extension);
         }
-        public GameObject() : base()
+        public GameObject(RenderSet render_set) : base(render_set)
         {
             _Transform = new Xform(this);
             Extensions = new List<Extension>();

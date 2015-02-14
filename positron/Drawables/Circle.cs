@@ -7,7 +7,7 @@ using OpenTK.Input;
 
 namespace Positron
 {
-    public class Circle : Drawable, IColorable
+    public class Circle : GameObject, IColorable
     {
         Color _Color;
         public Color Color {

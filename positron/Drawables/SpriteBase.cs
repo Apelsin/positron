@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Collections.Generic;
-using System.Reflection; // I'm a horrible person
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -11,11 +10,12 @@ using OpenTK.Input;
 namespace Positron
 {
     // TODO: Implement clonable interface maybe
-    public class SpriteBase : Drawable, IColorable
+    public class SpriteBase : GameObject, IColorable
     {
         #region SpriteAnimation
         public class SpriteAnimation : IDisposable
         {
+
             protected static int _FrameTimeDefault = 200;
             protected SpriteFrame[] _Frames;
             protected bool _Looping = false;
@@ -326,8 +326,8 @@ namespace Positron
         {
             // Size will scale _Texture width and height
             _Color = Color.White;
-            _Scale.X = scalex;
-            _Scale.Y = scaley;
+            mTransform.ScaleLocalX = scalex;
+            mTransform.ScaleLocalY = scaley;
             _TileX = 1.0f;
             _TileY = 1.0f;
             _AnimationFrameIndex = 0;
@@ -349,8 +349,8 @@ namespace Positron
             GL.PushMatrix();
             {
                 //GL.Translate (_Position + CalculateMovementParallax());
-                GL.Translate(_Position);
-                GL.Rotate(_Theta, 0.0f, 0.0f, 1.0f);
+                GL.Translate(mTransform.Position);
+                GL.Rotate( ??? );
                 GL.Scale(_Scale);
                 Draw();
             }
