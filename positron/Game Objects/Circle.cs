@@ -16,13 +16,13 @@ namespace Positron
         }
         public float Radius { get; set; }
 
-        public Circle (RenderSet render_set, float radius):
+        public Circle (SceneRoot render_set, float radius):
             base(render_set)
         {
             Color = Color.Black;
             Radius = radius;
         }
-        public override void Render()
+        public override void Draw()
         {
             GL.PointSize(Radius);
             GL.Begin(PrimitiveType.Points);

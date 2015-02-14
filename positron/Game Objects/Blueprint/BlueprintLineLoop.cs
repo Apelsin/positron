@@ -8,7 +8,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class BlueprintLineLoop : BlueprintBase, IRenderable
+    public class BlueprintLineLoop : BlueprintBase, IDrawable
     {
         public Vector3[] Vertices;
         public BlueprintLineLoop (GameObject game_object, params Vector3[] vertices):
@@ -16,7 +16,7 @@ namespace Positron
         {
             Vertices = vertices;
         }
-        public override void Render ()
+        public override void Draw()
         {
             int color_index = 0;
             // Unbind any texture that was previously bound

@@ -7,45 +7,30 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class HUDQuad : IRenderable, IRenderSetElementBase, IColorable
+    public class HUDQuad : GameObject, IColorable
     {
-        #region Abstract Classes and Interfaces
-        // TODO: Implement set accessor for mRenderSet with event handling
-        protected RenderSet _RenderSet;
-        public new RenderSet mRenderSet
-        {
-            get { return _RenderSet; }
-            protected set { _RenderSet = value; }
-        }
-        #endregion
-
-        protected Color _Color;
         public Vector3 A, B, C, D;
+        protected Color _Color;
         public Color Color
         {
             get { return _Color; }
             set { _Color = value; }
         }
-        public RenderSet Set {
-            get { return _RenderSet; }
-        }
-        public HUDQuad(RenderSet render_set, Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        public HUDQuad(Xform parent, Vector3 a, Vector3 b, Vector3 c, Vector3 d) : base(parent)
         {
             A = a;
             B = b;
             C = c;
             D = d;
-            _RenderSet = render_set;
-            _RenderSet.Add(this);
         }
-        public HUDQuad(RenderSet render_set, Vector3 p, Vector3 s) :
+        public HUDQuad(SceneRoot render_set, Vector3 p, Vector3 s) :
             this(render_set, p,
                  p + new Vector3(s.X, 0f,  0f),
                  p + new Vector3(s.X, s.Y, 0f),
                  p + new Vector3(0f,  s.Y, 0f))
         {
         }
-        public virtual void Render()
+        public override void Draw()
         {
             // Unbind any texture that was previously bound
             GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -57,10 +42,6 @@ namespace Positron
             GL.Vertex3(C);
             GL.Vertex3(D);
             GL.End();
-        }
-        public virtual void Dispose()
-        {
-            _RenderSet = null;
         }
     }
 }

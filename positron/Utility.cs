@@ -140,4 +140,25 @@ namespace Positron
     {
         public delegate float RayCastCallback(FarseerPhysics.Dynamics.Fixture fixture, Microsoft.Xna.Framework.Vector2  point, Microsoft.Xna.Framework.Vector2 normal, float fraction);
     }
+    public static class ExtensionMethods
+    {
+        // C# needs unions or something...
+        public static Microsoft.Xna.Framework.Vector3 XNA(this Vector3 self)
+        {
+            return new Microsoft.Xna.Framework.Vector3(self.X, self.Y, self.Z);
+        }
+        public static Microsoft.Xna.Framework.Vector2 XNA(this Vector2 self)
+        {
+            return new Microsoft.Xna.Framework.Vector2(self.X, self.Y);
+        }
+        public static Vector3 OTK(this Microsoft.Xna.Framework.Vector3 self)
+        {
+            return new Vector3(self.X, self.Y, self.Z);
+        }
+        public static Vector2 OTK(this Microsoft.Xna.Framework.Vector2 self)
+        {
+            return new Vector2(self.X, self.Y);
+        }
+
+    }
 }

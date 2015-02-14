@@ -2,50 +2,74 @@ using System;
 using System.Collections.Generic;
 
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public abstract class GameObjectBase : IRenderable
+    public abstract class GameObjectBase
     {
-        protected bool _Preserve = false;
-        protected RenderSet _RenderSet;
-        /// <summary>
-        /// Flag for whether or not this object should persist across Scene changes. If enabled, the object will be moved to the entering scene.
-        /// </summary>
-        public bool Preserve { get { return _Preserve; } set { _Preserve = value; } }
-        public GameObjectBase(RenderSet render_set)
-        {
-            _RenderSet = render_set;
-        }
+        public abstract Xform mTransform { get; }
         public ThreadedRendering mWindow { get { return mGame.Window; } }
         public PositronGame mGame { get { return mScene.Game; } }
-        public Scene mScene { get { return mRenderSet.Scene; } }
         public FarseerPhysics.Dynamics.World mWorld { get { return mScene.World; } }
-        public RenderSet mRenderSet { get { return _RenderSet; } }
+        public virtual Scene mScene {
+            get {
+                if (mTransform.Parent != null)
+                    return mTransform.Parent.mScene;
+                return null;
+            }
+        }
+        public GameObjectBase() : base()
+        {
+        }
         public virtual FarseerPhysics.Dynamics.Body mBody { get { return null; } }
         public virtual SpriteBase mSprite { get { return null; } }
-        
     }
-    public class GameObject : GameObjectBase
+    public class GameObject : GameObjectBase, IDrawable
     {
+        public class State
+        {
+            public bool BodyEnabled = true;
+            /// <summary>
+            /// Flag for whether or not this object should be preserved across Scene changes.
+            /// If enabled, the object will be moved to the entering scene.
+            /// Only works for objects that have the root node as their parent.
+            /// </summary>
+            public bool Persist = false;
+        }
+        public readonly State mState;
+
+        public void SaveState()
+        {
+            mState.BodyEnabled = mBody.Enabled;
+        }
+
+        public void LoadState()
+        {
+            mBody.Enabled = mState.BodyEnabled;
+        }
+
         protected readonly Xform _Transform;
-        public Xform mTransform { get { return _Transform; } }
-        protected List<Extension> Extensions;
+        public override Xform mTransform { get { return _Transform; } }
+
+        protected HashSet<Extension> Extensions;
         public void AddExtension(params Extension[] extensions)
         {
-            Extensions.AddRange(extensions);
+            foreach (Extension extension in extensions)
+                Extensions.Add(extension);
         }
         public void RemoveExtension(params Extension[] extensions)
         {
             foreach (Extension extension in extensions)
                 Extensions.Remove(extension);
         }
-        public GameObject(RenderSet render_set) : base(render_set)
+        public GameObject(Xform parent) : base()
         {
-            _Transform = new Xform(this);
-            Extensions = new List<Extension>();
+            _Transform = new Xform(this, parent);
+            Extensions = new HashSet<Extension>();
+            mState = new State();
         }
-        public void Update()
+        public virtual void Update()
         {
             mTransform.mState.Modified = false;
             if (mBody != null)
@@ -54,8 +78,23 @@ namespace Positron
                 mBody.GetTransform(out transform);
                 // TODO: update mTransform from Farseer transform
             }
+            foreach (Xform child in mTransform.Children)
+                child.mGameObject.Update();
         }
-        protected void LateUpdate()
+        public virtual void Render()
+        {
+            GL.PushMatrix();
+            GL.MultMatrix(ref mTransform._Local);
+            Draw();
+            foreach (Xform child in mTransform.Children)
+                child.mGameObject.Render();
+            GL.PopMatrix();
+        }
+        public virtual void Draw()
+        {
+            // Do a little dance
+        }
+        public void LateUpdate()
         {
             if (mBody != null)
             {
@@ -67,6 +106,8 @@ namespace Positron
                     new Microsoft.Xna.Framework.Vector2(mTransform.PositionX, mTransform.PositionY),
                     theta);
             }
+            foreach (Xform child in mTransform.Children)
+                child.mGameObject.LateUpdate();
         }
     }
 }

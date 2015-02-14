@@ -3,7 +3,7 @@ using System;
 namespace Positron
 {
     public delegate void RefreshHandler(object sender, EventArgs e);
-    public interface IUIElement : IRenderable
+    public interface IUIElement
     {
         event RefreshHandler Refresh;
         void OnRefresh(object sender, EventArgs e);

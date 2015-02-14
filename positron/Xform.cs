@@ -7,34 +7,66 @@ using OpenTK;
 
 namespace Positron
 {
-    public class Xform : Extension
+    public class Xform : Extension, IDisposable
     {
         public class State
         {
             public bool Modified = false;
         }
         public readonly State mState;
-        protected Matrix4 _Local;
-        protected Matrix4 _Global;
+        // These are public for optimization
+        public Matrix4 _Local;
+        public Matrix4 _Global;
         protected Xform _Parent;
         public Xform Parent {
-            get
-            {
-                return _Parent;
-            }
-            set
-            {
-                _Parent = value;
-            }
+            get { return _Parent; }
+            set { _Parent = value; }
         }
-        protected GameObject _GameObject;
-        
-        // Xform GameObject is get-only
 
-        public Xform (GameObject game_object): base(game_object)
+        protected HashSet<Xform> _Children = new HashSet<Xform>();
+        public HashSet<Xform> Children { get { return _Children; } }
+        public void RemoveChild(Xform xform)
+        {
+            if (xform.Parent == this)
+                _Children.Remove(xform);
+            xform.Parent = this;
+            _Children.Add(xform);
+        }
+        public void AddChild(Xform xform)
+        {
+
+            if (this.IsDescendantOf(xform))
+                throw new InvalidOperationException("Attepted to make Xform be a descendant of itself.");
+            if (xform.Parent != null)
+                xform.Parent.RemoveChild(xform);
+            xform.Parent = this;
+            _Children.Add(xform);
+        }
+
+        public bool IsChildOf(Xform parent)
+        {
+            return _Parent == parent;
+        }
+        public bool IsDescendantOf(Xform parent)
+        {
+            return IsDescendantOf(parent, this);
+        }
+
+        protected static bool IsDescendantOf(Xform parent, Xform child)
+        {
+            if (child == null)
+                return false;
+            else if (child.IsChildOf(parent))
+                return true;
+            return IsDescendantOf(parent, child._Parent);
+        }
+
+        public Xform(GameObject game_object, Xform parent)
+            : base(game_object)
         {
             _Local = new Matrix4();
-            _GameObject = game_object;
+            if(parent != null)
+                parent.AddChild(this);
             mState = new State();
         }
         #region Matrices
@@ -70,6 +102,12 @@ namespace Positron
             {
                 _Local = value;
             }
+        }
+        public override void Dispose()
+        {
+            base.Dispose();
+            _Parent = null;
+            _Children = null;
         }
         #endregion
         #region Positions

@@ -45,7 +45,7 @@ namespace Positron
             //AL.Source(SourceId, ALSource3f, _Target);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             Stop();
             AL.DeleteSource(SourceId);

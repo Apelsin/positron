@@ -10,7 +10,7 @@ using OpenTK.Input;
 namespace Positron
 {
     // TODO: Implement clonable interface maybe
-    public class SpriteBase : GameObject, IColorable
+    public class SpriteBase : GameObject, IColorable, IDisposable
     {
         #region SpriteAnimation
         public class SpriteAnimation : IDisposable
@@ -304,25 +304,25 @@ namespace Positron
         #endregion
         #endregion
         #region Behavior
-        public SpriteBase(RenderSet render_set):
-            this(render_set, 0.0f, 0.0f, 1.0f, 1.0f, Texture.DefaultTexture)
+        public SpriteBase(Xform parent):
+            this(parent, 0.0f, 0.0f, 1.0f, 1.0f, Texture.DefaultTexture)
         {
         }
-        public SpriteBase(RenderSet render_set, Texture texture):
-            this(render_set, 0.0f, 0.0f, 1.0f, 1.0f, texture)
+        public SpriteBase(Xform parent, Texture texture) :
+            this(parent, 0.0f, 0.0f, 1.0f, 1.0f, texture)
         {
         }
-        public SpriteBase (RenderSet render_set, float x, float y):
-            this(render_set, x, y, 1.0f, 1.0f, Texture.DefaultTexture)
+        public SpriteBase(Xform parent, float x, float y) :
+            this(parent, x, y, 1.0f, 1.0f, Texture.DefaultTexture)
         {        
         }
         // Main constructor:
-        public SpriteBase (RenderSet render_set, float x, float y, Texture texture):
-            this(render_set, x, y, 1.0f, 1.0f, texture)
+        public SpriteBase(Xform parent, float x, float y, Texture texture) :
+            this(parent, x, y, 1.0f, 1.0f, texture)
         {
         }
-        public SpriteBase (RenderSet render_set, float x, float y, float scalex, float scaley, Texture texture):
-            base(render_set)
+        public SpriteBase(Xform parent, float x, float y, float scalex, float scaley, Texture texture) :
+            base(parent)
         {
             // Size will scale _Texture width and height
             _Color = Color.White;
@@ -339,24 +339,8 @@ namespace Positron
             //if(!(this is IWorldObject))
             //    Corner = new Vector3(x, y, 0.0f);
         }
-        public SpriteBase CenterShift ()
-        {
-            mTransform.PositionLocalXY = mTransform.PositionLocalXY - new Vector2(FrameCurrent.SizeX * 0.5f, FrameCurrent.SizeY * 0.5f);
-            return this;
-        }
-        public override void Render ()
-        {
-            GL.PushMatrix();
-            {
-                //GL.Translate (_Position + CalculateMovementParallax());
-                GL.Translate(mTransform.Position);
-                GL.Rotate( ??? );
-                GL.Scale(_Scale);
-                Draw();
-            }
-            GL.PopMatrix();
-        }
-        protected virtual void Draw()
+        
+        public override void Draw()
         {
             // Handle invalidation here:
             if(_TileX != FrameCurrent.TileX)
@@ -367,21 +351,22 @@ namespace Positron
             GL.Color4(_Color);
             Texture.Bind(); // Bind to (current) sprite texture
             FrameCurrent.VBO.Render(); // Render the vertex buffer object
-            if (Configuration.DrawBlueprints /*&& BPVBO != null*/)
-            {
-                GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
+            //if (Configuration.DrawBlueprints /*&& BPVBO != null*/)
+            //{
+            //    GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
                 //BPVBO.Render(); // Render blueprint objects
-                if(_Blueprints != null)
-                    foreach(IRenderable r in _Blueprints)
-                        r.Render();
-            }
+                //if(_Blueprints != null)
+                //    foreach(IRenderable r in _Blueprints)
+                //        r.Render();
+            //}
         }
-        public override void Build()
+        public void Build()
         {
             // SpriteFrame handles Build() for frames
         }
-        public virtual void Update ()
+        public override void Update ()
         {
+            base.Update();
             if (_FirstUpdate) {
                 _FirstUpdate = false;
                 if(_AnimationCurrent != null)
@@ -444,20 +429,9 @@ namespace Positron
                 _FrameTimer.Restart();
             }
         }
-        public override void Dispose()
+        public virtual void Dispose()
         {
-            BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
-            FieldInfo[] fields = this.GetType().GetFields(flags);
-            for(int i = 0; i < fields.Length; i++)
-            {
-                var o = fields[i].GetValue(this);
-                if(o is SpriteAnimation)
-                {
-                    ((SpriteAnimation)o).Dispose();
-                    fields[i].SetValue(this, null);
-                }
-            }
-            base.Dispose();
+            // TODO
         }
         #endregion
     }

@@ -14,9 +14,8 @@ namespace Positron
     /// TextWriter implementation originally by some guy named David
     /// See http://www.opentk.com/node/1554?page=1#comment-10625 for details
     /// </summary>
-    public class PTextWriter : IRenderable
+    public class PTextWriter : GameObject
     {
-        public RenderSet Set { get { return null; } }
         protected Font TextFont = new Font(FontFamily.GenericMonospace, 11);
         protected Bitmap TextBitmap;
         protected List<PointF> Positions;
@@ -24,7 +23,7 @@ namespace Positron
         protected List<Brush> ColorBrushes;
         protected int TextureID;
 
-        public PTextWriter(IGLContextLateUpdate context, Size area_size)
+        public PTextWriter(Xform parent, IGLContextLateUpdate context, Size area_size) : base(parent)
         {
             Positions = new List<PointF>();
             Lines = new List<string>();
@@ -124,24 +123,20 @@ namespace Positron
             }
             return have_lines;
         }
-        public void Render ()
+        public override void Draw ()
         {
-            GL.PushMatrix ();
-            {
-                GL.BindTexture (TextureTarget.Texture2D, TextureID);
-                //GL.Translate (_Position.X, _Position.Y, 0.0);
-                GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2 (0, 0);
-                GL.Vertex2 (0, 0);
-                GL.TexCoord2 (1, 0);
-                GL.Vertex2 (TextBitmap.Width, 0);
-                GL.TexCoord2 (1, -1);
-                GL.Vertex2 (TextBitmap.Width, TextBitmap.Height);
-                GL.TexCoord2 (0, -1);
-                GL.Vertex2 (0, TextBitmap.Height);
-                GL.End ();
-            }
-            GL.PopMatrix ();
+            GL.BindTexture (TextureTarget.Texture2D, TextureID);
+            //GL.Translate (_Position.X, _Position.Y, 0.0);
+            GL.Begin(PrimitiveType.Quads);
+            GL.TexCoord2 (0, 0);
+            GL.Vertex2 (0, 0);
+            GL.TexCoord2 (1, 0);
+            GL.Vertex2 (TextBitmap.Width, 0);
+            GL.TexCoord2 (1, -1);
+            GL.Vertex2 (TextBitmap.Width, TextBitmap.Height);
+            GL.TexCoord2 (0, -1);
+            GL.Vertex2 (0, TextBitmap.Height);
+            GL.End ();
         }
         public void Dispose()
         {

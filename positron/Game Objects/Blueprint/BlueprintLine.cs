@@ -7,7 +7,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class BlueprintLine : BlueprintBase, IRenderable
+    public class BlueprintLine : BlueprintBase
     {
         public Vector3 A, B;
         public BlueprintLine (GameObject game_object, Vector3 a, Vector3 b):
@@ -16,7 +16,7 @@ namespace Positron
             A = a;
             B = b;
         }
-        public override void Render ()
+        public override void Draw ()
         {
             // Unbind any texture that was previously bound
             GL.BindTexture (TextureTarget.Texture2D, 0);

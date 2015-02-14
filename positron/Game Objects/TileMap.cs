@@ -15,7 +15,7 @@ namespace Positron
         public int CountY { get { return _CountY; } }
         
         protected VertexBuffer VBO;
-        public TileMap (RenderSet render_set, int countx, int county, Texture texture):
+        public TileMap (SceneRoot render_set, int countx, int county, Texture texture):
             base(render_set)
         {
             _CountX = countx;
@@ -32,7 +32,7 @@ namespace Positron
                 }
             }
         }
-        public override void Build()
+        public virtual void Build()
         {
             int idx = 0;
             var vertices = new Vertex[4 * _CountX * _CountY]; // 4 for BeginMode.Quads
@@ -67,7 +67,7 @@ namespace Positron
     }
     public class FadedTileMap : TileMap
     {
-        public FadedTileMap (RenderSet render_set, int countx, int county, Texture texture):
+        public FadedTileMap (SceneRoot render_set, int countx, int county, Texture texture):
             base(render_set, countx, county, texture)
         {
         }
