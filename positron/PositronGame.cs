@@ -127,10 +127,10 @@ namespace Positron
         }
         public void Update ()
         {
-            _DeltaTime = TimeStepCoefficient * (float)Math.Round(Window.LastFrameTime, 4);
-            _CurrentScene.Update ();
             ProcessUpdateEventList();
-            foreach(Xform xform in _CurrentScene.Root.Children)
+            _DeltaTime = TimeStepCoefficient * (float)Math.Round(Window.LastFrameTime, 4);
+            _CurrentScene.Update();
+            foreach (Xform xform in _CurrentScene.Root.Children)
                 xform.mGameObject.Update();
         }
         public void Render()

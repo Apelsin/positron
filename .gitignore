@@ -140,3 +140,6 @@ App_Data/*.ldf
 
 # Merge crap I can't seem to turn off anyway
 *.orig
+
+# Sandbox for misc stuff that shouldn't be tracked
+/Sandbox

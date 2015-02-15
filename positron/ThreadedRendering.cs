@@ -178,13 +178,6 @@ namespace Positron
             Resize += HandleResize;
         }
 
-        public new void Run()
-        {
-            base.Run();
-            RenderThread = new Thread(RenderLoop);
-            RenderThread.Start();
-        }
-
         #region Event Handlers
         void HandleResize(object sender, EventArgs e)
         {
@@ -340,6 +333,9 @@ namespace Positron
             Context.SwapInterval = 1;
 
             Context.MakeCurrent(null); // Release the OpenGL context so it can be used on the new thread.
+
+            RenderThread = new Thread(RenderLoop);
+            RenderThread.Start();
         }
 
         #endregion
@@ -482,53 +478,48 @@ namespace Positron
 
             while (!Exiting)
             {
-                using(_Game = new PositronGame(this))
+                // Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
+                UpdateWatch.Start();
+                RenderWatch.Start();
+                LateUpdateWatch.Start();
+                FrameWatch.Start();
+                TestWatch.Start();
+                RenderDrawingWatch.Start();
+
+                while(!Reset && !Exiting)
                 {
-                    //Game setup
+                    FrameWatch.Restart();
 
-                    // Since we don't use OpenTK's timing mechanism, we need to keep time ourselves;
-                    UpdateWatch.Start();
-                    RenderWatch.Start();
-                    LateUpdateWatch.Start();
-                    FrameWatch.Start();
-                    TestWatch.Start();
-                    RenderDrawingWatch.Start();
+                    // Store this in a local variable because accessors have overhead!
+                    // Bear with me...this will get a bit tricky to explain precisely...
 
-                    while(!Reset && !Exiting)
-                    {
-                        FrameWatch.Restart();
+                    // Sleep the thread for the most milliseconds less than the frame limit time
+                    float time_until = (float)FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001f;
+                    while (FrameWatch.Elapsed.TotalSeconds < time_until)
+                        Thread.Sleep(Configuration.ThreadSleepTimeStep);
+                    // Hard-loop the remainder
+                    while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime) ;
 
-                        // Store this in a local variable because accessors have overhead!
-                        // Bear with me...this will get a bit tricky to explain precisely...
+                    UpdateWatch.Restart();
+                    lock (UpdateLock)
+                        Update();
+                    _LastUpdateTime = (float)UpdateWatch.Elapsed.TotalSeconds;
 
-                        // Sleep the thread for the most milliseconds less than the frame limit time
-                        float time_until = (float)FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001f;
-                        while (FrameWatch.Elapsed.TotalSeconds < time_until)
-                            Thread.Sleep(Configuration.ThreadSleepTimeStep);
-                        // Hard-loop the remainder
-                        while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime) ;
+                    RenderWatch.Restart();
+                    lock (RenderLock)
+                        RenderView();
+                    _LastRenderTime = (float)RenderWatch.Elapsed.TotalSeconds;
 
-                        UpdateWatch.Restart();
-                        lock (UpdateLock)
-                            Update();
-                        _LastUpdateTime = (float)UpdateWatch.Elapsed.TotalSeconds;
-
-                        RenderWatch.Restart();
-                        lock (RenderLock)
-                            RenderView();
-                        _LastRenderTime = (float)RenderWatch.Elapsed.TotalSeconds;
-
-                        LateUpdateWatch.Restart();
-                        lock (LateUpdateLock)
-                            LateUpdate();
-                        _LastLateUpdateTime = (float)LateUpdateWatch.Elapsed.TotalSeconds;
-                        // TODO: Make sure FPS above 60 perform correctly
-                        SwapBuffers();
-                        _LastFrameTime = (float)UpdateWatch.Elapsed.TotalSeconds;
-                    }
-                    //Sound.KillTheNoise (); // I don't know where a better place for this could be...
-                    Reset = false;
+                    LateUpdateWatch.Restart();
+                    lock (LateUpdateLock)
+                        LateUpdate();
+                    _LastLateUpdateTime = (float)LateUpdateWatch.Elapsed.TotalSeconds;
+                    // TODO: Make sure FPS above 60 perform correctly
+                    SwapBuffers();
+                    _LastFrameTime = (float)UpdateWatch.Elapsed.TotalSeconds;
                 }
+                //Sound.KillTheNoise (); // I don't know where a better place for this could be...
+                Reset = false;
             }
             Context.MakeCurrent(null);
         }

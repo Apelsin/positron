@@ -167,7 +167,7 @@ namespace Positron
                 ATSIndex = (ATSIndex + 1) % AdaptiveTimeSteps.Length;
                 float t = AdaptiveTimeSteps [ATSIndex];
                 World.Step (t);
-            } else
+            } else if(World != null)
                 World.Step(Math.Min(Game.DeltaTime, Configuration.MaxWorldTimeStep));
         }
 		public virtual void Update ()
