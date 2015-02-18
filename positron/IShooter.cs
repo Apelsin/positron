@@ -4,7 +4,6 @@ namespace Positron
 {
     public class FireEventArgs : EventArgs
     {
-        // Auto-fields are eeviill!
         protected object Info { get; set; }
     }
     public delegate void FireEventHandler(object sender, FireEventArgs e);

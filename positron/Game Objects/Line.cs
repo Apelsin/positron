@@ -51,7 +51,6 @@ namespace Positron
             _End = end;
             _Color = Color.Black;
             Thickness = thickness;
-            RebuildBody();
         }
         private void RebuildBody()
         {

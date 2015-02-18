@@ -23,7 +23,7 @@ namespace Positron
         protected List<Brush> ColorBrushes;
         protected int TextureID;
 
-        public PTextWriter(Xform parent, IGLContextLateUpdate context, Size area_size) : base(parent)
+        public PTextWriter(Xform parent, Size area_size) : base(parent)
         {
             Positions = new List<PointF>();
             Lines = new List<string>();
@@ -31,11 +31,7 @@ namespace Positron
             
             TextBitmap = new Bitmap(area_size.Width, area_size.Height);
             // HACK FIXIE
-            context.AddUpdateEventHandler(this, (sender, e) =>
-                {
-                    TextureID = CreateTexture();
-                    return true;
-                });
+            TextureID = CreateTexture();
         }
         private int CreateTexture()
         {

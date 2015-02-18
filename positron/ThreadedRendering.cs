@@ -57,6 +57,8 @@ namespace Positron
         /// Height of the viewport in pixels
         /// </summary>
         int ViewportHeight;
+        int TargetWidth;
+        int TargetHeight;
         /// <summary>
         /// Width scale of FBO textured quad
         /// </summary>
@@ -183,12 +185,13 @@ namespace Positron
         {
             // Note that we cannot call any OpenGL methods directly. What we can do is set
             // a flag and respond to it from the rendering thread.
-            lock (UpdateLock)
+            lock (RenderLock)
             {
-                Width = Math.Max(Width, _CanvasWidth);
-                Height = Math.Max(Height, _CanvasHeight);
-                ViewportWidth = Width;
-                ViewportHeight = Height;
+                TargetWidth = Math.Max(Width, _CanvasWidth);
+                TargetHeight = Math.Max(Height, _CanvasHeight);
+                // TODO: figure out window minimum dimensions (Win 8.1 is picky)
+                ViewportWidth = TargetWidth;
+                ViewportHeight = TargetHeight;
                 int multi = ViewportWidth / _CanvasWidth;
                 multi = Math.Min(multi, ViewportHeight / _CanvasHeight);
                 FBOScaleX = multi * _CanvasWidth;
@@ -549,62 +552,51 @@ namespace Positron
         {
             #region Render Frame Buffer
 
-            //GL.PushAttrib(AttribMask.ViewportBit);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, CanvasFBO); // Bind canvas FBO
-            {
-                // FBO viewport
-                GL.Viewport(0, 0, _CanvasWidth, _CanvasHeight);
-                GL.ClearColor(Color.Black);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-                // TODO: pre-calculate these
-                float p = 1.0f;
-                float distance = -0.5f * _CanvasHeight / (float)Math.Tan(0.5f * p); // -0.5 * h * cot(0.5 * p)
-                float ratio = (float)_CanvasWidth / (float)_CanvasHeight;
-                Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView((float)p, (float)ratio, 0.01f, 9999.0f);
-                GL.MatrixMode(MatrixMode.Projection);
-                GL.LoadMatrix(ref perspective);
-                GL.Translate((float)_CanvasWidth / -2.0f, (float)_CanvasHeight / -2.0f, distance);
-                RenderDrawingWatch.Restart();
-                _Game.Render();
-                _LastRenderDrawingTime = (float)RenderDrawingWatch.Elapsed.TotalSeconds;
-                GL.Color4(1.0, 1.0, 1.0, 1.0);
+            GL.Viewport(0, 0, _CanvasWidth, _CanvasHeight);
+            GL.ClearColor(Color.Black);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            }
+            // Camera
+            GL.MatrixMode(MatrixMode.Projection);
+            Matrix4 perspective_camera = Matrix4.CreatePerspectiveFieldOfView(
+                _Game.CurrentCamera.FieldOfView,
+                (float)_CanvasWidth / (float)_CanvasHeight,
+                0.0001f,
+                9999.0f);
+            GL.LoadMatrix(ref perspective_camera);
+            GL.MultMatrix(ref _Game.CurrentCamera.mTransform._Global);
+
+            // Render
+            GL.MatrixMode(MatrixMode.Modelview);
+            RenderDrawingWatch.Restart();
+            _Game.Render();
+            _LastRenderDrawingTime = (float)RenderDrawingWatch.Elapsed.TotalSeconds;
+            GL.LoadIdentity();
+            GL.Color4(1.0, 1.0, 1.0, 1.0);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // unbind FBO
-            //GL.PopAttrib();
-
-
-
             #endregion
 
             #region Render Main Viewport
             GL.BindTexture(TextureTarget.Texture2D, CanvasTexture); // Bind the canvas
-            //GL.PushAttrib(AttribMask.ViewportBit);
-            {
-                // FBO viewport
-                GL.Viewport(0, 0, ViewportWidth, ViewportHeight);
-                GL.ClearColor(Color.Black);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Do clear
-                Matrix4 perspective = Matrix4.CreateOrthographic(ViewportWidth, ViewportHeight, -128, 128);
-                GL.MatrixMode(MatrixMode.Projection);
-                GL.LoadMatrix(ref perspective);
-                GL.PushMatrix();
-                {
-                    GL.Translate(FBOScaleX / -2.0, FBOScaleY / -2.0, 0);
-                    GL.Begin(PrimitiveType.Quads);
-                    GL.TexCoord2(0.0f, 0.0f);
-                    GL.Vertex3(0.0f, 0.0f, 0.0f);
-                    GL.TexCoord2(1.0f, 0.0f);
-                    GL.Vertex3(FBOScaleX, 0.0f, 0.0);
-                    GL.TexCoord2(1.0f, 1.0);
-                    GL.Vertex3(FBOScaleX, FBOScaleY, 0.0f);
-                    GL.TexCoord2(0.0f, 1.0f);
-                    GL.Vertex3(0.0f, FBOScaleY, 0.0f);
-                    GL.End();
-                }
-                GL.PopMatrix();
-            }
-            //GL.PopAttrib();
+            GL.Viewport(0, 0, ViewportWidth, ViewportHeight);
+            GL.ClearColor(Color.Black);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Do clear
+            Matrix4 projection = Matrix4.CreateOrthographic(ViewportWidth, ViewportHeight, -128, 128);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref projection);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.Translate(FBOScaleX / -2.0, FBOScaleY / -2.0, 0);
+            GL.Begin(PrimitiveType.Quads);
+            GL.TexCoord2(0.0f, 0.0f);
+            GL.Vertex3(0.0f, 0.0f, 0.0f);
+            GL.TexCoord2(1.0f, 0.0f);
+            GL.Vertex3(FBOScaleX, 0.0f, 0.0);
+            GL.TexCoord2(1.0f, 1.0);
+            GL.Vertex3(FBOScaleX, FBOScaleY, 0.0f);
+            GL.TexCoord2(0.0f, 1.0f);
+            GL.Vertex3(0.0f, FBOScaleY, 0.0f);
+            GL.End();
             GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
 
             //GL.Flush();

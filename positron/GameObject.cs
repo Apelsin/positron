@@ -12,18 +12,13 @@ namespace Positron
         public ThreadedRendering mWindow { get { return mGame.Window; } }
         public PositronGame mGame { get { return mScene.Game; } }
         public FarseerPhysics.Dynamics.World mWorld { get { return mScene.World; } }
-        public virtual Scene mScene {
-            get {
-                if (mTransform.Parent != null)
-                    return mTransform.Parent.mScene;
-                return null;
-            }
-        }
+        public virtual Scene mScene { get { return mTransform.Parent.mScene; } }
         public GameObjectBase() : base()
         {
         }
         public virtual FarseerPhysics.Dynamics.Body mBody { get { return null; } }
         public virtual SpriteBase mSprite { get { return null; } }
+        public virtual Camera mCamera { get { return mTransform.Parent.mCamera; } }
     }
     public class GameObject : GameObjectBase, IDrawable
     {
@@ -41,12 +36,14 @@ namespace Positron
 
         public void SaveState()
         {
-            mState.BodyEnabled = mBody.Enabled;
+            if (mBody != null)
+                mState.BodyEnabled = mBody.Enabled;
         }
 
         public void LoadState()
         {
-            mBody.Enabled = mState.BodyEnabled;
+            if(mBody != null)
+                mBody.Enabled = mState.BodyEnabled;
         }
 
         protected readonly Xform _Transform;
@@ -69,6 +66,10 @@ namespace Positron
             Extensions = new HashSet<Extension>();
             mState = new State();
         }
+        public GameObject(GameObject parent)
+            : this(parent.mTransform)
+        {
+        }
         public virtual void Update()
         {
             mTransform.mState.Modified = false;
@@ -83,12 +84,10 @@ namespace Positron
         }
         public virtual void Render()
         {
-            GL.PushMatrix();
-            GL.MultMatrix(ref mTransform._Local);
+            GL.LoadMatrix(ref mTransform._Global);
             Draw();
             foreach (Xform child in mTransform.Children)
                 child.mGameObject.Render();
-            GL.PopMatrix();
         }
         public virtual void Draw()
         {
@@ -96,11 +95,11 @@ namespace Positron
         }
         public void LateUpdate()
         {
+            mTransform.UpdateGlobalMatrix();
             if (mBody != null)
             {
-                Matrix4 global_matrix = mTransform.GlobalMatrix;
-                float x = global_matrix[0, 0]; // X+ vector
-                float y = global_matrix[1, 0]; // Y+ vector
+                float x = mTransform._Global[0, 0]; // X+ vector
+                float y = mTransform._Global[1, 0]; // Y+ vector
                 float theta = (float)Math.Atan2((double)y, (double)x); // Rotation about Z-axis
                 mBody.SetTransform(
                     new Microsoft.Xna.Framework.Vector2(mTransform.PositionX, mTransform.PositionY),

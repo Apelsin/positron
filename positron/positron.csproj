@@ -55,6 +55,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Camera.cs" />
     <Compile Include="Game Objects\Blueprint\BlueprintBase.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="Game Objects\HUD\HUDQuad.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="IInputAccepter.cs" />
-    <Compile Include="SceneRoot.cs" />
+    <Compile Include="Scene\SceneRoot.cs" />
     <Compile Include="Game Objects\Line.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Game Objects\BooleanIndicator.cs" />
@@ -94,8 +95,6 @@
     <Compile Include="PTextWriter.cs" />
     <Compile Include="Asset Management\Sound.cs" />
     <Compile Include="Scene\Scene.cs" />
-    <Compile Include="Scene\ISceneGameplay.cs" />
-    <Compile Include="IGLContextLateUpdate.cs" />
     <Compile Include="WR.cs" />
     <Compile Include="KeyEventArgs.cs" />
     <Compile Include="Xform.cs" />

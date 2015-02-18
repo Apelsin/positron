@@ -21,7 +21,6 @@ namespace Positron
     public class SharedState<T> : IDisposable
     {
         public event SharedStateChangeEventHandler<T> SharedStateChanged;
-        protected object _ValueLock = new object();
         protected T _Value;
         public T Value { get { return _Value; } }
         public SharedState(T initial_state)
@@ -31,15 +30,12 @@ namespace Positron
         }
         protected void HandleSharedStateChanged (object sender, SharedStateChangeEventArgs<T> e)
         {
-            lock(_ValueLock)
-                _Value = e.CurrentState;
+            _Value = e.CurrentState;
         }
         public void OnChange (object sender, T state)
         {
-            lock (_ValueLock) {
-                if(!state.Equals(_Value))
-                    SharedStateChanged(sender, new SharedStateChangeEventArgs<T>(_Value, state, this));
-            }
+            if(!state.Equals(_Value))
+                SharedStateChanged(sender, new SharedStateChangeEventArgs<T>(_Value, state, this));
         }
         public override bool Equals(object o)
         {

@@ -15,8 +15,8 @@ namespace Positron
         }
         public readonly State mState;
         // These are public for optimization
-        public Matrix4 _Local;
-        public Matrix4 _Global;
+        public Matrix4 _Local = Matrix4.Identity;
+        public Matrix4 _Global = Matrix4.Identity;
         protected Xform _Parent;
         public Xform Parent {
             get { return _Parent; }
@@ -64,13 +64,13 @@ namespace Positron
         public Xform(GameObject game_object, Xform parent)
             : base(game_object)
         {
-            _Local = new Matrix4();
             if(parent != null)
                 parent.AddChild(this);
+            UpdateGlobalMatrix();
             mState = new State();
         }
         #region Matrices
-        protected void UpdateGlobalMatrix()
+        public void UpdateGlobalMatrix()
         {
             _Global = _Local * ParentMatrix;
         }

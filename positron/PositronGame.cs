@@ -17,7 +17,7 @@ using FarseerPhysics.Factories;
 
 namespace Positron
 {
-    public class PositronGame: IDisposable, IGLContextLateUpdate
+    public class PositronGame: IDisposable
     {
         #region Event-Related
         protected List<KeyValuePair<object, UpdateEventHandler>> _UpdateEventList = new List<KeyValuePair<object, UpdateEventHandler>>();
@@ -49,6 +49,7 @@ namespace Positron
             set { LoadScene ((Scene)value); }
         }
         public World WorldMain { get { return _WorldMain; } set { _WorldMain = value; } }
+        public Camera CurrentCamera { get { return CurrentScene.Camera; } }
         // TODO: ensure thread safety here:
         public IInputAccepter[] InputAccepterGroup {
             get { 
@@ -186,13 +187,6 @@ namespace Positron
                     }
                 }
             }
-            if (next_scene == null) {
-                next_scene = (Scene)_Scenes["SceneFirstMenu"];
-            }
-            foreach (Scene scene in new_scenes)
-                scene.InstantiateConnections ();
-            foreach (Scene scene in new_scenes)
-                scene.InitializeScene ();
             LoadScene(next_scene); // Change scenes as necessary
         }
         protected void LoadScene (Scene next_scene)

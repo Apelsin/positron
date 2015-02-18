@@ -28,27 +28,32 @@ namespace Positron
 		}
 	}
 	#endregion
+    #region Delegates
     public delegate void SceneEntryEventHandler(object sender, SceneChangeEventArgs e);
 	public delegate void SceneExitEventHandler(object sender, SceneChangeEventArgs e);
-	public class Scene : IDisposable
+    #endregion
+    public class Scene : IDisposable
 	{
 		#region Events
+        /// <summary>
+        /// Event raised when this scene enters
+        /// </summary>
 		public event SceneEntryEventHandler SceneEntry;
+        /// <summary>
+        /// Event raised when this scene exist
+        /// </summary>
 		public event SceneExitEventHandler SceneExit;
 		#endregion
 		#region State
 		#region Member Variables
 		protected string _Name;
         protected PositronGame _Game;
-		protected Vector2 _ViewSize;
-		protected Vector3 _ViewOffset;
-		protected Vector3 _ViewPosition;
+        protected SceneRoot _Root;
         protected HUDQuad FrameTimeMeter;
         protected HUDQuad UpdateTimeMeter;
         protected HUDQuad RenderTimeMeter;
         protected HUDQuad RenderDrawingMeter;
-        protected SceneRoot _Root;
-        public SceneRoot Root { get { return _Root; } }
+        
 		protected float[] AdaptiveTimeSteps = new float[12];
 		/// <summary>
 		/// Index for adaptive time step mode
@@ -56,109 +61,68 @@ namespace Positron
 		protected int ATSIndex = 0;
 		#endregion
 		#region Member Accessors
+        /// <summary>
+        /// Name of the current scene
+        /// </summary>
 		public string Name { get { return _Name; } }
-
-		public Vector2 ViewSize { get { return _ViewSize; } }
-		public float ViewWidth {
-			get { return _ViewSize.X; }
-			protected set { _ViewSize.X = value; }
-		}
-		public float ViewHeight {
-			get { return _ViewSize.Y; }
-			protected set { _ViewSize.Y = value; }
-		}
-		public Vector3 ViewOffset {
-			get { return _ViewOffset; }
-			set { _ViewOffset = value; }
-		}
-		public Vector3 ViewPosition {
-			get { return _ViewPosition; }
-			//set { _ViewPosition = value; }
-		}
+        /// <summary>
+        /// Game object associated with this scene; the game this scene belongs to
+        /// </summary>
         public PositronGame Game { get { return _Game; } }
+        /// <summary>
+        /// The root Xform of the scene that contains the hierarchy of GameObjects
+        /// </summary>
+        public SceneRoot Root { get { return _Root; } }
+        /// <summary>
+        /// Physical world associated with the scene
+        /// </summary>
 		public World World { get { return Game.WorldMain; } }
+        /// <summary>
+        /// Camera used by the scene
+        /// </summary>
+        public Camera Camera { get { return Root.mCamera; } set { Root.mCamera = value; } }
 		#endregion
 		#endregion
 		#region Behavior
 		#region Member
+        /// <summary>
+        /// Creates a new scene object that can be used by a PositronGame object
+        /// </summary>
+        /// <param name="game">Associated PositronGame object</param>
+        /// <param name="name">Name for the scene</param>
         protected Scene (PositronGame game, string name)
 		{
             _Game = game;
             _Name = name;
-
-			// TODO: This is awful. Fix it.
-			// TODO: Actually fix this.
-			// TODO: Seriously, make this -not suck-
-            ViewWidth = _Game.Window.CanvasWidth;
-			ViewHeight = _Game.Window.CanvasHeight;
-
 			_Root = new SceneRoot(this);
-
-			SceneEntry += (sender, e) => 
-			{
-			};
 		}
+        /// <summary>
+        /// Creates a new scene object that can be used by a PositronGame object
+        /// </summary>
+        /// <param name="game">Associated PositronGame object</param>
 		protected Scene (PositronGame game):
 			this(game, "Scene")
 		{
-			_Name = GetType ().Name;
 		}
-		public virtual void InstantiateConnections ()
-		{
-		}
-		public virtual void InitializeScene ()
-		{
-		}
+        /// <summary>
+        /// Notify subscribers of the SceneEntry event that the scene has entered
+        /// </summary>
 		public void OnSceneEntry (object sender, SceneChangeEventArgs e)
 		{
 			if(SceneEntry != null)
 				SceneEntry(sender, e);
 		}
+        /// <summary>
+        /// Notify subscribers of the SceneExit event that the scene has exited
+        /// </summary>
 		public void OnSceneExit (object sender, SceneChangeEventArgs e)
 		{
 			if(SceneExit != null)
 				SceneExit(sender, e);
 		}
-        /*
-        protected void SetupHUD()
-        {
-            var p = new Vector3(5.0f, 5.0f, 0.0f);
-            var s = new Vector3(5.0f, 12f, 0.0f);
-			FrameTimeMeter = new HUDQuad(HUDDebug, p, s);
-            FrameTimeMeter.Color = Color.DarkSlateBlue;
-			UpdateTimeMeter = new HUDQuad(HUDDebug, p, s);
-            UpdateTimeMeter.Color = Color.DarkCyan;
-			RenderTimeMeter = new HUDQuad(HUDDebug, p, s);
-            RenderTimeMeter.Color = Color.DarkRed;
-			RenderDrawingMeter = new HUDQuad(HUDDebug, p, s);
-            RenderDrawingMeter.Color = Color.Red;
-        }
-        protected void UpdateHUDStats()
-        {
-            float w_x, w = 4000.0f;
-            w_x = w * _Game.Window.LastFrameTime;
-            FrameTimeMeter.B.X = FrameTimeMeter.A.X + w_x;
-            FrameTimeMeter.C.X = FrameTimeMeter.D.X + w_x;
-            w_x = w * _Game.Window.LastUpdateTime;
-            UpdateTimeMeter.B.X = FrameTimeMeter.A.X + w_x;
-            UpdateTimeMeter.C.X = FrameTimeMeter.D.X + w_x;
-            w_x = w * _Game.Window.LastRenderTime;
-            RenderTimeMeter.A.X = UpdateTimeMeter.B.X;
-            RenderTimeMeter.D.X = UpdateTimeMeter.C.X;
-            RenderTimeMeter.B.X = RenderTimeMeter.A.X + w_x;
-            RenderTimeMeter.C.X = RenderTimeMeter.D.X + w_x;
-            w_x = w * _Game.Window.LastRenderDrawingTime;
-            RenderDrawingMeter.A.Y = RenderTimeMeter.A.Y + 3;
-            RenderDrawingMeter.B.Y = RenderTimeMeter.B.Y + 3;
-            RenderDrawingMeter.C.Y = RenderTimeMeter.C.Y - 3;
-            RenderDrawingMeter.D.Y = RenderTimeMeter.D.Y - 3;
-            RenderDrawingMeter.A.X = RenderTimeMeter.A.X;
-            RenderDrawingMeter.D.X = RenderTimeMeter.D.X;
-            RenderDrawingMeter.B.X = RenderDrawingMeter.A.X + w_x;
-            RenderDrawingMeter.C.X = RenderDrawingMeter.D.X + w_x;
-        }
-        */
-
+        /// <summary>
+        /// Update the physical simulation by performing a time step
+        /// </summary>
         public virtual void UpdateWorld()
         {
             if (Configuration.AdaptiveTimeStep)
@@ -170,25 +134,38 @@ namespace Positron
             } else if(World != null)
                 World.Step(Math.Min(Game.DeltaTime, Configuration.MaxWorldTimeStep));
         }
+        /// <summary>
+        /// Perform the main update for this scene
+        /// </summary>
 		public virtual void Update ()
         {
             UpdateWorld();
             foreach (Xform xform in _Root.Children)
                 xform.mGameObject.Update();
 		}
+        /// <summary>
+        /// Render the current scene
+        /// </summary>
         public virtual void Render()
         {
-            GL.PushMatrix();
             GL.LoadMatrix(ref _Root._Local);
             foreach (Xform xform in _Root.Children)
                 xform.mGameObject.Render();
-            GL.PopMatrix();
         }
+        /// <summary>
+        /// Perform the post-render update for this scene. Physical calculations happen here.
+        /// </summary>
         public virtual void LateUpdate()
         {
             foreach (Xform xform in _Root.Children)
                 xform.mGameObject.LateUpdate();
         }
+        /// <summary>
+        /// Perform a ray cast test in the current <see cref="World"/>.
+        /// </summary>
+        /// <param name="callback"></param>
+        /// <param name="point1"></param>
+        /// <param name="point2"></param>
 		public void RayCast (Physics.RayCastCallback callback, Microsoft.Xna.Framework.Vector2 point1, Microsoft.Xna.Framework.Vector2 point2)
 		{
 			World.RayCast (callback.Invoke, point1, point2);
@@ -203,6 +180,11 @@ namespace Positron
 			}
             */
 		}
+        /// <summary>
+        /// Hit-test a point in <see cref="World"/>-space on all fixtures
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
 		public List<Fixture> TestPointAll (Microsoft.Xna.Framework.Vector2 point)
 		{
 			List<Fixture> hit_fixture = World.TestPointAll (point);
