@@ -42,14 +42,6 @@ namespace Positron
         /// </summary>
         uint CanvasFBO;
         /// <summary>
-        /// Width of canvas in pixels
-        /// </summary>
-        int _CanvasWidth { get { return Configuration.CanvasWidth; } }
-        /// <summary>
-        /// Height of canvas in pixels
-        /// </summary>
-        int _CanvasHeight { get { return Configuration.CanvasHeight; } }
-        /// <summary>
         /// Width of the viewport in pixels
         /// </summary>
         int ViewportWidth;
@@ -106,8 +98,6 @@ namespace Positron
 
         Stopwatch TestWatch = new Stopwatch();
 
-        float FrameLimitTime = 1.0f / Configuration.FrameRateCap;
-
         float _LastFrameTime,
             _LastUpdateTime,
             _LastRenderTime,
@@ -131,22 +121,29 @@ namespace Positron
 
         #endregion
         #region Accessors
-        public PositronGame Game { get { return _Game; } set { _Game = value; } }
+        /// <summary>
+        /// The current <see cref="PositronGame"/> for this window
+        /// </summary>
+        public PositronGame Game { get { return _Game; }
+            set {
+                _Game = value;
+                Width = CanvasWidth;
+                Height = CanvasHeight;
+            }
+        }
+        /// <summary>
+        /// Alias for Game.Configuration
+        /// </summary>
+        protected Configuration Configuration { get { return _Game.Configuration; } }
         /// <summary>
         /// Width of canvas in pixels
         /// </summary>
-        public int CanvasWidth
-        {
-            get { return _CanvasWidth; }
-        }
+        public int CanvasWidth { get { return (int)Configuration.CanvasWidth; } }
         /// <summary>
         /// Height of canvas in pixels
         /// </summary>
-        public int CanvasHeight
-        {
-            get { return _CanvasHeight; }
-        }
-
+        public int CanvasHeight { get { return (int)Configuration.CanvasHeight; } }
+        float FrameLimitTime { get { return 1.0f / (float)Configuration.FrameRateCap; } }
         public float LastFrameTime { get { return _LastFrameTime; } }
         public float LastUpdateTime { get { return _LastUpdateTime; } }
         public float LastRenderTime { get { return _LastRenderTime; } }
@@ -173,8 +170,6 @@ namespace Positron
         public ThreadedRendering()
             : base()
         {
-            this.Width = _CanvasWidth;
-            this.Height = _CanvasHeight;
             Keyboard.KeyDown += HandleKeyDown;
             Keyboard.KeyUp += HandleKeyUp;
             Resize += HandleResize;
@@ -187,25 +182,37 @@ namespace Positron
             // a flag and respond to it from the rendering thread.
             lock (RenderLock)
             {
-                TargetWidth = Math.Max(Width, _CanvasWidth);
-                TargetHeight = Math.Max(Height, _CanvasHeight);
+                int canvas_width = CanvasWidth;
+                int canvas_height = CanvasHeight;
+                TargetWidth = Math.Max(Width, canvas_width);
+                TargetHeight = Math.Max(Height, canvas_height);
                 // TODO: figure out window minimum dimensions (Win 8.1 is picky)
                 ViewportWidth = TargetWidth;
                 ViewportHeight = TargetHeight;
-                int multi = ViewportWidth / _CanvasWidth;
-                multi = Math.Min(multi, ViewportHeight / _CanvasHeight);
-                FBOScaleX = multi * _CanvasWidth;
-                FBOScaleY = multi * _CanvasHeight;
+                int multi = ViewportWidth / canvas_width;
+                multi = Math.Min(multi, ViewportHeight / canvas_height);
+                FBOScaleX = multi * canvas_width;
+                FBOScaleY = multi * canvas_height;
             }
         }
 
+        protected bool KeyMatch(Key key, string name)
+        {
+            Key named_key;
+            return Configuration.Keys.TryGetValue(name, out named_key) ? key == named_key : false;
+        }
+        protected bool KeyIsPressed(string name)
+        {
+            Key named_key;
+            return Configuration.Keys.TryGetValue(name, out named_key) ? KeysPressed.Contains(named_key) : false;
+        }
         void HandleKeyUp(object sender, KeyboardKeyEventArgs e)
         {
             KeyEventArgs key_args = new KeyEventArgs();
             key_args.Key = e.Key;
             if (_Game == null)
                 return;
-            if (key_args.Key == Configuration.KeyToggleFullScreen)
+            if (KeyMatch(key_args.Key, "ToggleFullScreen"))
             {
                 if (_Game != null)
                 {
@@ -232,9 +239,9 @@ namespace Positron
         {
             KeyEventArgs key_args = new KeyEventArgs();
             key_args.Key = e.Key;
-            if (key_args.Key == Configuration.KeyReset)
+            if (KeyMatch(key_args.Key, "Reset"))
             {
-                if (KeysPressed.Contains(Configuration.KeyResetModifier))
+                if (KeyIsPressed("ResetModifier"))
                 {
                     this.Exit();
                 }
@@ -251,11 +258,11 @@ namespace Positron
                     this.Exit();
                 }
             }
-            else if (key_args.Key == Configuration.KeyToggleDrawBlueprints)
+            else if (KeyIsPressed("ToggleDrawBlueprints"))
             {
                 Configuration.DrawBlueprints ^= true;
             }
-            else if (key_args.Key == Configuration.KeyToggleShowDebugVisuals)
+            else if (KeyIsPressed("ToggleShowDebugVisuals"))
             {
                 Configuration.ShowDebugVisuals ^= true;
             }
@@ -317,7 +324,7 @@ namespace Positron
             // Create Color Tex
             GL.GenTextures(1, out CanvasTexture);
             GL.BindTexture(TextureTarget.Texture2D, CanvasTexture);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, _CanvasWidth, _CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, CanvasWidth, CanvasHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
@@ -497,11 +504,12 @@ namespace Positron
                     // Bear with me...this will get a bit tricky to explain precisely...
 
                     // Sleep the thread for the most milliseconds less than the frame limit time
-                    float time_until = (float)FrameLimitTime - Configuration.ThreadSleepTimeStep * 0.001f;
+                    float frame_limit_time = FrameLimitTime;
+                    float time_until = (float)frame_limit_time - (float)Configuration.ThreadSleepTimeStep * 0.001f;
                     while (FrameWatch.Elapsed.TotalSeconds < time_until)
-                        Thread.Sleep(Configuration.ThreadSleepTimeStep);
+                        Thread.Sleep((int)Configuration.ThreadSleepTimeStep);
                     // Hard-loop the remainder
-                    while (FrameWatch.Elapsed.TotalSeconds < FrameLimitTime) ;
+                    while (FrameWatch.Elapsed.TotalSeconds < frame_limit_time) ;
 
                     UpdateWatch.Restart();
                     lock (UpdateLock)
@@ -552,8 +560,11 @@ namespace Positron
         {
             #region Render Frame Buffer
 
+            int canvas_width = CanvasWidth;
+            int canvas_height = CanvasHeight;
+
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, CanvasFBO); // Bind canvas FBO
-            GL.Viewport(0, 0, _CanvasWidth, _CanvasHeight);
+            GL.Viewport(0, 0, canvas_width, canvas_height);
             GL.ClearColor(Color.Black);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -561,7 +572,7 @@ namespace Positron
             GL.MatrixMode(MatrixMode.Projection);
             Matrix4 perspective_camera = Matrix4.CreatePerspectiveFieldOfView(
                 _Game.CurrentCamera.FieldOfView,
-                (float)_CanvasWidth / (float)_CanvasHeight,
+                (float)canvas_width / (float)canvas_height,
                 0.0001f,
                 9999.0f);
             GL.LoadMatrix(ref perspective_camera);

@@ -24,11 +24,7 @@ namespace Positron
         public List<KeyValuePair<object, UpdateEventHandler>> UpdateEventList { get { return _UpdateEventList; } }
         #endregion
         #region Member Variables
-        public void AddUpdateEventHandler(object sender, UpdateEventHandler handler)
-        {
-            lock(_UpdateEventList)
-                _UpdateEventList.Add(new KeyValuePair<object, UpdateEventHandler>(sender, handler));
-        }
+        public readonly Configuration Configuration;
         protected float _DeltaTime;
         public float DeltaTime { get { return _DeltaTime; } }
         protected ThreadedRendering _Window;
@@ -63,21 +59,16 @@ namespace Positron
         #region Static Accessors
         #endregion
 
-        public PositronGame (ThreadedRendering window)
+        public PositronGame (ThreadedRendering window, Configuration configuration)
         {
+            Configuration = configuration;
             _Window = window;
+            _Window.Game = this;
             // TODO: world objects need to be pending initialization before the world is controlled by the scene
             FarseerPhysics.Settings.VelocityIterations = 1;
             InputAccepterGroups = new OrderedDictionary();
             //SetupScenes();
             //_CurrentScene = (Scene)_Scenes["SceneFirstMenu"];
-        }
-        public static void InitialSetup ()
-        {
-            // Load textures into graphics memory space
-            Texture.InitialSetup();
-            Sound.InitialSetup();
-            //DialogSpeaker.InitialSetup();
         }
         public void SetInputAccepters (string name, params IInputAccepter[] input_accepters)
         {

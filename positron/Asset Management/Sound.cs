@@ -8,6 +8,17 @@ using OpenTK.Audio.OpenAL;
 
 namespace Positron
 {
+    public static class SoundHelper
+    {
+        public static Sound LoadWaveFile(this PositronGame game, string title, params string[] path_components)
+        {
+            string[] all_path_components = new string[path_components.Length + 1];
+            all_path_components[0] = game.Configuration.AudioDirectory;
+            path_components.CopyTo(all_path_components, 1);
+            string path = Path.Combine(all_path_components);
+            return Sound.LoadWaveFileAbsolute(title, path);
+        }
+    }
     public class Sound : IDisposable
     {
         private static IntPtr AudioDevice;
@@ -73,15 +84,7 @@ namespace Positron
         {
             _Duration += dt;
         }
-        public static Sound LoadWaveFile(string title, params string[] path_components)
-        {
-            string[] all_path_components = new string[path_components.Length + 1];
-            all_path_components[0] = Configuration.AudioPath;
-            path_components.CopyTo(all_path_components, 1);
-            string path = Path.Combine(all_path_components);
-            return LoadWaveFileAbsolute(title, path);
-        }
-        protected static Sound LoadWaveFileAbsolute(string title, string file_path)
+        internal static Sound LoadWaveFileAbsolute(string title, string file_path)
         {   
             if(!System.IO.File.Exists(file_path))
                 throw new FileNotFoundException("File missing: ", file_path);

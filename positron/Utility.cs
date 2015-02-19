@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.IO;
 
@@ -142,6 +143,7 @@ namespace Positron
     }
     public static class ExtensionMethods
     {
+        #region Typecasting
         // C# needs unions or something...
         public static Microsoft.Xna.Framework.Vector3 XNA(this Vector3 self)
         {
@@ -159,6 +161,28 @@ namespace Positron
         {
             return new Vector2(self.X, self.Y);
         }
-
+        #endregion
+        #region Dictionary Helpers
+        public static V GetValueOrDefault<K, V>(this IDictionary<K, V> dict, K key)
+        {
+            return dict.GetValueOrDefault(key, default(V));
+        }
+        public static V GetValueOrDefault<K, V>(this IDictionary<K, V> dict, K key, V defVal)
+        {
+            return dict.GetValueOrDefault(key, () => defVal);
+        }
+        public static V GetValueOrDefault<K, V>(this IDictionary<K, V> dict, K key, Func<V> defValSelector)
+        {
+            V value;
+            return dict.TryGetValue(key, out value) ? value : defValSelector();
+        }
+        public static bool SetValueIfNotDefined<K, V>(this IDictionary<K, V> dict, K key, V value)
+        {
+            if (dict.ContainsKey(key))
+                return false;
+            dict[key] = value;
+            return true;
+        }
+        #endregion
     }
 }

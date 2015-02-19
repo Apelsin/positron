@@ -15,9 +15,9 @@ namespace Positron
 {
     public static class Helper
     {
-        public static bool KeyPressedInTime (DateTime pressed, DateTime now)
+        public static bool KeyPressedInTime (this PositronGame game, DateTime pressed, DateTime now)
         {
-            return (now - pressed).TotalSeconds < Configuration.KeyPressTimeTolerance;
+            return (now - pressed).TotalSeconds < game.Configuration.KeyPressTimeTolerance;
         }
         public static Color Blend(this Color S, Color C, float alpha)
         {

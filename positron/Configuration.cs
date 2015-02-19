@@ -3,247 +3,254 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.ComponentModel;
+using System.Xml;
+
+using System.Dynamic;
+
 using OpenTK.Input;
 
 namespace Positron
 {
-    public static class Configuration
+    #region ConfigurationBase
+    [DataContract]
+    public abstract class ConfigurationBase
     {
-        // This exists because dictionaries can be slow, and that's nooo gooood.
-        // GOTTA GO FAST!
-        #region Hard-Coded Settings
-        private static float _MetersInPixels;
-        private static float _ForceDueToGravity;
-        private static float _KeyPressTimeTolerance;
-        private static float _FrameRateCap;
-        private static int _ThreadSleepTimeStep;
-        //private static int _ThreadSleepToleranceStep;
-        private static float _MaxWorldTimeStep;
-        private static bool _AdaptiveTimeStep;
-        private static int _CanvasWidth;
-        private static int _CanvasHeight;
-        private static bool _DrawBlueprints;
-        private static bool _ShowDebugVisuals;
+        protected static DataContractJsonSerializerSettings SerializerSettings =
+            new DataContractJsonSerializerSettings()
+                {
+                    UseSimpleDictionaryFormat = true
+                };
+        protected static XmlWriter CreateJsonWriter(Stream stream)
+        {
+            return JsonReaderWriterFactory.CreateJsonWriter(stream, System.Text.Encoding.UTF8, true, true, "    ");
+        }
+        protected static XmlObjectSerializer Serializer = new DataContractJsonSerializer(typeof(ConfigurationBase));
+        protected abstract void Setup();
+        protected ConfigurationBase()
+        {
+            Setup();
+        }
+        [OnDeserialized]
+        protected void OnDeserialized(StreamingContext context)
+        {
+            Setup();
+        }
+    }
+    #endregion
+    #region GlobalConfiguration
+    [DataContract]
+    public class GlobalConfiguration : ConfigurationBase
+    {
+        new protected static XmlObjectSerializer Serializer =
+            new DataContractJsonSerializer(
+                typeof(GlobalConfiguration),
+                SerializerSettings);
+        private static GlobalConfiguration _Instance;
+        public static GlobalConfiguration Instance { get { return _Instance; } }
 
-        private static Key
-            _KeyUp,
-            _KeyLeft,
-            _KeyDown,
-            _KeyRight,
-            _KeyJump,
-            _KeyUseEquippedItem,
-            _KeyDoAction,
-            _KeyCrouch,
-            _KeyReset,
-            _KeyResetModifier,
-            _KeyToggleFullScreen,
-            _KeyToggleShowDebugVisuals,
-            _KeyToggleDrawBlueprints;
+        #region Stored Settings
+        protected bool? _TestBool;
+        [DataMember]
+        public bool TestBool {
+            get { return (bool)_TestBool; }
+            protected set { _TestBool = value; }
+        }
+        protected string _TestString;
+        [DataMember]
+        public string TestString {
+            get { return _TestString; }
+            set { _TestString = value; }
+        }
         #endregion
 
-        private static Dictionary<String, object> __dict__ = new Dictionary<String, object>();
-        static Configuration ()
+        protected override void Setup()
+        {
+            _TestBool = _TestBool ?? true;
+            _TestString = _TestString ?? "Hello, World!";
+        }
+
+        protected GlobalConfiguration():
+            base()
+        {
+            Setup();
+        }
+        /// <summary>
+        /// Load and parse (deserialize) the global configuration from a JSON stream.
+        /// </summary>
+        /// <param name="stream"></param>
+        public static void Load(Stream stream)
+        {
+            _Instance = (GlobalConfiguration)Serializer.ReadObject(stream);
+        }
+        public static void Store(Stream stream)
+        {
+            using(var writer = CreateJsonWriter(stream))
+                Serializer.WriteObject(writer, _Instance);
+        }
+        public static void LoadDefaults()
+        {
+            _Instance = new GlobalConfiguration();
+        }
+    }
+    #endregion
+    #region Configuration
+    [DataContract]
+    public class Configuration : ConfigurationBase
+    {
+        new protected static XmlObjectSerializer Serializer =
+            new DataContractJsonSerializer(
+                typeof(Configuration),
+                SerializerSettings);
+
+        #region Stored Settings
+        [DataMember] public string ArtworkDirectory{ get; protected set; }
+        [DataMember] public string AudioDirectory { get; protected set; }
+        [DataMember] public Dictionary<String, Key> Keys { get; protected set; }
+        /// <summary>
+        /// The acceleration due to gravity to use for most scenes
+        /// </summary>
+        [DataMember] public float? ForceDueToGravity { get; protected set; }
+        /// <summary>
+        /// Time in seconds to allow existingly-pressed keystrokes to
+        /// retrigger through the bubbling KeysUpdate event.
+        /// </summary>
+        /// <remarks>
+        /// Think of this as "buffer timeframe" in which you can press
+        /// a button and have an action happen as soon as it can.
+        /// </remarks>
+        [DataMember] public float? KeyPressTimeTolerance { get; protected set; }
+        /// <summary>
+        /// Maximum frame rate to work at
+        /// </summary>
+        [DataMember] public float? FrameRateCap { get; protected set; }
+        /// <summary>
+        /// Time in milliseconds to sleep at a time
+        /// during the frame rate cap loop
+        /// </summary>
+        [DataMember] public int? ThreadSleepTimeStep { get; protected set; }
+        /// <summary>
+        /// Maximum time in seconds that the physics solver can
+        /// step through time.
+        /// </summary>
+        /// <remarks>
+        /// High values may risk physics lag whereas
+        /// lower values will cause slowness
+        /// </remarks>
+        [DataMember] public float? MaxWorldTimeStep { get; protected set; }
+        /// <summary>
+        /// Whether the world time step should adapt to the load
+        /// </summary>
+        [DataMember] public bool? AdaptiveTimeStep { get; protected set; }
+        [DataMember] public int? CanvasWidth { get; protected set; }
+        [DataMember] public int? CanvasHeight { get; protected set; }
+        #endregion
+        
+        #region Volatile Settings
+        public string AssetsPath { get; protected set; }
+        public string ArtworkPath
+        {
+            get { return Path.Combine(AssetsPath, ArtworkDirectory); }
+        }
+        public string AudioPath
+        {
+            get { return Path.Combine(AssetsPath, AudioDirectory); }
+        }
+        public bool DrawBlueprints { get;  set; }
+        public bool ShowDebugVisuals { get;  set; }
+        #endregion
+
+        protected override void Setup()
+        {
+            FindAssetsPath();
+
+            // Load or default
+            ArtworkDirectory = ArtworkDirectory ?? "Artwork";
+            AudioDirectory = AudioDirectory ?? "Audio";
+            ForceDueToGravity = ForceDueToGravity ?? -9.8f;
+            KeyPressTimeTolerance = KeyPressTimeTolerance ?? 0.1f;
+            FrameRateCap = FrameRateCap ?? 1200.0f;
+            ThreadSleepTimeStep = ThreadSleepTimeStep ?? 1;
+            MaxWorldTimeStep = MaxWorldTimeStep ?? 0.05f;
+            AdaptiveTimeStep = AdaptiveTimeStep ?? false;
+            CanvasWidth = CanvasWidth ?? 1280 / 2;
+            CanvasHeight = CanvasHeight ?? 800 / 2;
+
+            if(Keys == null)
+            {
+                Keys = new Dictionary<string, Key>();
+                Keys["Up"] = Key.W;
+                Keys["Left"] = Key.A;
+                Keys["Down"] = Key.S;
+                Keys["Right"] = Key.D;
+                Keys["Jump"] = Key.F;
+
+                Keys["Reset"] = Key.Number1;
+                Keys["ResetModifier"] = Key.Number2;
+                Keys["ToggleFullScreen"] = Key.BackSlash;
+                Keys["ToggleShowDebugVisuals"] = Key.Semicolon;
+                Keys["ToggleDrawBlueprints"] = Key.Quote;
+            }
+
+            // Volatile
+            DrawBlueprints = false;
+            ShowDebugVisuals = false;
+
+            
+        }
+
+        protected void FindAssetsPath()
         {
             // Positron attempts to locate the Assets directory in three different places
             // Assets           Default
             // ../../Assets     Development
             // ../../../Assets  Development, platform-specific
             // Release path
-            string assets_path = "Assets";
+            AssetsPath = "Assets";
 #if DEBUG
-            if (!Directory.Exists (assets_path)) {
+            if (!Directory.Exists(AssetsPath))
+            {
                 // Development path
-                assets_path = Path.Combine ("..", "..", "Assets");
-                if (!Directory.Exists (assets_path))
+                AssetsPath = Path.Combine("..", "..", "Assets");
+                if (!Directory.Exists(AssetsPath))
                 {
                     // Platform-specific development path
-                    assets_path = Path.Combine ("..", "..", "..", "Assets");
+                    AssetsPath = Path.Combine("..", "..", "..", "Assets");
                 }
             }
 #endif
-            if (!Directory.Exists(assets_path))
-                throw new FileNotFoundException("Unable to locate Assets directory", assets_path);
-            
+            if (!Directory.Exists(AssetsPath))
+                throw new FileNotFoundException("Unable to locate Assets directory", AssetsPath);
 
-            // Absolute executable path
-            // This is not working on OS X, but it would be nice if it were
-            /*
-            if(!Directory.Exists(artwork_path))
-            {
-                string exe_location = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                //Console.WriteLine("Executable location is {0}", exe_location);
-                string exe_directory = Path.GetDirectoryName(exe_location);
-                //Console.WriteLine("Executable directory is {0}", exe_directory);
-                artwork_path = Path.Combine(exe_directory, "Assets", "Artwork");
-                //Console.WriteLine("Using artwork path {0}", artwork_path);
-            }
-            */
-            Console.WriteLine ("Using assets path {0}", assets_path);
-            Set("ArtworkPath", Path.Combine(assets_path, "Artwork"));
-            Set("AudioPath", Path.Combine(assets_path, "Audio"));
-            Set ("SceneBeginning", "SceneIntro");
-            _MetersInPixels = 96.0f;
-            _ForceDueToGravity = -9.8f;
-            _KeyPressTimeTolerance = 0.1f;
-            _FrameRateCap = 1200.0f;
-            _ThreadSleepTimeStep = 1;
-            _MaxWorldTimeStep = 0.05f;
-            _AdaptiveTimeStep = false;
-            _CanvasWidth = 1280 / 2;
-            _CanvasHeight = 800 / 2;
-            //_CanvasWidth = 1280 ;
-            //_CanvasHeight = 640;
-            _DrawBlueprints = false;
-            _ShowDebugVisuals = false;
-            _KeyUp = Key.W;
-            _KeyLeft = Key.A;
-            _KeyDown = Key.S;
-            _KeyRight = Key.D;
-            _KeyJump = Key.F;
-            _KeyUseEquippedItem = Key.G;
-            _KeyDoAction = Key.H;
-            _KeyCrouch = Key.C;
-            _KeyReset = Key.Number1;
-            _KeyResetModifier = Key.Number2;
-            _KeyToggleFullScreen = Key.BackSlash;
-            _KeyToggleShowDebugVisuals = Key.Semicolon;
-            _KeyToggleDrawBlueprints = Key.Quote;
+            Console.WriteLine("Using assets path {0}", AssetsPath);
         }
-        #region Alias Accessors
-        public static string ArtworkPath {
-            get { return (string)__dict__["ArtworkPath"]; }
-        }
-        public static string AudioPath {
-            get { return (string)__dict__["AudioPath"]; }
-        }
+
         /// <summary>
-        /// Meters in pixels scalar for FarseerPhysics to use
-        /// Protip: don't muck with this
+        /// Deserialize the configuration from a JSON stream.
         /// </summary>
-        public static float MeterInPixels {
-            get { return _MetersInPixels; }
-        }
-        /// <summary>
-        /// The acceleration due to gravity to use for most scenes
-        /// </summary>
-        public static float ForceDueToGravity {
-            get { return _ForceDueToGravity; }
-        }
-        /// <summary>
-        /// Time in seconds to allow existingly-pressed keystrokes to
-        /// retrigger through the bubbling KeysUpdate event.
-        /// Think of this as "buffer timeframe" in which you can press
-        /// a button and have an action happen as soon as it can.
-        /// </summary>
-        public static float KeyPressTimeTolerance {
-            get { return _KeyPressTimeTolerance; }
-        }
-        /// <summary>
-        /// Maximum frame rate to work at
-        /// </summary>
-        public static float FrameRateCap {
-            get { return _FrameRateCap; }
-        }
-        /// <summary>
-        /// Time in milliseconds to sleep at a time
-        /// during the frame rate cap loop
-        /// </summary>
-        public static int ThreadSleepTimeStep {
-            get { return _ThreadSleepTimeStep; }
-        }
-        /// <summary>
-        /// Maximum time in seconds that the physics solver can
-        /// step through time.
-        /// High values may risk horrible physics lag whereas
-        /// lower values will cause slowness
-        /// </summary>
-        public static float MaxWorldTimeStep {
-            get { return _MaxWorldTimeStep; }
-        }
-        /// <summary>
-        /// Whether the world time step should adapt to the load
-        /// </summary>
-        public static bool AdaptiveTimeStep {
-            get { return _AdaptiveTimeStep; }
-        }
-        public static int CanvasWidth {
-            get { return _CanvasWidth; }
-        }
-        public static int CanvasHeight {
-            get { return _CanvasHeight; }
-        }
-        public static bool DrawBlueprints {
-            get { return _DrawBlueprints; }
-            set { _DrawBlueprints = value; }
-        }
-        public static bool ShowDebugVisuals {
-            get { return _ShowDebugVisuals; }
-            set { _ShowDebugVisuals = value; }
-        }
-        public static Key KeyUp { get { return _KeyUp; } }
-        public static Key KeyLeft { get { return _KeyLeft; } }
-        public static Key KeyDown { get { return _KeyDown; } }
-        public static Key KeyRight { get { return _KeyRight; } }
-        public static Key KeyJump { get { return _KeyJump; } }
-        public static Key KeyUseEquippedItem { get { return _KeyUseEquippedItem; } }
-        public static Key KeyDoAction { get { return _KeyDoAction; } }
-        public static Key KeyCrouch { get { return _KeyCrouch; } }
-        public static Key KeyReset { get { return _KeyReset; } }
-        public static Key KeyResetModifier { get { return _KeyResetModifier; } }
-        public static Key KeyToggleFullScreen { get { return _KeyToggleFullScreen; } }
-        public static Key KeyToggleShowDebugVisuals { get { return _KeyToggleShowDebugVisuals; } }
-        public static Key KeyToggleDrawBlueprints { get { return _KeyToggleDrawBlueprints; } }
-        public static void Set(String key, object value)
+        /// <param name="stream"></param>
+        public static Configuration Load(Stream stream)
         {
-            __dict__[key] = value;
+            Configuration configuration = (Configuration)Serializer.ReadObject(stream);
+            configuration.Setup();
+            return configuration;
         }
-        public static object Get(String key)
+        /// <summary>
+        /// Serialize the configuration into a JSON stream
+        /// </summary>
+        /// <param name="stream"></param>
+        public void Store(Stream stream)
         {
-            return __dict__[key];
+            using(var writer = CreateJsonWriter(stream))
+                Serializer.WriteObject(writer, this);
         }
-        public static void LoadConfigurationFile(string config_file_path)
+        public Configuration ():
+            base()
         {
-            // Mono's compiler does not like this exception for whatever reason
-            //throw NotImplementedException;
+            Setup();
         }
-        public static IEnumerable<KeyValuePair<String, object>> GetAllSettings()
-        {
-            yield return new KeyValuePair<String, object>("_MetersInPixels", _MetersInPixels);
-            yield return new KeyValuePair<String, object>("_ForceDueToGravity", _ForceDueToGravity);
-            yield return new KeyValuePair<String, object>("_KeyPressTimeTolerance", _KeyPressTimeTolerance);
-            yield return new KeyValuePair<String, object>("_FrameRateCap", _FrameRateCap);
-            yield return new KeyValuePair<String, object>("_ThreadSleepTimeStep", _ThreadSleepTimeStep);
-            yield return new KeyValuePair<String, object>("_MinWorldTimeStep", _MaxWorldTimeStep);
-            yield return new KeyValuePair<String, object>("_AdaptiveTimeStep", _AdaptiveTimeStep);
-            yield return new KeyValuePair<String, object>("_DrawBlueprints", _DrawBlueprints);
-            yield return new KeyValuePair<String, object>("_ShowDebugVisuals", _ShowDebugVisuals);
-            yield return new KeyValuePair<String, object>("_KeyUp", _KeyUp);
-            yield return new KeyValuePair<String, object>("_KeyLeft", _KeyLeft);
-            yield return new KeyValuePair<String, object>("_KeyDown", _KeyDown);
-            yield return new KeyValuePair<String, object>("_KeyRight", _KeyRight);
-            yield return new KeyValuePair<String, object>("_KeyJump", _KeyJump);
-            yield return new KeyValuePair<String, object>("_KeyUseEquippedItem", _KeyUseEquippedItem);
-            yield return new KeyValuePair<String, object>("_KeyDoAction", _KeyDoAction);
-            yield return new KeyValuePair<String, object>("_KeyCrouch", _KeyCrouch);
-            yield return new KeyValuePair<String, object>("_KeyReset", _KeyReset);
-            yield return new KeyValuePair<String, object>("_KeyResetModifier", _KeyResetModifier);
-            yield return new KeyValuePair<String, object>("_KeyToggleFullScreen", _KeyToggleFullScreen);
-            yield return new KeyValuePair<String, object>("_KeyToggleShowDebugVisuals", _KeyToggleShowDebugVisuals);
-            yield return new KeyValuePair<String, object>("_KeyToggleDrawBlueprints", _KeyToggleDrawBlueprints);
-            foreach(KeyValuePair<String, object> e in __dict__)
-                yield return e;
-        }
-        public static void DumpEverything ()
-        {
-            Console.WriteLine("{");
-            Console.WriteLine("\t\"Configuration\": {");
-            foreach (KeyValuePair<String, object> kvp in GetAllSettings()) {
-                Console.WriteLine("\t\t\"{0}\": \"{1}\",", kvp.Key, kvp.Value);
-            }
-            Console.WriteLine("\t}");
-            Console.WriteLine("}");
-        }
-        #endregion
     }
+    #endregion
 }
-

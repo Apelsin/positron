@@ -17,6 +17,7 @@ namespace Positron
         }
         public bool KeyDown (object sender, KeyEventArgs e)
         {
+            /*
             if (e.Key == Configuration.KeyUp || e.Key == Configuration.KeyLeft) {
                 _ElementFocusedIndex = (_ElementFocusedIndex + Count - 1) % Count;
                 this.ForEach(element => element.OnRefresh(this, new EventArgs()));
@@ -28,6 +29,7 @@ namespace Positron
                 ActuateFocused();
                 this.ForEach(element => element.OnRefresh(this, new EventArgs()));
             }
+            */
             return true;
         }
         public void ActuateFocused ()

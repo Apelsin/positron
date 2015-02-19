@@ -50,6 +50,17 @@ namespace Positron
             return string.Format ("[TextureRegion: Label={0}, Low={1}, High={2}, Size={3}]", Label, Low, High, Size);
         }
     }
+    public static class TextureHelper
+    {
+        public static Texture LoadTexture(this PositronGame game, string title, params string[] path_components)
+        {
+            string[] all_path_components = new string[path_components.Length + 1];
+            all_path_components[0] = game.Configuration.ArtworkPath;
+            path_components.CopyTo(all_path_components, 1);
+            string path = Path.Combine(all_path_components);
+            return Texture.LoadTextureAbsolute(title, path);
+        }
+    }
     public class Texture
     {
         #region State
@@ -91,10 +102,15 @@ namespace Positron
         }
 #endregion
         #region Static
-        public static void InitialSetup ()
+        static Texture()
         {
             Textures = new Hashtable();
-            _DefaultTexture = LoadTexture ("sprite_null", "sprite_null.png");
+        }
+        public static void Initialize(string artwork_path)
+        {
+            string title = "sprite_null";
+            string path = Path.Combine(artwork_path, "sprite_null.png");
+            _DefaultTexture = Texture.LoadTextureAbsolute(title, path);
         }
         public static void Teardown ()
         {
@@ -123,15 +139,8 @@ namespace Positron
                 return (Texture)Textures[key];
             return _DefaultTexture;
         }
-        public static Texture LoadTexture(string title, params string[] path_components)
-        {
-            string[] all_path_components = new string[path_components.Length + 1];
-            all_path_components[0] = Configuration.ArtworkPath;
-            path_components.CopyTo(all_path_components, 1);
-            string path = Path.Combine(all_path_components);
-            return LoadTextureAbsolute(title, path);
-        }
-        protected static Texture LoadTextureAbsolute(string title, string file_path)
+        
+        internal static Texture LoadTextureAbsolute(string title, string file_path)
         {    
             if(!System.IO.File.Exists(file_path))
                 throw new FileNotFoundException("File missing: ", file_path);
