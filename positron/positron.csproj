@@ -61,18 +61,21 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoSerializer.cs" />
     <Compile Include="Camera.cs" />
+    <Compile Include="Asset Management\Configurator.cs" />
     <Compile Include="Game Objects\Blueprint\BlueprintBase.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="Game Objects\HUD\HUDQuad.cs" />
     <Compile Include="Game Objects\IUpdateSync.cs" />
     <Compile Include="IDrawable.cs" />
+    <Compile Include="Scene\SceneConfigurator.cs" />
     <Compile Include="SoundPickup.cs" />
     <Compile Include="SoundSource.cs" />
     <Compile Include="ThreadedRendering.cs" />
     <Compile Include="Game Objects\Circle.cs" />
     <Compile Include="IColorable.cs" />
-    <Compile Include="Configuration.cs" />
+    <Compile Include="Asset Management\Configuration.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="IInputAccepter.cs" />
     <Compile Include="Scene\SceneRoot.cs" />

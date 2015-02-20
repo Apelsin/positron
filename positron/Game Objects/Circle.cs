@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Runtime.Serialization;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -7,15 +8,17 @@ using OpenTK.Input;
 
 namespace Positron
 {
+    [DataContract]
     public class Circle : GameObject, IColorable
     {
         Color _Color;
+        [DataMember]
         public Color Color {
             get { return _Color; }
             set { _Color = value; }
         }
+        [DataMember]
         public float Radius { get; set; }
-
         public Circle (Xform parent, float x, float y, float radius):
             base(parent)
         {

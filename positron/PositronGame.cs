@@ -24,7 +24,7 @@ namespace Positron
         public List<KeyValuePair<object, UpdateEventHandler>> UpdateEventList { get { return _UpdateEventList; } }
         #endregion
         #region Member Variables
-        public readonly Configuration Configuration;
+        public readonly GameConfiguration Configuration;
         protected float _DeltaTime;
         public float DeltaTime { get { return _DeltaTime; } }
         protected ThreadedRendering _Window;
@@ -44,7 +44,10 @@ namespace Positron
             get { return _CurrentScene; }
             set { LoadScene ((Scene)value); }
         }
-        public World WorldMain { get { return _WorldMain; } set { _WorldMain = value; } }
+        public World WorldMain {
+            get { return _WorldMain; }
+            internal set { _WorldMain = value; }
+        }
         public Camera CurrentCamera { get { return CurrentScene.Camera; } }
         // TODO: ensure thread safety here:
         public IInputAccepter[] InputAccepterGroup {
@@ -59,7 +62,7 @@ namespace Positron
         #region Static Accessors
         #endregion
 
-        public PositronGame (ThreadedRendering window, Configuration configuration)
+        public PositronGame (ThreadedRendering window, GameConfiguration configuration)
         {
             Configuration = configuration;
             _Window = window;

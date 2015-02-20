@@ -134,7 +134,7 @@ namespace Positron
         /// <summary>
         /// Alias for Game.Configuration
         /// </summary>
-        protected Configuration Configuration { get { return _Game.Configuration; } }
+        protected GameConfiguration Configuration { get { return _Game.Configuration; } }
         /// <summary>
         /// Width of canvas in pixels
         /// </summary>
@@ -199,12 +199,12 @@ namespace Positron
         protected bool KeyMatch(Key key, string name)
         {
             Key named_key;
-            return Configuration.Keys.TryGetValue(name, out named_key) ? key == named_key : false;
+            return Configuration.KeyMap.TryGetValue(name, out named_key) ? key == named_key : false;
         }
         protected bool KeyIsPressed(string name)
         {
             Key named_key;
-            return Configuration.Keys.TryGetValue(name, out named_key) ? KeysPressed.Contains(named_key) : false;
+            return Configuration.KeyMap.TryGetValue(name, out named_key) ? KeysPressed.Contains(named_key) : false;
         }
         void HandleKeyUp(object sender, KeyboardKeyEventArgs e)
         {
@@ -569,15 +569,18 @@ namespace Positron
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             // Camera
-            GL.MatrixMode(MatrixMode.Projection);
             Matrix4 perspective_camera = Matrix4.CreatePerspectiveFieldOfView(
-                _Game.CurrentCamera.FieldOfView,
-                (float)canvas_width / (float)canvas_height,
-                0.0001f,
-                9999.0f);
-            GL.LoadMatrix(ref perspective_camera);
-            GL.MultMatrix(ref _Game.CurrentCamera.mTransform._Global);
+               _Game.CurrentCamera.FieldOfView,
+               (float)canvas_width / (float)canvas_height,
+               0.0001f,
+               9999.0f);
 
+            // TODO: figure out how to do this step in ModelView matrix mode instead
+            Matrix4 cam_inv = Game.CurrentCamera.mTransform._Global.Inverted();
+
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref perspective_camera);
+            GL.MultMatrix(ref cam_inv);
             // Render
             GL.MatrixMode(MatrixMode.Modelview);
             RenderDrawingWatch.Restart();

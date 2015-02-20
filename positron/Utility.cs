@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Text.RegularExpressions;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -121,6 +122,31 @@ namespace Positron.Utility
             
             return rawData;
         }
+    }
+    public static class Codec
+    {
+        #region Parsing and Encoding
+        internal static char[] SpaceSeparator = new char[] { ' ' };
+        public static string M4Encode(ref Matrix4 M)
+        {
+            return String.Format(
+                "{00} {01} {02} {03} {04} {05} {06} {07} {08} {09} {10} {11} {12} {13} {14} {15}",
+                M.M11, M.M12, M.M13, M.M14,
+                M.M21, M.M22, M.M23, M.M24,
+                M.M31, M.M32, M.M33, M.M34,
+                M.M41, M.M42, M.M43, M.M44
+                );
+        }
+        public static Matrix4 M4Decode(ref string S)
+        {
+            string[] C = S.Split(SpaceSeparator, 16);
+            return new Matrix4(
+                float.Parse(C[00]), float.Parse(C[01]), float.Parse(C[02]), float.Parse(C[03]),
+                float.Parse(C[04]), float.Parse(C[05]), float.Parse(C[06]), float.Parse(C[07]),
+                float.Parse(C[08]), float.Parse(C[09]), float.Parse(C[10]), float.Parse(C[11]),
+                float.Parse(C[12]), float.Parse(C[13]), float.Parse(C[14]), float.Parse(C[15]));
+        }
+        #endregion
     }
 }
 

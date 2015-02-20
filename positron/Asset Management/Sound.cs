@@ -13,7 +13,7 @@ namespace Positron
         public static Sound LoadWaveFile(this PositronGame game, string title, params string[] path_components)
         {
             string[] all_path_components = new string[path_components.Length + 1];
-            all_path_components[0] = game.Configuration.AudioDirectory;
+            all_path_components[0] = game.Configuration.AudioPath;
             path_components.CopyTo(all_path_components, 1);
             string path = Path.Combine(all_path_components);
             return Sound.LoadWaveFileAbsolute(title, path);

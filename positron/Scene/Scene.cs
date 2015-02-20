@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Reflection; // Please kill me.
+using System.Runtime.Serialization;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -32,8 +32,20 @@ namespace Positron
     public delegate void SceneEntryEventHandler(object sender, SceneChangeEventArgs e);
 	public delegate void SceneExitEventHandler(object sender, SceneChangeEventArgs e);
     #endregion
+    
+    [DataContract]
     public class Scene : IDisposable
 	{
+        [OnDeserialized]
+        internal void _OnDeserialized(StreamingContext context)
+        {
+            OnDeserialized(context);
+        }
+        internal virtual void OnDeserialized(StreamingContext context)
+        {
+            Root.mScene = this;
+            Camera = (Camera)Root.FindGameObjectById(CameraId);
+        }
 		#region Events
         /// <summary>
         /// Event raised when this scene enters
@@ -49,10 +61,11 @@ namespace Positron
 		protected string _Name;
         protected PositronGame _Game;
         protected SceneRoot _Root;
-        protected HUDQuad FrameTimeMeter;
-        protected HUDQuad UpdateTimeMeter;
-        protected HUDQuad RenderTimeMeter;
-        protected HUDQuad RenderDrawingMeter;
+        protected Camera _Camera;
+        //protected HUDQuad FrameTimeMeter;
+        //protected HUDQuad UpdateTimeMeter;
+        //protected HUDQuad RenderTimeMeter;
+        //protected HUDQuad RenderDrawingMeter;
         
 		protected float[] AdaptiveTimeSteps = new float[12];
 		/// <summary>
@@ -64,23 +77,47 @@ namespace Positron
         /// <summary>
         /// Name of the current scene
         /// </summary>
-		public string Name { get { return _Name; } }
+        [DataMember]
+		public string Name {
+            get { return _Name; }
+            internal set { _Name = value; }
+        }
         /// <summary>
         /// Game object associated with this scene; the game this scene belongs to
         /// </summary>
-        public PositronGame Game { get { return _Game; } }
+        public PositronGame Game {
+            get { return _Game; }
+            internal set { _Game = value; }
+        }
         /// <summary>
         /// The root Xform of the scene that contains the hierarchy of GameObjects
         /// </summary>
-        public SceneRoot Root { get { return _Root; } }
+        [DataMember]
+        public SceneRoot Root {
+            get { return _Root; }
+            internal set { _Root = value; }
+        }
         /// <summary>
         /// Physical world associated with the scene
         /// </summary>
-		public World World { get { return Game.WorldMain; } }
+		public World World {
+            get { return Game.WorldMain; }
+            internal set { Game.WorldMain = value; }
+        }
+
         /// <summary>
         /// Camera used by the scene
         /// </summary>
-        public Camera Camera { get { return Root.mCamera; } set { Root.mCamera = value; } }
+        public Camera Camera {
+            get { return _Camera; }
+            set { _Camera = value; CameraId = _Camera.ElementId; }
+        }
+        [DataMember]
+        internal string CameraId
+        {
+            get;
+            set;
+        }
 		#endregion
 		#endregion
 		#region Behavior
@@ -90,17 +127,18 @@ namespace Positron
         /// </summary>
         /// <param name="game">Associated PositronGame object</param>
         /// <param name="name">Name for the scene</param>
-        protected Scene (PositronGame game, string name)
+        public Scene (PositronGame game, string name)
 		{
-            _Game = game;
-            _Name = name;
-			_Root = new SceneRoot(this);
+            Game = game;
+            Name = name;
+            Root = new SceneRoot(this);
+            Root.AddChild((Camera = new Camera(Root)).mTransform);
 		}
         /// <summary>
         /// Creates a new scene object that can be used by a PositronGame object
         /// </summary>
         /// <param name="game">Associated PositronGame object</param>
-		protected Scene (PositronGame game):
+		public Scene (PositronGame game):
 			this(game, "Scene")
 		{
 		}

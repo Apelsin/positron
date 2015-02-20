@@ -55,7 +55,7 @@ namespace Positron
         public static Texture LoadTexture(this PositronGame game, string title, params string[] path_components)
         {
             string[] all_path_components = new string[path_components.Length + 1];
-            all_path_components[0] = game.Configuration.ArtworkPath;
+            all_path_components[0] = game.Configuration.ArtworkPathFull;
             path_components.CopyTo(all_path_components, 1);
             string path = Path.Combine(all_path_components);
             return Texture.LoadTextureAbsolute(title, path);

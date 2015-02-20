@@ -2,29 +2,54 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 using OpenTK;
 
 namespace Positron
 {
+    [DataContract]
     public class Xform : Extension, IDisposable
     {
+        internal override void OnDeserialized(StreamingContext context)
+        {
+            UpdateGlobalMatrix();
+            if (_GameObject != null)
+            {
+                _GameObject.mTransform = this;
+            }
+            foreach (Xform child in _Children)
+                child._Parent = this;
+        }
+        [DataContract]
         public class State
         {
             public bool Modified = false;
         }
-        public readonly State mState;
+        protected State _State;
+        [DataMember]
+        public State mState
+        {
+            get { return _State; }
+            internal set { _State = value; }
+        }
+
         // These are public for optimization
         public Matrix4 _Local = Matrix4.Identity;
         public Matrix4 _Global = Matrix4.Identity;
         protected Xform _Parent;
+
         public Xform Parent {
             get { return _Parent; }
-            set { _Parent = value; }
+            internal set { _Parent = value; }
         }
 
         protected HashSet<Xform> _Children = new HashSet<Xform>();
-        public HashSet<Xform> Children { get { return _Children; } }
+        [DataMember]
+        public HashSet<Xform> Children {
+            get { return _Children; }
+            internal set { _Children = value; }
+        }
         public void RemoveChild(Xform xform)
         {
             if (xform.Parent == this)
@@ -60,7 +85,38 @@ namespace Positron
                 return true;
             return IsDescendantOf(parent, child._Parent);
         }
-
+        public Xform FindChildById(string element_id)
+        {
+            return FindChildById(this, element_id);
+        }
+        protected static Xform FindChildById(Xform parent, string element_id)
+        {
+            Xform x;
+            foreach(Xform child in parent._Children)
+            {
+                if (child.ElementId == element_id)
+                    return child;
+                else if((x = FindChildById(child, element_id)) != null)
+                    return x;
+            }
+            return null;
+        }
+        public GameObject FindGameObjectById(string element_id)
+        {
+            return FindGameObjectById(this, element_id);
+        }
+        protected static GameObject FindGameObjectById(Xform parent, string element_id)
+        {
+            GameObject o;
+            foreach (Xform child in parent._Children)
+            {
+                if (child.mGameObject != null && child.mGameObject.ElementId == element_id)
+                    return child.mGameObject;
+                else if ((o = FindGameObjectById(child, element_id)) != null)
+                    return o;
+            }
+            return null;
+        }
         public Xform(GameObject game_object, Xform parent)
             : base(game_object)
         {
@@ -101,6 +157,18 @@ namespace Positron
             set
             {
                 _Local = value;
+            }
+        }
+        [DataMember]
+        internal String M
+        {
+            get
+            {
+                return Positron.Utility.Codec.M4Encode(ref _Local);
+            }
+            set
+            {
+                _Local = Positron.Utility.Codec.M4Decode(ref value);
             }
         }
         public override void Dispose()
