@@ -27,10 +27,27 @@ namespace Positron
 			To = to;
 		}
 	}
+    public class UpdateEventArgs : EventArgs
+    {
+        public UpdateEventArgs()
+            : base()
+        {
+        }
+    }
+    public class LateUpdateEventArgs : EventArgs
+    {
+        public LateUpdateEventArgs()
+            : base()
+        {
+        }
+    }
+    
 	#endregion
     #region Delegates
     public delegate void SceneEntryEventHandler(object sender, SceneChangeEventArgs e);
 	public delegate void SceneExitEventHandler(object sender, SceneChangeEventArgs e);
+    public delegate void UpdateEventHandler(object sender, UpdateEventArgs e);
+    public delegate void LateUpdateEventHandler(object sender, LateUpdateEventArgs e);
     #endregion
     
     [DataContract]
@@ -44,9 +61,10 @@ namespace Positron
         internal virtual void OnDeserialized(StreamingContext context)
         {
             Root.mScene = this;
-            Camera = (Camera)Root.FindGameObjectById(CameraId);
+            Camera = (Camera)Root.FindGameObjectById(Root.CameraId);
         }
 		#region Events
+
         /// <summary>
         /// Event raised when this scene enters
         /// </summary>
@@ -55,6 +73,8 @@ namespace Positron
         /// Event raised when this scene exist
         /// </summary>
 		public event SceneExitEventHandler SceneExit;
+        public event UpdateEventHandler Update;
+        public event LateUpdateEventHandler LateUpdate;
 		#endregion
 		#region State
 		#region Member Variables
@@ -109,14 +129,8 @@ namespace Positron
         /// Camera used by the scene
         /// </summary>
         public Camera Camera {
-            get { return _Camera; }
-            set { _Camera = value; CameraId = _Camera.ElementId; }
-        }
-        [DataMember]
-        internal string CameraId
-        {
-            get;
-            set;
+            get { return Root.mCamera; }
+            set { Root.mCamera = value; }
         }
 		#endregion
 		#endregion
@@ -175,8 +189,10 @@ namespace Positron
         /// <summary>
         /// Perform the main update for this scene
         /// </summary>
-		public virtual void Update ()
+		public virtual void OnUpdate ()
         {
+            if (Update != null)
+                Update(this, new UpdateEventArgs());
             UpdateWorld();
             foreach (Xform xform in _Root.Children)
                 xform.mGameObject.Update();
@@ -184,7 +200,7 @@ namespace Positron
         /// <summary>
         /// Render the current scene
         /// </summary>
-        public virtual void Render()
+        public virtual void OnRender()
         {
             GL.LoadMatrix(ref _Root._Local);
             foreach (Xform xform in _Root.Children)
@@ -193,8 +209,10 @@ namespace Positron
         /// <summary>
         /// Perform the post-render update for this scene. Physical calculations happen here.
         /// </summary>
-        public virtual void LateUpdate()
+        public virtual void OnLateUpdate()
         {
+            if (LateUpdate != null)
+                LateUpdate(this, new LateUpdateEventArgs());
             foreach (Xform xform in _Root.Children)
                 xform.mGameObject.LateUpdate();
         }

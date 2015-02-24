@@ -26,11 +26,11 @@ namespace Positron
             string path = Path.Combine(all_path_components);
             return LoadSpriteSheetAbsolute(title, path);
         }
-        private static Texture LoadSpriteSheetAbsolute (string title, string file_name)
+        private static Texture LoadSpriteSheetAbsolute (string title, string file_path)
         {
             // Load and decompress Photoshop file structures
             var psdFile = new PsdFile ();
-            psdFile.Load (file_name, Encoding.Default);
+            psdFile.Load (file_path, Encoding.Default);
         
             if (psdFile.Layers.Count == 0) {
                 psdFile.BaseLayer.CreateMissingChannels ();
@@ -55,27 +55,24 @@ namespace Positron
                     }
                     bmp.UnlockBits (bmp_data);
                 }
-                var texture = Texture.LoadTexture (title, bmp);
+                var texture = Texture.LoadTexture(title, bmp, file_path);
                 psdFile.SlicesToTextureRegionInfo (ref texture);
                 return texture;
             }
         }
+        /// <summary>
+        /// Welcome to hell.
+        /// </summary>
+        /// <param name="psd"></param>
+        /// <param name="texture"></param>
         public static void SlicesToTextureRegionInfo (this PsdFile psd, ref Texture texture)
         {
             RawImageResource slices_resource = (RawImageResource)psd.ImageResources.Find (resource => resource.ID == ResourceID.Slices);
-
-//            Console.Write("Slices image resource:"); // Newline handled by ternary
-//            for(int i = 0; i < slices_resource.Data.Length; i++)
-//            {
-//                char c = MathUtil.Clamp((char)slices_resource.Data[i], '~', ' ');
-//                if(c == slices_resource.Data[i])
-//                    Console.Write(c);
-//                else
-//                    Console.Write("[{0}]", slices_resource.Data[i]);
-//            }
-
             PsdSlicesHeader psd_slices_header = new PsdSlicesHeader ();
             PsdSlice[] psd_slices;
+
+            #region Slices Data Parsing
+            // Read the slices data as a stream
             // FixedEndianness and ReadPascalString are defined in Utility.Structure
             using(MemoryStream mem_stream = new MemoryStream(slices_resource.Data))
             {
@@ -123,35 +120,22 @@ namespace Positron
                 }
                 mem_stream.Dispose();
             }
-            var tr = new List<TextureRegion> ();
-            var set_corner = new List<TextureRegion> ();
+            #endregion
+            var regions = new List<Texture.Region> ();
             for (int i = 0; i < psd_slices.Length; i++) {
                 PsdSlice slice = psd_slices [i];
                 if (slice.Name != "") {
-                    TextureRegion region =
-                        new TextureRegion (slice.Name,
+                    Texture.Region region =
+                        new Texture.Region(slice.Name,
                                           new Vector2 (slice.Left, psd.RowCount - slice.Bottom),
                                           new Vector2 (slice.Right, psd.RowCount - slice.Top)); // Vertical axis (Y) is flipped
 
                     if (slice.Target.ToLower () == "default")
-                        texture.DefaultRegionIndex = tr.Count;
-                    if (slice.Target.ToLower () == "corner") {
-                        set_corner.Add (region);
-                    }
-                    tr.Add (region);
+                        texture.DefaultRegionIndex = regions.Count;
+                    regions.Add (region);
                 }
             }
-
-            texture.Regions = tr.ToArray();
-
-            // Set the origin of these regions to a position that aligns its
-            // lower left corner with the default region
-            for (int i = 0; i < set_corner.Count; i++) {
-                Vector2 origin_offset = 0.5f * (set_corner[i].Size - texture.DefaultRegion.Size);
-                //Console.WriteLine("Expected: {0}", origin);
-                set_corner[i].OriginOffset = origin_offset;
-                //Console.WriteLine("Result: {0}", set_corner[i].OriginOffset);
-            }
+            texture.Regions = regions.ToArray();
         }
     }
 }

@@ -99,6 +99,10 @@ namespace Positron
             }
             return configuration;
         }
+        //public Configurator(params Type[] known_types):
+        //    this(known_types)
+        //{
+        //}
         public Configurator(IEnumerable<Type> known_types = null) :
             base(known_types)
         {

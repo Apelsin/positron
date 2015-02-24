@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Linq;
+
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -10,177 +13,138 @@ using OpenTK.Input;
 namespace Positron
 {
     // TODO: Implement clonable interface maybe
-    public class SpriteBase : GameObject, IColorable, IDisposable
+    [DataContract]
+    public class SpriteBase : GameObject, IDisposable
     {
-        #region SpriteAnimation
-        public class SpriteAnimation : IDisposable
+        internal override void OnSerializing(StreamingContext context)
         {
-
-            protected static int _FrameTimeDefault = 200;
-            protected SpriteFrame[] _Frames;
-            protected bool _Looping = false;
-            protected bool _PingPong = false;
-            protected Sound _Sound;
-
-            public SpriteFrame[] Frames { get { return _Frames; } }
-            public int FrameCount { get { return _Frames == null ? 0 : _Frames.Length; } }
-            public bool Looping { get { return _Looping; } set { _Looping = value; } }
-            public bool PingPong { get { return _PingPong; } set { _PingPong = value; } }
-            public Sound Sound { get { return _Sound; } set { _Sound = value; } }
-
-
-            public SpriteAnimation(Texture texture, int frame_time, bool looping, bool ping_pong, params int[] region_incices):
-                this(looping, ping_pong)
+            base.OnSerializing(context);
+            AnimationCurrentId = AnimationCurrent.ElementId;
+        }
+        #region SpriteAnimation
+        [DataContract]
+        public class Animation : ContractElement, IDisposable
+        {
+            protected static List<Animation> Animations = new List<Animation>();
+            [DataMember]
+            public string Name { get; set; }
+            [DataMember]
+            public Frame[] Frames { get; set; }
+            public int FrameCount { get { return Frames == null ? 0 : Frames.Length; } }
+            [DataMember]
+            public bool Looping { get; set; }
+            [DataMember]
+            public bool PingPong { get; set; }
+            // TODO: this is awful. Fix it.
+            public Animation(string name, Texture texture, bool looping, bool ping_pong, int? frame_time_n = null, params int[] region_incices)
             {
+                int frame_time = frame_time_n ?? Frame.DefaultDuration;
+
+                Looping = looping;
+                PingPong = ping_pong;
+
                 // TODO: make this better (supply color and frame time)
                 if(region_incices == null || region_incices.Length < 1)
                 {
-                    _Frames = new SpriteFrame[1];
-                    _Frames[0] = new SpriteFrame(texture, 0, Color.White, frame_time);
+                    Frames = new Frame[1];
+                    Frames[0] = new Frame(texture, 0, Color.White, frame_time);
                 }
                 else
                 {
-                    _Frames = new SpriteFrame[region_incices.Length];
+                    Frames = new Frame[region_incices.Length];
                     for(int i = 0; i < region_incices.Length; i++)
-                        _Frames[i] = new SpriteFrame(texture, region_incices[i], Color.White, frame_time);
+                        Frames[i] = new Frame(texture, region_incices[i], Color.White, frame_time);
                 }
+                Animations.Add(this);
             }
-            public SpriteAnimation(Texture texture, int frame_time, bool looping, bool ping_pong, params string[] region_labels) :
-                this(texture, frame_time, looping, ping_pong, texture.Regions.Labeled(region_labels))
+            public Animation(string name, Texture texture, bool looping = true, bool ping_pong = false):
+                this(name, texture, looping, ping_pong, null)
             {
-            }
-            public SpriteAnimation(Texture texture, int frame_time, bool looping, params string[] region_labels) :
-                this(texture, frame_time, looping, false, region_labels)
-            {
-            }
-//            public SpriteAnimation(Texture texture, int frame_time, params string[] region_labels) :
-//                this(texture, frame_time, false, region_labels)
-//            {
-//            }
-            public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params string[] region_labels) :
-                this(texture, _FrameTimeDefault, looping, ping_pong, region_labels)
-            {
-            }
-            public SpriteAnimation(Texture texture, bool looping, params string[] region_labels) :
-                this(texture, looping, false, region_labels)
-            {
-            }
-            public SpriteAnimation(Texture texture, params string[] region_labels) :
-                this(texture, false, region_labels)
-            {
+                
             }
 
-            public SpriteAnimation(Texture texture, bool looping, bool ping_pong, params int[] region_incices) :
-                this(texture, _FrameTimeDefault, looping, ping_pong, region_incices)
+            public static void Store(PositronGame game)
             {
+                var configurator = new Configurator<Animation>(new Type[] { typeof(Frame) });
+                foreach (Animation animation in Animations)
+                {
+                    string path = System.IO.Path.Combine(
+                        game.Configuration.AnimationPathFull,
+                        animation.ElementId + ".spa");
+                    using(var stream = new System.IO.FileStream(path, System.IO.FileMode.Create))
+                    {
+                        configurator.Store(stream, animation);
+                    }
+                }
             }
-            public SpriteAnimation(Texture texture, bool looping, params int[] region_incices):
-                this(texture, looping, false, region_incices)
-            {
-            }
-            /// <summary>
-            /// Initializes a new instance of the <see cref="positron.SpriteBase+SpriteAnimation"/> class.
-            /// If region_indices is empty, frame_time instead defines first frame and default frame time is used,
-            /// otherwise frame time is the first integer parameter followed by texture region indices for frames.
-            /// </summary>
-            public SpriteAnimation(Texture texture, int frame_time, params int[] region_incices) :
-                this(texture,
-                region_incices != null && region_incices.Length > 0 ? frame_time : _FrameTimeDefault,
-                false, false,
-                region_incices != null && region_incices.Length > 0 ? region_incices : new int[1] { frame_time })
-            {
-            }
-            public SpriteAnimation(bool looping, bool ping_pong, params SpriteFrame[] frames):
-                this(looping, ping_pong)
-            {
-                _Frames = frames;
-            }
-            private SpriteAnimation(bool looping, bool ping_pong)
-            {
-                _Looping = looping;
-                _PingPong = ping_pong;
-            }
+
             public virtual void Dispose ()
             {
-                if (_Frames != null) {
-                    for (int i = 0; i < _Frames.Length; i++) {
-                        _Frames [i].Dispose ();
-                        _Frames [i] = null;
+                if (Frames != null)
+                {
+                    for (int i = 0; i < Frames.Length; i++)
+                    {
+                        Frames [i].Dispose ();
+                        Frames [i] = null;
                     }
-                    _Frames = null;
+                    Frames = null;
                 }
-                _Sound = null;
             }
         }
         #endregion
         #region SpriteFrame
-        public class SpriteFrame : IDisposable
+        [DataContract]
+        public class Frame : ContractElementBase, IDisposable
         {
-            protected Color _Color;
-            protected Texture _Texture;
-            protected int _FrameTime;
-            protected int _TextureRegionIndex;
-            protected VertexBuffer _VBO;
-            //protected VertexBuffer _BPVBO;
-            protected float _TileX;
-            protected float _TileY;
-            public Color Color {
-                get { return _Color; }
-                set { _Color = value; }
+            internal override void OnSerializing(StreamingContext context)
+            {
+                base.OnSerializing(context);
+                TexturePath = Texture.FilePath;
             }
-            public Texture Texture {
-                get { return _Texture; }
-                set { _Texture = value; }
-            }
-            public float TileX {
-                get { return _TileX; }
-                set { _TileX = value; }
-            }
-            public float TileY {
-                get { return _TileY; }
-                set { _TileY = value; }
-            }
-            public int FrameTime {
-                get { return _FrameTime; }
-                set { _FrameTime = value; }
-            }
-            public int TextureRegionIndex {
-                get { return _TextureRegionIndex; }
-            }
+            [DataMember]
+            public Color Color { get; set; }
+            public Texture Texture { get; set; }
+            [DataMember]
+            internal string TexturePath;
+            [DataMember]
+            public int Duration { get; set; }
+            [DataMember]
+            public int TextureRegionIndex { get; set; }
+            public static readonly int DefaultDuration;
             public float SizeX {
-                get { return _Texture.Regions == null || _Texture.Regions.Length == 0 ?
-                    _Texture.Width : _Texture.Regions [_TextureRegionIndex].SizeX; }
+                get { return Texture.Regions == null || Texture.Regions.Length == 0 ?
+                    Texture.Width : Texture.Regions [TextureRegionIndex].SizeX; }
             }
             public float SizeY {
-                get { return _Texture.Regions == null || _Texture.Regions.Length == 0 ?
-                    _Texture.Height : _Texture.Regions[_TextureRegionIndex].SizeY; }
+                get { return Texture.Regions == null || Texture.Regions.Length == 0 ?
+                    Texture.Height : Texture.Regions[TextureRegionIndex].SizeY; }
             }
-            public VertexBuffer VBO { get { return _VBO; } }
-            //public VertexBuffer BPVBO { get { return _BPVBO; } }
-            public SpriteFrame (Texture texture, int idx):
+            public VertexBuffer VBO { get; internal set; }
+            public Frame (Texture texture, int idx):
                 this(texture, idx, Color.White)
             {
             }
-            public SpriteFrame (Texture texture, int idx, Color color):
-                this(texture, idx, color, 100)
+            public Frame (Texture texture, int idx, Color color):
+                this(texture, idx, color, DefaultDuration)
             {
             }
-            public SpriteFrame (Texture texture, int idx, Color color, int frame_time)
+            public Frame (Texture texture, int idx, Color color, int duration)
             {
-                _Texture = texture;
-                _TextureRegionIndex = idx;
-                _Color = color;
-                _FrameTime = frame_time;
-                _TileX = 1.0f;
-                _TileY = 1.0f;
+                Texture = texture;
+                TextureRegionIndex = idx;
+                Color = color;
+                Duration = duration;
                 Build();
             }
+            /// <summary>
+            /// Builds the vertex buffer object for this sprite frame
+            /// </summary>
             public void Build()
             {
                 float w, h, w_half, h_half, x0, y0, x1, y1, xx, yy, corner_x, corner_y;
-                if (_Texture.Regions != null && _Texture.Regions.Length > 0)
+                if (Texture.Regions != null && Texture.Regions.Length > 0)
                 {
-                    TextureRegion region = _Texture.Regions[_TextureRegionIndex];
+                    Texture.Region region = Texture.Regions[TextureRegionIndex];
                     x0 = region.Low.X;
                     y0 = region.Low.Y;
                     x1 = region.High.X;
@@ -189,25 +153,25 @@ namespace Positron
                     h = y1 - y0;
                     xx = x0 + x1;
                     yy = y0 + y1;
-                    x0 = (xx - w * _TileX) * 0.5f;
-                    y0 = (yy - h * _TileY) * 0.5f;
-                    x1 = (xx + w * _TileX) * 0.5f;
-                    y1 = (yy + h * _TileY) * 0.5f;
-                    x0 /= _Texture.Width;
-                    x1 /= _Texture.Width;
-                    y0 /= _Texture.Height;
-                    y1 /= _Texture.Height;
-                    corner_x = region.OriginOffsetX;
-                    corner_y = region.OriginOffsetY;
+                    x0 = (xx - w) * 0.5f;
+                    y0 = (yy - h) * 0.5f;
+                    x1 = (xx + w) * 0.5f;
+                    y1 = (yy + h) * 0.5f;
+                    x0 /= Texture.Width;
+                    x1 /= Texture.Width;
+                    y0 /= Texture.Height;
+                    y1 /= Texture.Height;
+                    corner_x = region.AnchorX;
+                    corner_y = region.AnchorY;
                 }
                 else
                 {
-                    w = _Texture.Width;
-                    h = _Texture.Height;
+                    w = Texture.Width;
+                    h = Texture.Height;
                     x0 = 0.0f;
                     y0 = 0.0f;
-                    x1 = _TileX;
-                    y1 = _TileY;
+                    x1 = w;
+                    y1 = h;
                     corner_x = 0;
                     corner_y = 0;
                 }
@@ -217,79 +181,47 @@ namespace Positron
                 var B = new VertexLite(corner_x + w_half, corner_y - h_half, 1.0f, x1, -y0);
                 var C = new VertexLite(corner_x + w_half, corner_y + h_half, 1.0f, x1, -y1);
                 var D = new VertexLite(corner_x - w_half, corner_y + h_half, 1.0f, x0, -y1);
-                _VBO = new VertexBuffer(A, B, C, D);
-                //BPVBO = new VertexBuffer(A, B, C, D);
+                VBO = new VertexBuffer(A, B, C, D);
             }
             public virtual void Dispose ()
             {
-                if (_VBO != null) {
-                    _VBO.Dispose ();
-                    _VBO = null;
+                if (VBO != null) {
+                    VBO.Dispose ();
+                    VBO = null;
                 }
-                _Texture = null;
+                Texture = null;
             }
         }
         #endregion
         #region State
-        #region Member Variables
-        protected Color4 _Color;
-        protected float _TileX;
-        protected float _TileY;
+        #region Instance Fields
 
-        //protected Dictionary<string, SpriteAnimation> _Animations;
-        protected Stopwatch _FrameTimer;
-        protected int _AnimationFrameIndex;
-
-        protected SpriteAnimation _AnimationDefault;
-        protected SpriteAnimation _AnimationCurrent;
-        protected Lazy<SpriteAnimation> _AnimationNext;
-
-        //protected SpriteFrame _FrameStatic;
-
-        protected bool _FirstUpdate = true;
+        protected Stopwatch FrameTimer;
+        protected int AnimationFrameIndex;
+        protected bool FirstUpdate = true;
 
         /// <summary>
         /// The blueprint vertex buffer object
         /// </summary>
         //protected VertexBuffer BPVBO;
         #endregion
-        #region Member Accessors
-        public SpriteAnimation AnimationDefault {
-            get { return _AnimationDefault; }
-        }
-        public SpriteAnimation AnimationCurrent {
-            get { return _AnimationCurrent; }
-        }
-        public Lazy<SpriteAnimation> AnimationNext {
-            get { return _AnimationNext; }
-        }
-        public SpriteFrame FrameCurrent {
-            get { return _AnimationCurrent == null ? _AnimationDefault.Frames[0] : _AnimationCurrent.Frames[_AnimationFrameIndex]; }
+        #region Instance Properties
+        public Animation AnimationDefault { get; internal set; }
+        [DataMember]
+        internal string AnimationCurrentId;
+        public Animation AnimationCurrent { get; internal set; }
+        public Lazy<Animation> AnimationNext { get; internal set; }
+        public Frame FrameCurrent {
+            get { return AnimationCurrent == null ? AnimationDefault.Frames[0] : AnimationCurrent.Frames[AnimationFrameIndex]; }
         }
         
         public int FrameIndex {
-            get { return _AnimationFrameIndex; }
+            get { return AnimationFrameIndex; }
             set { 
-                if(_FrameTimer != null)
-                    _FrameTimer.Restart();
-                _AnimationFrameIndex = value;
+                if(FrameTimer != null)
+                    FrameTimer.Restart();
+                AnimationFrameIndex = value;
             }
-        }
-        public Color Color {
-            get { return FrameCurrent.Color; }
-            set { FrameCurrent.Color = value; }
-        }
-        public Texture Texture {
-            get { return FrameCurrent.Texture; }
-            //set { FrameCurrent.Texture = value; }
-        }
-        public float TileX {
-            get { return _TileX; }
-            set { _TileX = value; }
-        }
-        public float TileY {
-            get { return _TileY; }
-            set { _TileY = value; }
         }
         public float SizeX {
             get { return mTransform.ScaleLocalX * FrameCurrent.SizeX; }
@@ -324,41 +256,18 @@ namespace Positron
         public SpriteBase(Xform parent, float x, float y, float scalex, float scaley, Texture texture) :
             base(parent)
         {
-            // Size will scale _Texture width and height
-            _Color = Color.White;
             mTransform.ScaleLocalX = scalex;
             mTransform.ScaleLocalY = scaley;
-            _TileX = 1.0f;
-            _TileY = 1.0f;
-            _AnimationFrameIndex = 0;
-            _FrameTimer = new Stopwatch();
-            _AnimationDefault = _AnimationCurrent = new SpriteAnimation(texture, 0);
-            //_FrameStatic = _AnimationDefault.Frames[0];
-            
-            // Position for world objects is handled differently
-            //if(!(this is IWorldObject))
-            //    Corner = new Vector3(x, y, 0.0f);
+            AnimationFrameIndex = 0;
+            FrameTimer = new Stopwatch();
+            AnimationDefault = AnimationCurrent = new Animation("Default", texture);
         }
         
         public override void Draw()
         {
-            // Handle invalidation here:
-            if(_TileX != FrameCurrent.TileX)
-            {
-                FrameCurrent.TileX = _TileX;
-                FrameCurrent.Build(); // Invalidation
-            }
-            GL.Color4(_Color);
-            Texture.Bind(); // Bind to (current) sprite texture
+            GL.Color4(FrameCurrent.Color);
+            FrameCurrent.Texture.Bind(); // Bind to (current) sprite texture
             FrameCurrent.VBO.Render(); // Render the vertex buffer object
-            //if (Configuration.DrawBlueprints /*&& BPVBO != null*/)
-            //{
-            //    GL.BindTexture(TextureTarget.Texture2D, 0); // Unbind
-                //BPVBO.Render(); // Render blueprint objects
-                //if(_Blueprints != null)
-                //    foreach(IRenderable r in _Blueprints)
-                //        r.Render();
-            //}
         }
         public void Build()
         {
@@ -367,31 +276,33 @@ namespace Positron
         public override void Update ()
         {
             base.Update();
-            if (_FirstUpdate) {
-                _FirstUpdate = false;
-                if(_AnimationCurrent != null)
+            if (FirstUpdate) {
+                FirstUpdate = false;
+                if(AnimationCurrent != null)
                 {
+                    // TODO: is this good for anything?
+
                     //if(_AnimationCurrent.Sound != null)
                     //    _AnimationCurrent.Sound.Play();
                 }
             }
-            if (_AnimationCurrent != null) {
-                if (_AnimationFrameIndex < _AnimationCurrent.FrameCount) {
-                    if (_FrameTimer.Elapsed.TotalMilliseconds > FrameCurrent.FrameTime) {
-                        _AnimationFrameIndex++;
-                        _FrameTimer.Restart();
-                        if (_AnimationFrameIndex >= _AnimationCurrent.FrameCount) {
-                            if(_AnimationCurrent.Looping)
+            if (AnimationCurrent != null) {
+                if (AnimationFrameIndex < AnimationCurrent.FrameCount) {
+                    if (FrameTimer.Elapsed.TotalMilliseconds > FrameCurrent.Duration) {
+                        AnimationFrameIndex++;
+                        FrameTimer.Restart();
+                        if (AnimationFrameIndex >= AnimationCurrent.FrameCount) {
+                            if(AnimationCurrent.Looping)
                             {
-                                _AnimationFrameIndex = 0;
-                                _FirstUpdate = true;
+                                AnimationFrameIndex = 0;
+                                FirstUpdate = true;
                             }
                             else
                             {
-                                _FrameTimer.Stop ();
-                                _AnimationFrameIndex = _AnimationCurrent.FrameCount - 1;
-                                if(_AnimationNext != null)
-                                    PlayAnimation(_AnimationNext.Value);
+                                FrameTimer.Stop ();
+                                AnimationFrameIndex = AnimationCurrent.FrameCount - 1;
+                                if(AnimationNext != null)
+                                    PlayAnimation(AnimationNext.Value);
                             }
                         }
                     }
@@ -401,9 +312,9 @@ namespace Positron
         /// <summary>
         /// Starts a sprite animation if it is not already playing
         /// </summary>
-        public void PlayAnimation(SpriteAnimation animation)
+        public void PlayAnimation(Animation animation)
         {
-            if(animation != _AnimationCurrent)
+            if(animation != AnimationCurrent)
                  StartAnimation(animation);
         }
         /// <summary>
@@ -411,22 +322,22 @@ namespace Positron
         /// using the current animation with the specified region given
         /// the region label
         /// </summary>
-        public SpriteBase SetRegion (string region_label)
-        {
-            PlayAnimation(new SpriteAnimation(Texture, region_label));
-            return this;
-        }
-        public void StartAnimation (SpriteAnimation animation)
+        //public SpriteBase SetRegion (string region_label)
+        //{
+        //    PlayAnimation(new Animation("region:" + region_label, FrameCurrent.Texture));
+        //    return this;
+        //}
+        public void StartAnimation (Animation animation)
         {
             if (animation == null) {
-                if (_AnimationNext != null)
-                    animation = _AnimationNext.Value;
+                if (AnimationNext != null)
+                    animation = AnimationNext.Value;
             }
             if (animation != null) {
-                _FirstUpdate = true;
-                _AnimationFrameIndex = 0;
-                _AnimationCurrent = animation;
-                _FrameTimer.Restart();
+                FirstUpdate = true;
+                AnimationFrameIndex = 0;
+                AnimationCurrent = animation;
+                FrameTimer.Restart();
             }
         }
         public virtual void Dispose()

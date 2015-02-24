@@ -107,24 +107,10 @@ namespace Positron
                 InputAccepterGroups.Remove (name);
             }
         }
-        protected void ProcessUpdateEventList ()
-        {
-            lock (_UpdateEventList)
-            {
-                for(int i = 0; i < _UpdateEventList.Count;)
-                {
-                    if(_UpdateEventList[i].Value(_UpdateEventList[i].Key, new UpdateEventArgs(i)))
-                        _UpdateEventList.RemoveAt(i);
-                    else
-                        i++;
-                }
-            }
-        }
         public void Update ()
         {
-            ProcessUpdateEventList();
             _DeltaTime = TimeStepCoefficient * (float)Math.Round(Window.LastFrameTime, 4);
-            _CurrentScene.Update();
+            _CurrentScene.OnUpdate();
             foreach (Xform xform in _CurrentScene.Root.Children)
                 xform.mGameObject.Update();
         }

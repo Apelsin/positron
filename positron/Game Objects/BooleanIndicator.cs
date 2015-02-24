@@ -16,13 +16,13 @@ namespace Positron
             base(parent, x, y, Texture.Get("sprite_indicator"))
         {
             Value = value;
-            _Color = Color.SkyBlue;
+            FrameCurrent.Color = Color.SkyBlue;
             new SpriteBase(mTransform, Texture.Get ("sprite_indicator_gloss"));
         }
         public override void Draw ()
         {
-            GL.Color4(Value ? _Color : Color.SlateGray);
-            Texture.Bind();
+            GL.Color4(Value ? FrameCurrent.Color : Color.SlateGray);
+            FrameCurrent.Texture.Bind();
             FrameCurrent.VBO.Render();
         }
     }

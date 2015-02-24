@@ -3,53 +3,13 @@ using System.IO;
 using System.Collections;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.Serialization;
+
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace Positron
 {
-    public class TextureRegion
-    {
-        private string _Label;
-        private Vector2 _Low, _High, _OriginOffset = Vector2.Zero;
-
-        public TextureRegion(Vector2 l, Vector2 h):
-            this("Region", l, h)
-        {
-        }
-        public TextureRegion(float x, float y, float w, float h):
-            this("Region", x, y, w, h)
-        {
-        }
-        public TextureRegion(string label, float x, float y, float w, float h)
-        {
-            _Label = label;
-            _Low = new Vector2(x, y);
-            _High = _Low + new Vector2(w, h);
-        }
-        public TextureRegion(string label, Vector2 l, Vector2 h)
-        {
-            _Label = label;
-            _Low = l;
-            _High = h;
-        }
-        public string Label { get { return _Label; } set { _Label = value; } }
-        public Vector2 Low { get { return _Low; } set { _Low = value; } }
-        public Vector2 High { get { return _High; } set { _High = value; } }
-        public Vector2 OriginOffset { get { return _OriginOffset; } set { _OriginOffset = value; } }
-        public float OriginOffsetX { get { return _OriginOffset.X; } set { _OriginOffset.X = value; } }
-        public float OriginOffsetY { get { return _OriginOffset.Y; } set { _OriginOffset.Y = value; } }
-        public Vector2 Center { get { return 0.5f * (_Low + _High); } }
-        public float CenterX { get { return 0.5f * (_Low.X + _High.X); } }
-        public float CenterY { get { return 0.5f * (_Low.Y + _High.Y); } }
-        public Vector2 Size { get { return _High - _Low; } }
-        public float SizeX { get { return _High.X - _Low.X; } }
-        public float SizeY { get { return _High.Y -  _Low.Y; } }
-        public override string ToString ()
-        {
-            return string.Format ("[TextureRegion: Label={0}, Low={1}, High={2}, Size={3}]", Label, Low, High, Size);
-        }
-    }
     public static class TextureHelper
     {
         public static Texture LoadTexture(this PositronGame game, string title, params string[] path_components)
@@ -61,46 +21,110 @@ namespace Positron
             return Texture.LoadTextureAbsolute(title, path);
         }
     }
+    [DataContract]
     public class Texture
     {
-        #region State
-        #region Member Variables
-        protected int _TextureID = 0;
-        protected String _Label = "Texture";
-        protected int _Width;
-        protected int _Height;
-        public TextureRegion[] Regions;
-        protected int _DefaultRegionIndex = 0;
-        #endregion
-        #region Static Variables
-        private static Texture _DefaultTexture;
-        private static Hashtable Textures;
-        #endregion
-        #region Member Accessors
-        public int TextureID { get { return _TextureID; } }
-        public String Label { get { return Label; } }
-        public int Width { get { return _Width; } }
-        public int Height { get { return _Height; } }
-        public int DefaultRegionIndex {
-            get { return _DefaultRegionIndex; }
-            set { _DefaultRegionIndex = value; }
+        [DataContract]
+        public struct Region
+        {
+            internal string _Label;
+            public string Label
+            {
+                get { return _Label; }
+                set { _Label = value; }
+            }
+            internal Vector2 _Low, _High, _Size, _Anchor;
+            [DataMember]
+            public Vector2 Low
+            {
+                get { return _Low; }
+                set
+                {
+                    _Low = value;
+                    _Size = _High - _Low;
+                }
+            }
+            [DataMember]
+            public Vector2 High
+            {
+                get { return _High; }
+                set
+                {
+                    _High = value;
+                    _Size = _High - _Low;
+                }
+            }
+            public Vector2 Size
+            {
+                get { return _Size; }
+                set
+                {
+                    _Size = value;
+                    _High = _Low + _Size;
+                }
+            }
+            public Vector2 Anchor { get { return _Anchor; } set { _Anchor = value; } }
+            public float AnchorX { get { return _Anchor.X; } set { _Anchor.X = value; } }
+            public float AnchorY { get { return _Anchor.Y; } set { _Anchor.Y = value; } }
+            public Vector2 Center { get { return 0.5f * (Low + High); } }
+            public float CenterX { get { return 0.5f * (Low.X + High.X); } }
+            public float CenterY { get { return 0.5f * (Low.Y + High.Y); } }
+            public float SizeX { get { return High.X - Low.X; } }
+            public float SizeY { get { return High.Y - Low.Y; } }
+            public Region(string label, Vector2 low, Vector2 high, Vector2 anchor)
+            {
+                _Low = low;
+                _High = high;
+                _Size = _High - _Low;
+                _Anchor = anchor;
+                _Label = label;
+            }
+            public Region(string label, Vector2 low, Vector2 high) :
+                this(label, low, high, Vector2.Zero)
+            {
+            }
+            public Region(string label, float x0, float y0, float x1, float y1) :
+                this(label, new Vector2(x0, y0), new Vector2(x1, y1))
+            {
+            }
+            public override string ToString()
+            {
+                return string.Format("[Region: Label={0}, Low={1}, High={2}, Size={3}]", Label, Low, High, Size);
+            }
         }
-        public TextureRegion DefaultRegion { get { return Regions[_DefaultRegionIndex]; } }
+        #region State
+        #region Instance Fields
+        [DataMember]
+        public Region[] Regions;
         #endregion
-        #region Static Accessors
-        public static Texture DefaultTexture { get { return _DefaultTexture; } }
+        #region Static Fields
+
+        #endregion
+        #region Instance Properties
+        public int Id { get; internal set; }
+        public String Label { get; internal set; }
+        public String FilePath { get; internal set; }
+        public int Width { get; internal set; }
+        public int Height { get; internal set; }
+        public int DefaultRegionIndex { get; set; }
+        public Region DefaultRegion { get { return Regions[DefaultRegionIndex]; } }
+        #endregion
+        #region Static Properties
+        public static Texture DefaultTexture { get; internal set; }
+        public static Hashtable Textures { get; internal set; }
         #endregion
         #endregion
         #region Behavior
         #region Member
-        private Texture(string label, int id, int w, int h)
+        private Texture(string label, int id, int w, int h, string file_path)
         {
-            _Label = label;
-            _TextureID = id;
-            _Width = w;
-            _Height = h;
+            Label = label;
+            Id = id;
+            Width = w;
+            Height = h;
+            FilePath = file_path;
         }
-#endregion
+        #endregion
         #region Static
         static Texture()
         {
@@ -110,17 +134,17 @@ namespace Positron
         {
             string title = "sprite_null";
             string path = Path.Combine(artwork_path, "sprite_null.png");
-            _DefaultTexture = Texture.LoadTextureAbsolute(title, path);
+            DefaultTexture = Texture.LoadTextureAbsolute(title, path);
         }
         public static void Teardown ()
         {
             foreach(DictionaryEntry pair in Textures)
-                GL.DeleteTexture(((Texture)pair.Value).TextureID);
+                GL.DeleteTexture(((Texture)pair.Value).Id);
         }
         
         public void Bind()
         {
-            GL.BindTexture(TextureTarget.Texture2D, TextureID);
+            GL.BindTexture(TextureTarget.Texture2D, Id);
         }
         
         public static void Bind(object key)
@@ -130,14 +154,17 @@ namespace Positron
         
         public static void Bind(Texture t)
         {
-            GL.BindTexture(TextureTarget.Texture2D, t.TextureID);
+            GL.BindTexture(TextureTarget.Texture2D, t.Id);
         }
-        
+        public static void Unbind()
+        {
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+        }
         public static Texture Get (object key)
         {
             if(Textures.ContainsKey(key))
                 return (Texture)Textures[key];
-            return _DefaultTexture;
+            return DefaultTexture;
         }
         
         internal static Texture LoadTextureAbsolute(string title, string file_path)
@@ -145,12 +172,17 @@ namespace Positron
             if(!System.IO.File.Exists(file_path))
                 throw new FileNotFoundException("File missing: ", file_path);
             using (Bitmap bitmap = new Bitmap(file_path))
-                return LoadTexture(title, bitmap);
+            {
+                var texture = LoadTexture(title, bitmap, file_path);
+                return texture;
+            }
         }
-        public static Texture LoadTexture(string title, Bitmap bitmap)
+        public static Texture LoadTexture(string title, Bitmap bitmap, string file_path)
         {
             int texture;
             
+            // TODO: allow user customization of this portion
+
             GL.GenTextures(1, out texture);
             GL.BindTexture(TextureTarget.Texture2D, texture);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
@@ -166,7 +198,7 @@ namespace Positron
             
             bitmap.UnlockBits(data);
             
-            Texture T = new Texture(title, texture, bitmap.Width, bitmap.Height);
+            Texture T = new Texture(title, texture, bitmap.Width, bitmap.Height, file_path);
             Textures[title] = T;
             return T;
         }

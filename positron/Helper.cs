@@ -27,19 +27,19 @@ namespace Positron
                 S.G + (byte)((C.G - S.G) * alpha),
                 S.B + (byte)((C.B - S.B) * alpha));
         }
-        public static void BuildTiledRegions(this TextureRegion[] regions, int count_x, float w, float h)
+        public static void BuildTiledRegions(this Texture.Region[] regions, int count_x, float w, float h)
         {
             for (int i = 0; i < regions.Length; i++)
             {
                 var low = new Vector2(w * (i % count_x), h * (i / count_x));
                 var high = new Vector2(low.X + w, low.Y + h);
-                regions[i] = new TextureRegion(low, high);
+                regions[i] = new Texture.Region(null, low, high);
             }
         }
         /// <summary>
         ///    Returns the index of the texture region matching a given label
         /// </summary>
-        public static int Labeled(this TextureRegion[] regions, string label_seek, int no_match_index = -1)
+        public static int Labeled(this Texture.Region[] regions, string label_seek, int no_match_index = -1)
         {
             for (int i = 0; i < regions.Length; i++)
                 if(regions[i].Label == label_seek)
@@ -49,7 +49,7 @@ namespace Positron
         /// <summary>
         /// Returns the index of the texture region matching a given label; unoptimized multi-region lookup
         /// </summary>
-        public static int[] Labeled(this TextureRegion[] regions, int no_match_index, params string[] labels_seek)
+        public static int[] Labeled(this Texture.Region[] regions, int no_match_index, params string[] labels_seek)
         {
             int[] region_indices = new int[labels_seek.Length];
             for(int i = 0; i < labels_seek.Length; i++)
@@ -59,7 +59,7 @@ namespace Positron
         /// <summary>
         /// Returns the index of the texture region matching a given label; unoptimized multi-region lookup
         /// </summary>
-        public static int[] Labeled(this TextureRegion[] regions, params string[] labels_seek)
+        public static int[] Labeled(this Texture.Region[] regions, params string[] labels_seek)
         {
             return regions.Labeled(-1, labels_seek);
         }

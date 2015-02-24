@@ -16,9 +16,11 @@ namespace Positron
         {
             foreach(Type type in Configurator<Scene>.KnownTypes())
                 yield return type;
+            yield return typeof(ContractElement);
             yield return typeof(SceneRoot);
             yield return typeof(GameObject);
             yield return typeof(Camera);
+            yield return typeof(SpriteBase);
         }
         new protected static IEnumerable<Type> KnownTypesMore(IEnumerable<Type> more_types)
         {

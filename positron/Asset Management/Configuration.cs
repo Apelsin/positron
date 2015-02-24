@@ -83,6 +83,10 @@ namespace Positron
         /// </summary>
         [DataMember] public string ScenePath { get; internal set; }
         /// <summary>
+        /// Relative path within AssetsPath containing animation assets
+        /// </summary>
+        [DataMember] public string AnimationPath { get; internal set; }
+        /// <summary>
         /// Dictionary containing keyboard-control mapping.
         /// </summary>
         [DataMember] public Dictionary<String, Key> KeyMap { get; internal set; }
@@ -139,6 +143,10 @@ namespace Positron
         {
             get { return Path.Combine(AssetsPath, ScenePath); }
         }
+        public string AnimationPathFull
+        {
+            get { return Path.Combine(AssetsPath, AnimationPath); }
+        }
         public bool DrawBlueprints { get;  set; }
         public bool ShowDebugVisuals { get;  set; }
         /// <summary>
@@ -193,6 +201,7 @@ namespace Positron
             ArtworkPath = ArtworkPath ?? "Artwork";
             AudioPath = AudioPath ?? "Audio";
             ScenePath = ScenePath ?? "Scene";
+            AnimationPath = AnimationPath ?? "Animation";
             ForceDueToGravity = ForceDueToGravity ?? -9.8f;
             KeyPressTimeTolerance = KeyPressTimeTolerance ?? 0.1f;
             FrameRateCap = FrameRateCap ?? 1200.0f;

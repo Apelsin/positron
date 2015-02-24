@@ -64,10 +64,9 @@
     <Compile Include="AutoSerializer.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Asset Management\Configurator.cs" />
+    <Compile Include="ContractItemBase.cs" />
     <Compile Include="Game Objects\Blueprint\BlueprintBase.cs" />
     <Compile Include="Extension.cs" />
-    <Compile Include="Game Objects\HUD\HUDQuad.cs" />
-    <Compile Include="Game Objects\IUpdateSync.cs" />
     <Compile Include="IDrawable.cs" />
     <Compile Include="Scene\SceneConfigurator.cs" />
     <Compile Include="SoundPickup.cs" />
@@ -89,9 +88,6 @@
     <Compile Include="Game Objects\IVariant.cs" />
     <Compile Include="SharedState.cs" />
     <Compile Include="Game Objects\TileMap.cs" />
-    <Compile Include="Game Objects\HUD\UIButton.cs" />
-    <Compile Include="Game Objects\HUD\UIElementGroup.cs" />
-    <Compile Include="Game Objects\HUD\IUIElement.cs" />
     <Compile Include="IActuator.cs" />
     <Compile Include="Game Objects\Blueprint\BlueprintLineLoop.cs" />
     <Compile Include="Asset Management\Texture.cs" />

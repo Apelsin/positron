@@ -8,23 +8,8 @@ using OpenTK.Graphics.OpenGL;
 namespace Positron
 {
     [DataContract]
-    public abstract class GameObjectBase
+    public abstract class GameObjectBase : ContractElement
     {
-        [OnDeserialized]
-        internal void _OnDeserialized(StreamingContext context)
-        {
-            OnDeserialized(context);
-        }
-        internal virtual void OnDeserialized(StreamingContext context)
-        {
-
-        }
-        internal string _ElementId;
-        [DataMember]
-        internal string ElementId {
-            get { return _ElementId; }
-            set { _ElementId = value; }
-        }
         public abstract Xform mTransform { get; internal set; }
         public ThreadedRendering mWindow { get { return mGame.Window; } }
         public PositronGame mGame { get { return mScene.Game; } }
@@ -35,7 +20,6 @@ namespace Positron
         }
         public GameObjectBase() : base()
         {
-            _ElementId = this.GetType().FullName + "#" + GetHashCode().ToString();
         }
         public virtual FarseerPhysics.Dynamics.Body mBody { get { return null; } }
         public virtual SpriteBase mSprite { get { return null; } }

@@ -7,15 +7,26 @@ namespace Positron
     [DataContract]
     public class SceneRoot : Xform
     {
+        internal virtual void OnDeserialized(StreamingContext context)
+        {
+            mCamera = (Camera)FindGameObjectById(CameraId);
+        }
         protected Scene _Scene;
         public override Scene mScene {
             get { return _Scene; }
             internal set { _Scene = value; }
         }
+        internal Camera _Camera;
         public override Camera mCamera
         {
-            get { return mScene.Camera; }
-            internal set { mScene.Camera = value; }
+            get { return _Camera; }
+            internal set { _Camera = value; CameraId = _Camera.ElementId; }
+        }
+        [DataMember]
+        internal string CameraId
+        {
+            get;
+            set;
         }
         public SceneRoot (Scene scene):
             base(null, null)
